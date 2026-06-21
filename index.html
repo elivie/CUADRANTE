@@ -811,6 +811,44 @@ function calcHoras(ini,fin){
   if(mins<=0) mins+=24*60;
   return Math.round(mins/60*10)/10;
 }
+function getShiftHours(s, key){
+  if(!s || !s.t) return 0;
+  var def = TURNO_HORAS_DEF[s.t] || {h:0, ini:'', fin:''};
+  if(s.t==='V' && key && isWeekend(key)) return 0;
+  if(s.t==='D'){
+    var iniM = s.iniM || def.iniM || cfg.iniDM || '06:30';
+    var finM = s.finM || def.finM || cfg.finDM || '14:00';
+    var iniN = s.iniN || def.iniN || cfg.iniDN || '22:00';
+    var finN = s.finN || def.finN || cfg.finDN || '05:30';
+    return Math.round((calcHoras(iniM, finM) + calcHoras(iniN, finN))*10)/10;
+  }
+  if(s.ini && s.fin) return calcHoras(s.ini, s.fin);
+  if(s.h !== undefined) return s.h;
+  return def.h || 0;
+}
+
+function actualizarHorasDefectoTurnos(){
+  TURNO_HORAS_DEF.M.ini = cfg.iniM || '06:30';
+  TURNO_HORAS_DEF.M.fin = cfg.finM || '14:00';
+  TURNO_HORAS_DEF.M.h = calcHoras(TURNO_HORAS_DEF.M.ini, TURNO_HORAS_DEF.M.fin);
+
+  TURNO_HORAS_DEF.T.ini = cfg.iniT || '14:00';
+  TURNO_HORAS_DEF.T.fin = cfg.finT || '21:30';
+  TURNO_HORAS_DEF.T.h = calcHoras(TURNO_HORAS_DEF.T.ini, TURNO_HORAS_DEF.T.fin);
+
+  TURNO_HORAS_DEF.N.ini = cfg.iniN || '22:00';
+  TURNO_HORAS_DEF.N.fin = cfg.finN || '05:30';
+  TURNO_HORAS_DEF.N.h = calcHoras(TURNO_HORAS_DEF.N.ini, TURNO_HORAS_DEF.N.fin);
+
+  TURNO_HORAS_DEF.D.iniM = cfg.iniDM || '06:30';
+  TURNO_HORAS_DEF.D.finM = cfg.finDM || '14:00';
+  TURNO_HORAS_DEF.D.iniN = cfg.iniDN || '22:00';
+  TURNO_HORAS_DEF.D.finN = cfg.finDN || '05:30';
+  TURNO_HORAS_DEF.D.ini = TURNO_HORAS_DEF.D.iniM;
+  TURNO_HORAS_DEF.D.fin = TURNO_HORAS_DEF.D.finN;
+  TURNO_HORAS_DEF.D.h = Math.round((calcHoras(TURNO_HORAS_DEF.D.iniM, TURNO_HORAS_DEF.D.finM) + calcHoras(TURNO_HORAS_DEF.D.iniN, TURNO_HORAS_DEF.D.finN))*10)/10;
+}
+
 
 // ==========================================
 // PERIODOS GC
@@ -937,11 +975,11 @@ function saveCfg(){
   cfg.finT=document.getElementById('cfgFinT').value||'21:30';
   cfg.iniN=document.getElementById('cfgIniN').value||'22:00';
   cfg.finN=document.getElementById('cfgFinN').value||'05:30';
-  // Update TURNO_HORAS_DEF dynamically
-  TURNO_HORAS_DEF.M.ini=cfg.iniM; TURNO_HORAS_DEF.M.fin=cfg.finM;
-  TURNO_HORAS_DEF.T.ini=cfg.iniT; TURNO_HORAS_DEF.T.fin=cfg.finT;
-  TURNO_HORAS_DEF.N.ini=cfg.iniN; TURNO_HORAS_DEF.N.fin=cfg.finN;
-  TURNO_HORAS_DEF.D.ini=cfg.iniM; TURNO_HORAS_DEF.D.fin=cfg.finN;
+  cfg.iniDM=document.getElementById('cfgIniDM').value||'06:30';
+  cfg.finDM=document.getElementById('cfgFinDM').value||'14:00';
+  cfg.iniDN=document.getElementById('cfgIniDN').value||'22:00';
+  cfg.finDN=document.getElementById('cfgFinDN').value||'05:30';
+  actualizarHorasDefectoTurnos();
   try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
   scheduleGistPush();
   calcNomina();
@@ -992,17 +1030,11 @@ function applyConfig(){
   document.getElementById('cfgFinT').value=cfg.finT||'21:30';
   document.getElementById('cfgIniN').value=cfg.iniN||'22:00';
   document.getElementById('cfgFinN').value=cfg.finN||'05:30';
-  // Apply to TURNO_HORAS_DEF
-  TURNO_HORAS_DEF.M.ini=cfg.iniM||'06:30'; TURNO_HORAS_DEF.M.fin=cfg.finM||'14:00';
-  TURNO_HORAS_DEF.T.ini=cfg.iniT||'14:00'; TURNO_HORAS_DEF.T.fin=cfg.finT||'21:30';
-  TURNO_HORAS_DEF.N.ini=cfg.iniN||'22:00'; TURNO_HORAS_DEF.N.fin=cfg.finN||'05:30';
-  cfg.iniDM=document.getElementById('cfgIniDM').value||'06:30';
-  cfg.finDM=document.getElementById('cfgFinDM').value||'14:00';
-  cfg.iniDN=document.getElementById('cfgIniDN').value||'22:00';
-  cfg.finDN=document.getElementById('cfgFinDN').value||'05:30';
-  TURNO_HORAS_DEF.D.ini=cfg.iniDM||'06:30'; TURNO_HORAS_DEF.D.fin=cfg.finDN||'05:30';
-  TURNO_HORAS_DEF.D.iniM=cfg.iniDM||'06:30'; TURNO_HORAS_DEF.D.finM=cfg.finDM||'14:00';
-  TURNO_HORAS_DEF.D.iniN=cfg.iniDN||'22:00'; TURNO_HORAS_DEF.D.finN=cfg.finDN||'05:30';
+  document.getElementById('cfgIniDM').value=cfg.iniDM||'06:30';
+  document.getElementById('cfgFinDM').value=cfg.finDM||'14:00';
+  document.getElementById('cfgIniDN').value=cfg.iniDN||'22:00';
+  document.getElementById('cfgFinDN').value=cfg.finDN||'05:30';
+  actualizarHorasDefectoTurnos();
   document.getElementById('cfgPnavTotales').value=cfg.pnavTotales||3;
   document.getElementById('cfgHuerfanosOrd').value=(cfg.huerfanosOrd!==undefined?cfg.huerfanosOrd:9.01);
   document.getElementById('cfgHuerfanosExtra').value=(cfg.huerfanosExtra!==undefined?cfg.huerfanosExtra:16.79);
@@ -1267,7 +1299,7 @@ function renderCalendar(){
         ch.innerText=iniM+'-'+finM+'\n'+iniN+'-'+finN;
         ch.style.whiteSpace='pre';
       } else {
-        var hVal = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+        var hVal = getShiftHours(s, key);
         ch.innerText=hVal+'h';
       }
       cell.appendChild(ch);
@@ -1381,16 +1413,13 @@ function assignSelected(tKey){
   var def = TURNO_HORAS_DEF[tKey];
   shifts[selectedDay].ini = def ? def.ini : '';
   shifts[selectedDay].fin = def ? def.fin : '';
-  // Vacaciones en finde de semana: 0 horas
-  var hDef = def ? def.h : 7.5;
-  if(tKey==='V' && isWeekend(selectedDay)) hDef = 0;
-  shifts[selectedDay].h = hDef;
   if(tKey==='D'){
-    shifts[selectedDay].iniM = shifts[selectedDay].iniM || cfg.iniDM || '06:30';
-    shifts[selectedDay].finM = shifts[selectedDay].finM || cfg.finDM || '14:00';
-    shifts[selectedDay].iniN = shifts[selectedDay].iniN || cfg.iniDN || '22:00';
-    shifts[selectedDay].finN = shifts[selectedDay].finN || cfg.finDN || '05:30';
+    shifts[selectedDay].iniM = cfg.iniDM || '06:30';
+    shifts[selectedDay].finM = cfg.finDM || '14:00';
+    shifts[selectedDay].iniN = cfg.iniDN || '22:00';
+    shifts[selectedDay].finN = cfg.finDN || '05:30';
   }
+  shifts[selectedDay].h = getShiftHours(shifts[selectedDay], selectedDay);
   if(!shifts[selectedDay].companeros) shifts[selectedDay].companeros=[];
   if(!shifts[selectedDay].nota) shifts[selectedDay].nota='';
   
@@ -1537,7 +1566,7 @@ function calcQuickStats(){
     if(s && s.t){
       var tObj=TURNOS[s.t];
       if(tObj && tObj.compHoras && s.t!=='B'){
-        var horas = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+        var horas = getShiftHours(s, k);
         if(s.t==='V' && isWeekend(k)) horas = 0;
         totalH += horas;
       }
@@ -1852,7 +1881,7 @@ function calcResumen(){
     if(s && s.t && counts[s.t]!==undefined){
       counts[s.t]++;
       if(TURNOS[s.t].compHoras && s.t!=='B'){
-        var hRes = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+        var hRes = getShiftHours(s, k);
         if(s.t==='V' && isWeekend(k)) hRes = 0;
         totalH += hRes;
       }
@@ -1907,7 +1936,7 @@ function calcResumen(){
       var s=shifts[k];
       if(s && s.t && annCounts[s.t]!==undefined){
         annCounts[s.t]++;
-        if(TURNOS[s.t].compHoras) annH+= s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+        if(TURNOS[s.t].compHoras) annH+= getShiftHours(s, k);
         if(s.t==='N'||s.t==='D') annN++;
         if(s.t==='ES'||isFestivo(k,s.t)){
           if(s.t!=='L'&&s.t!=='B'&&s.t!=='AP'&&s.t!=='V'&&s.t!=='S') annF++;
@@ -1995,7 +2024,7 @@ function calcCrexMes(){
     if(s && s.t){
       var tObj=TURNOS[s.t];
       if(tObj && tObj.compHoras && s.t!=='B'){
-        var hCrex = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+        var hCrex = getShiftHours(s, k);
         if(s.t==='V' && isWeekend(k)) hCrex = 0;
         totalH += hCrex;
       }
@@ -3032,7 +3061,7 @@ function renderVacApContent(y){
       var kx = dStr(runx.getFullYear(), runx.getMonth(), runx.getDate());
       var sx = shifts[kx];
       if(sx && sx.t && TURNOS[sx.t] && TURNOS[sx.t].compHoras){
-        totalHx += sx.h !== undefined ? sx.h : TURNO_HORAS_DEF[sx.t].h;
+        totalHx += getShiftHours(sx, kx);
       }
       runx.setDate(runx.getDate()+1);
     }
@@ -3234,7 +3263,7 @@ function exportarCuadrantePDF(){
         html += '<div class="turno" style="color:#0369a1">Vacaciones</div>';
       } else {
         html += '<div class="turno">' + tObj.label + '</div>';
-        var h = s.h !== undefined ? s.h : (TURNO_HORAS_DEF[s.t] ? TURNO_HORAS_DEF[s.t].h : 0);
+        var h = getShiftHours(s, k);
         if(h > 0) html += '<div class="horas">' + h + 'h</div>';
         if(s.ini && s.fin) html += '<div class="horas">' + s.ini + '-' + s.fin + '</div>';
       }
@@ -3280,7 +3309,7 @@ function exportarCuadrantePDF(){
     var ss = shifts[kk];
     if(ss && ss.t){
       var tt = TURNOS[ss.t];
-      if(tt && tt.compHoras) totalH += ss.h !== undefined ? ss.h : (TURNO_HORAS_DEF[ss.t] ? TURNO_HORAS_DEF[ss.t].h : 0);
+      if(tt && tt.compHoras) totalH += getShiftHours(ss, kk);
       if(ss.t === 'N' || ss.t === 'D') nNoches++;
       if(ss.t === 'L') nLibres++;
       if(esServicioFestivo(kk, ss.t)) nFest++;
