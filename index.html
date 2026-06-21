@@ -270,7 +270,7 @@ input:focus,select:focus{border-color:var(--verde);}
 
   <div id="vIncentivos" style="display:none">
     <div class="sec-title">⚡ Sistema INCENTIVOS</div>
-    <div class="info-box">El <strong>INCENTIVOS</strong> (Índice Cualificador para la Retribución por Determinados Servicios) se calcula según la fórmula oficial del boletín oficial correspondiente. Introduce los valores del mes para obtener tu retribución exacta.</div>
+    <div class="info-box">El <strong>INCENTIVOS</strong> (Índice Cualificador para la Retribución por Determinados Servicios) se estima mediante la fórmula y la tabla incorporadas en la aplicación. Introduce los valores del mes para obtener una estimación orientativa de la retribución.</div>
 
     <div class="bal-card">
       <h3>🧮 Fórmula INCENTIVOS — Introduce tus valores del mes</h3>
@@ -455,26 +455,40 @@ input:focus,select:focus{border-color:var(--verde);}
     </div>
 
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">☁️ Sincronización GitHub Gist</div>
+    <div class="sec-title" style="font-size:14px">☁️ Sincronización GitHub Gist cifrada</div>
     <div class="rule-card" style="margin-bottom:8px">
-      <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:4px;border:none">
-        <span style="font-size:11px;color:#555">Tus datos se guardan en un Gist privado de tu cuenta de GitHub y se sincronizan automáticamente entre todos tus dispositivos.</span>
+      <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:6px;border:none">
+        <span style="font-size:11px;color:#555">Antes de subirlos, la app cifra tus turnos y ajustes en el propio dispositivo mediante <strong>AES-256-GCM</strong>. En el Gist solo se guarda contenido cifrado.</span>
+        <span style="font-size:11px;color:#92400e;background:#fef3c7;border-radius:7px;padding:7px 9px;width:100%"><strong>Importante:</strong> usa la misma contraseña en todos tus dispositivos. La contraseña no se sube al Gist y, si la olvidas, la copia cifrada no podrá recuperarse.</span>
       </div>
     </div>
     <div class="ig">
       <label class="il">🔑 Token de acceso GitHub (ghp_...)</label>
-      <input type="password" id="cfgGhToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" oninput="saveGistCfg()">
+      <input type="password" id="cfgGhToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" oninput="saveGistCfg()" autocomplete="off">
     </div>
     <div class="ig">
-      <label class="il">📄 ID del Gist</label>
-      <input type="text" id="cfgGistId" placeholder="a1b2c3d4e5f6..." oninput="saveGistCfg()">
+      <label class="il">📄 ID del Gist secreto</label>
+      <input type="text" id="cfgGistId" placeholder="a1b2c3d4e5f6..." oninput="saveGistCfg()" autocomplete="off">
     </div>
+    <div class="ig">
+      <label class="il">🔐 Contraseña de cifrado</label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="password" id="cfgGistPassword" placeholder="Mínimo 8 caracteres" oninput="saveGistCfg()" autocomplete="new-password" style="flex:1">
+        <button type="button" id="btnToggleGistPassword" onclick="toggleGistPassword()" aria-label="Mostrar u ocultar contraseña" style="width:46px;height:40px;border:2px solid #ddd;border-radius:9px;background:#fff;font-size:18px;cursor:pointer">👁️</button>
+      </div>
+      <div style="font-size:10px;color:#666;margin-top:5px;line-height:1.35">No es la contraseña de GitHub. Es una frase que eliges tú para cifrar el cuadrante. No se incluye en el Gist ni se envía a GitHub.</div>
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:9px 10px;margin-bottom:8px;cursor:pointer">
+      <input type="checkbox" id="cfgRememberGistPassword" onchange="saveGistCfg()" style="width:18px;height:18px;margin-top:1px;accent-color:var(--verde)">
+      <span style="font-size:11px;color:#555;line-height:1.35"><strong>Recordar la contraseña en este dispositivo.</strong> Facilita la sincronización automática, pero quedará guardada localmente en este navegador.</span>
+    </label>
+    <button type="button" onclick="clearGistPassword()" style="background:none;border:none;color:#64748b;text-decoration:underline;font-size:11px;cursor:pointer;padding:2px 0 8px">Olvidar contraseña guardada en este dispositivo</button>
     <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
-      <button class="btn-export" style="flex:1;min-width:120px" onclick="gistPush()">☁️ Subir ahora</button>
-      <button class="btn-import" style="flex:1;min-width:120px" onclick="gistPull()">⬇️ Descargar ahora</button>
+      <button class="btn-export" style="flex:1;min-width:120px" onclick="gistPush()">🔒 Cifrar y subir ahora</button>
+      <button class="btn-import" style="flex:1;min-width:120px" onclick="gistPull()">🔓 Descargar y descifrar</button>
     </div>
     <div id="gistStatus" style="display:none;margin-top:8px;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700;text-align:center"></div>
-    <p style="font-size:10px;color:#aaa;margin-top:6px;text-align:center">¿No sabes cómo obtenerlos? Sigue la guía incluida con la app.</p>
+    <p style="font-size:10px;color:#aaa;margin-top:6px;text-align:center">El Gist secreto no aparece en búsquedas, pero el cifrado es lo que impide leer los datos sin tu contraseña.</p>
 
     <div class="divider"></div>
     <div class="sec-title" style="font-size:14px">📦 Copia de seguridad local</div>
@@ -502,6 +516,11 @@ input:focus,select:focus{border-color:var(--verde);}
 
     <div class="info-box" style="margin-bottom:12px">
       Esta app te permite gestionar tu cuadrante de servicio, calcular el INCENTIVOS, estimar la nómina y controlar tus descansos. Todos los datos se guardan en tu dispositivo.
+    </div>
+
+    <div class="info-box" style="margin-bottom:12px;background:#fff7ed;border-left-color:#d97706;color:#7c2d12">
+      <strong>⚠️ Aviso importante</strong><br>
+      CUADRANTE es una herramienta personal e independiente de apoyo para organizar turnos y realizar cálculos orientativos. <strong>No es una aplicación oficial</strong> ni está vinculada, avalada o supervisada por ninguna Administración u organismo público. Los resultados sobre jornada, descansos, incentivos y nómina son estimaciones y deben comprobarse con la normativa vigente, las instrucciones aplicables y la documentación oficial.
     </div>
 
     <div class="sec-title" style="font-size:14px">📅 Cuadrante</div>
@@ -587,21 +606,22 @@ input:focus,select:focus{border-color:var(--verde);}
         6. <strong>Copia el token</strong> — solo se muestra una vez</span>
       </div>
       <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:6px">
-        <strong style="color:#1e3a6e">Paso 3 — Crear un Gist</strong>
+        <strong style="color:#1e3a6e">Paso 3 — Crear un Gist secreto</strong>
         <span style="font-size:12px">1. Ve a <strong>gist.github.com</strong><br>
         2. Crea un nuevo Gist: pon cualquier nombre de archivo (ej: <em>cuadrante.json</em>), escribe cualquier cosa en el contenido y pulsa <strong>Create secret gist</strong><br>
-        3. Copia el <strong>ID del Gist</strong> — es la parte final de la URL: gist.github.com/tuusuario/<strong>abc123def456</strong></span>
+        3. Copia el <strong>ID del Gist</strong> — es la parte final de la URL: gist.github.com/tuusuario/<strong>abc123def456</strong><br><br><span style="color:#92400e"><strong>Nota:</strong> un Gist secreto no aparece en búsquedas, pero quien conozca su enlace podría abrirlo. Por eso CUADRANTE cifra el contenido antes de subirlo.</span></span>
       </div>
       <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:6px">
         <strong style="color:#1e3a6e">Paso 4 — Configurar en la app</strong>
-        <span style="font-size:12px">Ve a <strong>Ajustes → Sincronización GitHub Gist</strong> e introduce:<br>
+        <span style="font-size:12px">Ve a <strong>Ajustes → Sincronización GitHub Gist cifrada</strong> e introduce:<br>
         • <strong>Token</strong>: el que copiaste en el paso 2<br>
         • <strong>Gist ID</strong>: el que copiaste en el paso 3<br>
-        Pulsa <strong>Guardar y sincronizar</strong>. A partir de ahora tus datos se sincronizan automáticamente.</span>
+        • <strong>Contraseña de cifrado</strong>: una frase elegida por ti, de al menos 8 caracteres<br><br>
+        Usa exactamente la misma contraseña en todos tus dispositivos. Pulsa <strong>Cifrar y subir ahora</strong> la primera vez. Después, la sincronización podrá hacerse automáticamente si marcas «Recordar la contraseña».</span>
       </div>
       <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:6px">
         <strong style="color:#1e3a6e">Compartir con usuarios</strong>
-        <span style="font-size:12px">Cada usuario necesita su propia cuenta GitHub y su propio Gist. La sincronización es individual — cada uno guarda sus propios datos en la nube.</span>
+        <span style="font-size:12px">Cada usuario necesita su propia cuenta GitHub, su propio Gist y su propia contraseña de cifrado. La sincronización es individual. La contraseña no se puede recuperar desde GitHub, por lo que conviene guardarla en un lugar seguro.</span>
       </div>
     </div>
 
@@ -1017,34 +1037,109 @@ function applyConfig(){
   document.getElementById('cfgExtraEspG').value=cfg.extraEspG||562.338;
 }
 
-// Gist Config & Sync
-var gistCfg = { token:'', gistId:'' };
+// Gist Config & Sync cifrada (AES-256-GCM + PBKDF2-SHA-256)
+var gistCfg = { token:'', gistId:'', rememberPassword:false, encrypted:false };
+var gistPassword = '';
 var gistAutoTimer = null;
+var GIST_FILE_NAME = 'cuadrante_data.json';
+var GIST_ENCRYPTION_FORMAT = 'CUADRANTE_AES_GCM';
+var GIST_ENCRYPTION_VERSION = 1;
+var GIST_PBKDF2_ITERATIONS = 310000;
+var GIST_ADDITIONAL_DATA = 'CUADRANTE_GIST_V1';
 
 function loadGistCfg(){
   try{
     var g = localStorage.getItem('cuadrante_gist');
     if(g) gistCfg = Object.assign(gistCfg, JSON.parse(g));
+    gistPassword = localStorage.getItem('cuadrante_gist_password') || sessionStorage.getItem('cuadrante_gist_password') || '';
+    gistCfg.rememberPassword = !!localStorage.getItem('cuadrante_gist_password');
     document.getElementById('cfgGhToken').value = gistCfg.token||'';
     document.getElementById('cfgGistId').value = gistCfg.gistId||'';
+    var p = document.getElementById('cfgGistPassword');
+    var r = document.getElementById('cfgRememberGistPassword');
+    if(p) p.value = gistPassword;
+    if(r) r.checked = !!gistCfg.rememberPassword;
     updateSyncBadge();
-  }catch(e){}
+  }catch(e){
+    updateSyncBadge();
+  }
+}
+
+function persistGistCfg(){
+  var safeCfg = {
+    token: gistCfg.token || '',
+    gistId: gistCfg.gistId || '',
+    rememberPassword: !!gistCfg.rememberPassword,
+    encrypted: !!gistCfg.encrypted
+  };
+  try{ localStorage.setItem('cuadrante_gist', JSON.stringify(safeCfg)); }catch(e){}
 }
 
 function saveGistCfg(){
-  gistCfg.token = document.getElementById('cfgGhToken').value.trim();
-  gistCfg.gistId = document.getElementById('cfgGistId').value.trim();
-  try{ localStorage.setItem('cuadrante_gist', JSON.stringify(gistCfg)); }catch(e){}
+  var tokenEl = document.getElementById('cfgGhToken');
+  var idEl = document.getElementById('cfgGistId');
+  var passEl = document.getElementById('cfgGistPassword');
+  var rememberEl = document.getElementById('cfgRememberGistPassword');
+  gistCfg.token = tokenEl ? tokenEl.value.trim() : '';
+  gistCfg.gistId = idEl ? idEl.value.trim() : '';
+  gistPassword = passEl ? passEl.value : '';
+  gistCfg.rememberPassword = rememberEl ? rememberEl.checked : false;
+  persistGistCfg();
+  try{
+    if(gistCfg.rememberPassword && gistPassword){
+      localStorage.setItem('cuadrante_gist_password', gistPassword);
+      sessionStorage.removeItem('cuadrante_gist_password');
+    }else{
+      localStorage.removeItem('cuadrante_gist_password');
+      if(gistPassword) sessionStorage.setItem('cuadrante_gist_password', gistPassword);
+      else sessionStorage.removeItem('cuadrante_gist_password');
+    }
+  }catch(e){}
   updateSyncBadge();
 }
 
-function updateSyncBadge(){
+function clearGistPassword(){
+  gistPassword = '';
+  gistCfg.rememberPassword = false;
+  var p = document.getElementById('cfgGistPassword');
+  var r = document.getElementById('cfgRememberGistPassword');
+  if(p) p.value = '';
+  if(r) r.checked = false;
+  try{
+    localStorage.removeItem('cuadrante_gist_password');
+    sessionStorage.removeItem('cuadrante_gist_password');
+  }catch(e){}
+  persistGistCfg();
+  updateSyncBadge();
+  showGistMsg('Contraseña olvidada en este dispositivo. El Gist no se ha modificado.', false);
+}
+
+function toggleGistPassword(){
+  var p = document.getElementById('cfgGistPassword');
+  var b = document.getElementById('btnToggleGistPassword');
+  if(!p) return;
+  p.type = p.type === 'password' ? 'text' : 'password';
+  if(b) b.textContent = p.type === 'password' ? '👁️' : '🙈';
+}
+
+function setSyncBadge(text, mode){
   var b = document.getElementById('syncBadge');
-  if(gistCfg.token && gistCfg.gistId){
-    b.innerText = '☁️ Sincronizado';
-    b.style.display = 'block';
-  } else {
-    b.style.display = 'none';
+  if(!b) return;
+  if(!text){ b.style.display='none'; return; }
+  b.innerText = text;
+  b.style.display = 'block';
+  if(mode === 'error') b.style.background = 'rgba(185,43,39,.75)';
+  else if(mode === 'warn') b.style.background = 'rgba(217,119,6,.75)';
+  else b.style.background = 'rgba(255,255,255,.15)';
+}
+
+function updateSyncBadge(){
+  if(gistCfg.token && gistCfg.gistId && gistPassword && gistPassword.length >= 8){
+    setSyncBadge(gistCfg.encrypted ? '🔒 Sincronizado' : '🔒 Cifrado listo');
+  }else if(gistCfg.token && gistCfg.gistId){
+    setSyncBadge('🔑 Falta contraseña', 'warn');
+  }else{
+    setSyncBadge('');
   }
 }
 
@@ -1056,62 +1151,252 @@ function showToast(m){
 
 function showGistMsg(m, isErr){
   var d = document.getElementById('gistStatus');
+  if(!d) return;
   d.innerText = m; d.style.display = 'block';
   d.style.background = isErr ? '#fee2e2' : '#e8f4f0';
   d.style.color = isErr ? 'var(--rojo)' : 'var(--verde)';
 }
 
-function gistPush(){
-  if(!gistCfg.token || !gistCfg.gistId){ showGistMsg('Configura el Token y Gist ID primero', true); return; }
-  showGistMsg('Subiendo datos...', false);
-  var payload = { shifts: shifts, cfg: cfg, ts: new Date().toISOString() };
-  var body = { description: "CUADRANTE Backup", files: { "cuadrante_data.json": { content: JSON.stringify(payload, null, 2) } } };
-  
-  fetch('https://api.github.com/gists/'+gistCfg.gistId, {
-    method: 'PATCH',
-    headers: { 'Authorization': 'Bearer '+gistCfg.token, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(function(res){
-    if(!res.ok) throw new Error('Error HTTP: '+res.status);
-    return res.json();
-  }).then(function(){
-    showGistMsg('☁️ ¡Guardado en GitHub con éxito!', false);
-  }).catch(function(err){
-    showGistMsg('Error al subir: '+err.message, true);
-  });
+function cryptoDisponible(){
+  return !!(window.crypto && window.crypto.subtle && window.TextEncoder && window.TextDecoder);
 }
 
-function gistPull(){
-  if(!gistCfg.token || !gistCfg.gistId){ alert('Configura el Token y Gist ID en ajustes'); return; }
-  if(!confirm('¿Descargar desde la nube? Se sobrescribirán los datos locales actuales.')) return;
-  
-  fetch('https://api.github.com/gists/'+gistCfg.gistId, {
+function validarGistConfig(mostrarMensaje){
+  if(!gistCfg.token || !gistCfg.gistId){
+    if(mostrarMensaje) showGistMsg('Configura el Token y el ID del Gist primero.', true);
+    return false;
+  }
+  if(!gistPassword || gistPassword.length < 8){
+    if(mostrarMensaje) showGistMsg('Introduce una contraseña de cifrado de al menos 8 caracteres.', true);
+    return false;
+  }
+  if(!cryptoDisponible()){
+    if(mostrarMensaje) showGistMsg('Este navegador no permite el cifrado Web Crypto. Abre la app mediante HTTPS (por ejemplo, GitHub Pages) y actualiza el navegador.', true);
+    return false;
+  }
+  return true;
+}
+
+function bytesToBase64(bytes){
+  var binary = '';
+  var chunk = 0x8000;
+  for(var i=0;i<bytes.length;i+=chunk){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+chunk, bytes.length)));
+  }
+  return btoa(binary);
+}
+
+function base64ToBytes(value){
+  var binary = atob(value);
+  var bytes = new Uint8Array(binary.length);
+  for(var i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function deriveGistKey(password, salt, iterations){
+  var enc = new TextEncoder();
+  var material = await crypto.subtle.importKey(
+    'raw', enc.encode(password), {name:'PBKDF2'}, false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt:salt, iterations:iterations, hash:'SHA-256'},
+    material,
+    {name:'AES-GCM', length:256},
+    false,
+    ['encrypt','decrypt']
+  );
+}
+
+async function encryptGistPayload(payload, password){
+  var enc = new TextEncoder();
+  var salt = crypto.getRandomValues(new Uint8Array(16));
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var key = await deriveGistKey(password, salt, GIST_PBKDF2_ITERATIONS);
+  var cipherBuffer = await crypto.subtle.encrypt(
+    {name:'AES-GCM', iv:iv, additionalData:enc.encode(GIST_ADDITIONAL_DATA), tagLength:128},
+    key,
+    enc.encode(JSON.stringify(payload))
+  );
+  return {
+    format: GIST_ENCRYPTION_FORMAT,
+    version: GIST_ENCRYPTION_VERSION,
+    algorithm: 'AES-256-GCM',
+    kdf: 'PBKDF2-SHA-256',
+    iterations: GIST_PBKDF2_ITERATIONS,
+    salt: bytesToBase64(salt),
+    iv: bytesToBase64(iv),
+    ciphertext: bytesToBase64(new Uint8Array(cipherBuffer)),
+    ts: payload.ts
+  };
+}
+
+function isEncryptedGistData(data){
+  return !!(data && data.format === GIST_ENCRYPTION_FORMAT && data.version === GIST_ENCRYPTION_VERSION && data.ciphertext);
+}
+
+async function decryptGistPayload(envelope, password){
+  if(!isEncryptedGistData(envelope)) throw new Error('Formato cifrado no reconocido');
+  var iterations = parseInt(envelope.iterations,10);
+  if(!iterations || iterations < 100000 || iterations > 2000000) throw new Error('Parámetros de cifrado no válidos');
+  var enc = new TextEncoder();
+  var key = await deriveGistKey(password, base64ToBytes(envelope.salt), iterations);
+  try{
+    var plainBuffer = await crypto.subtle.decrypt(
+      {name:'AES-GCM', iv:base64ToBytes(envelope.iv), additionalData:enc.encode(GIST_ADDITIONAL_DATA), tagLength:128},
+      key,
+      base64ToBytes(envelope.ciphertext)
+    );
+    return JSON.parse(new TextDecoder().decode(plainBuffer));
+  }catch(e){
+    throw new Error('Contraseña incorrecta o copia cifrada dañada');
+  }
+}
+
+function buildGistPayload(){
+  return {
+    shifts: shifts,
+    cfg: cfg,
+    festivosExtra: (typeof festivosExtra !== 'undefined' ? festivosExtra : {}),
+    ts: new Date().toISOString()
+  };
+}
+
+function applyGistPayload(parsed, remoteTs){
+  if(!parsed || typeof parsed !== 'object') throw new Error('La copia no contiene datos válidos');
+  if(parsed.shifts && typeof parsed.shifts === 'object') shifts = parsed.shifts;
+  if(parsed.cfg && typeof parsed.cfg === 'object') cfg = Object.assign(cfg, parsed.cfg);
+  if(parsed.festivosExtra && typeof parsed.festivosExtra === 'object') festivosExtra = parsed.festivosExtra;
+  var ts = remoteTs || (parsed.ts ? new Date(parsed.ts).getTime() : Date.now());
+  if(!isFinite(ts)) ts = Date.now();
+  try{
+    localStorage.setItem('cuadrante_shifts', JSON.stringify(shifts));
+    localStorage.setItem('cuadrante_cfg', JSON.stringify(cfg));
+    if(typeof festivosExtra !== 'undefined') localStorage.setItem('cuadrante_festivos', JSON.stringify(festivosExtra));
+    localStorage.setItem('cuadrante_lastSave', ts.toString());
+  }catch(e){}
+  applyConfig();
+  renderAll();
+  updateAntiguedadInfo();
+}
+
+async function fetchGistFile(){
+  var res = await fetch('https://api.github.com/gists/'+gistCfg.gistId, {
     headers: { 'Authorization': 'Bearer '+gistCfg.token, 'X-GitHub-Api-Version': '2022-11-28' }
-  }).then(function(res){
-    if(!res.ok) throw new Error('Error '+res.status);
-    return res.json();
-  }).then(function(data){
-    var file = data.files && data.files['cuadrante_data.json'];
-    if(!file || !file.content) throw new Error('Fichero no encontrado en el Gist');
-    var parsed = JSON.parse(file.content);
-    if(parsed.shifts) shifts = parsed.shifts;
-    if(parsed.cfg) cfg = Object.assign(cfg, parsed.cfg);
-    try{
-      localStorage.setItem('cuadrante_shifts', JSON.stringify(shifts));
-      localStorage.setItem('cuadrante_cfg', JSON.stringify(cfg));
-      localStorage.setItem('cuadrante_lastSave', Date.now().toString());
-    }catch(e){}
-    applyConfig(); renderAll();
-    alert('¡Datos descargados con éxito!');
-  }).catch(function(err){
-    alert('Error al descargar: '+err.message);
   });
+  if(!res.ok) throw new Error('Error HTTP: '+res.status);
+  var data = await res.json();
+  var file = data.files && data.files[GIST_FILE_NAME];
+  if(!file || !file.content) throw new Error('Fichero '+GIST_FILE_NAME+' no encontrado en el Gist');
+  return file.content;
+}
+
+async function gistPush(){
+  if(!validarGistConfig(true)) return;
+  showGistMsg('Cifrando datos en este dispositivo...', false);
+  try{
+    var payload = buildGistPayload();
+    var encrypted = await encryptGistPayload(payload, gistPassword);
+    showGistMsg('Subiendo la copia cifrada...', false);
+    var body = {
+      description: 'CUADRANTE Backup cifrado',
+      files: {}
+    };
+    body.files[GIST_FILE_NAME] = { content: JSON.stringify(encrypted, null, 2) };
+    var res = await fetch('https://api.github.com/gists/'+gistCfg.gistId, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer '+gistCfg.token, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('Error HTTP: '+res.status);
+    gistCfg.encrypted = true;
+    persistGistCfg();
+    try{ localStorage.setItem('cuadrante_lastSave', new Date(payload.ts).getTime().toString()); }catch(e){}
+    setSyncBadge('🔒 Sincronizado');
+    showGistMsg('🔒 Copia cifrada y guardada en GitHub con éxito.', false);
+  }catch(err){
+    setSyncBadge('⚠️ Error de sincronización', 'error');
+    showGistMsg('Error al cifrar o subir: '+err.message, true);
+  }
+}
+
+async function gistPull(){
+  if(!validarGistConfig(true)) return;
+  if(!confirm('¿Descargar desde la nube? Se sobrescribirán los datos locales actuales.')) return;
+  showGistMsg('Descargando copia...', false);
+  try{
+    var content = await fetchGistFile();
+    var stored = JSON.parse(content);
+    var parsed;
+    var wasEncrypted = isEncryptedGistData(stored);
+    if(wasEncrypted){
+      showGistMsg('Descifrando datos en este dispositivo...', false);
+      parsed = await decryptGistPayload(stored, gistPassword);
+      gistCfg.encrypted = true;
+    }else{
+      parsed = stored;
+      gistCfg.encrypted = false;
+    }
+    applyGistPayload(parsed);
+    persistGistCfg();
+    if(wasEncrypted){
+      setSyncBadge('🔒 Sincronizado');
+      showGistMsg('🔓 Copia descargada y descifrada correctamente.', false);
+      alert('¡Datos descargados y descifrados con éxito!');
+    }else{
+      setSyncBadge('⚠️ Gist sin cifrar', 'warn');
+      showGistMsg('Copia antigua descargada. Pulsa «Cifrar y subir ahora» para sustituirla por una copia protegida.', false);
+      alert('Datos descargados. Esta copia antigua todavía no estaba cifrada. Pulsa «Cifrar y subir ahora» para protegerla.');
+    }
+  }catch(err){
+    setSyncBadge('⚠️ No se pudo descifrar', 'error');
+    showGistMsg('Error al descargar o descifrar: '+err.message, true);
+    alert('Error al descargar o descifrar: '+err.message);
+  }
 }
 
 function scheduleGistPush(){
-  if(!gistCfg.token || !gistCfg.gistId) return;
+  if(!gistCfg.token || !gistCfg.gistId || !gistPassword || gistPassword.length < 8 || !cryptoDisponible()) return;
   clearTimeout(gistAutoTimer);
   gistAutoTimer = setTimeout(function(){ gistPush(); }, 3000);
+}
+
+async function autoSyncGistOnLoad(){
+  if(!gistCfg.token || !gistCfg.gistId) return;
+  if(!cryptoDisponible()){
+    setSyncBadge('⚠️ Cifrado no disponible', 'error');
+    return;
+  }
+  try{
+    var content = await fetchGistFile();
+    var stored = JSON.parse(content);
+    var encrypted = isEncryptedGistData(stored);
+    var remoteTs = new Date((encrypted ? stored.ts : stored.ts) || 0).getTime();
+    var localTs = parseInt(localStorage.getItem('cuadrante_lastSave')||'0',10);
+    if(encrypted){
+      gistCfg.encrypted = true;
+      persistGistCfg();
+      if(!gistPassword || gistPassword.length < 8){
+        setSyncBadge('🔑 Falta contraseña', 'warn');
+        return;
+      }
+      if(!remoteTs || remoteTs > localTs){
+        var parsed = await decryptGistPayload(stored, gistPassword);
+        applyGistPayload(parsed, remoteTs || undefined);
+      }
+      setSyncBadge('🔒 Sincronizado');
+    }else{
+      gistCfg.encrypted = false;
+      persistGistCfg();
+      if(stored.shifts && (!remoteTs || remoteTs > localTs)) applyGistPayload(stored, remoteTs || undefined);
+      setSyncBadge('⚠️ Gist sin cifrar', 'warn');
+      showGistMsg('La copia actual del Gist no está cifrada. Introduce una contraseña y pulsa «Cifrar y subir ahora».', false);
+    }
+  }catch(err){
+    if(String(err.message||'').indexOf('Contraseña incorrecta') !== -1){
+      setSyncBadge('⚠️ Contraseña incorrecta', 'error');
+      showGistMsg('No se pudo descifrar la copia automática: contraseña incorrecta.', true);
+    }
+  }
 }
 
 // ==========================================
@@ -3517,34 +3802,8 @@ window.onload=function(){
   var btnHTML = document.getElementById('btnExportHTML');
   if(btnHTML) btnHTML.addEventListener('click', exportarHTMLCompleto);
 
-  // Sincronizacion automatica silenciosa al arrancar
-  if(gistCfg.token && gistCfg.gistId){
-    fetch('https://api.github.com/gists/'+gistCfg.gistId, {
-      headers:{'Authorization':'Bearer '+gistCfg.token,'X-GitHub-Api-Version':'2022-11-28'}
-    }).then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(data){
-      if(!data) return;
-      var file = data.files && data.files['cuadrante_data.json'];
-      if(!file || !file.content) return;
-      var parsed = JSON.parse(file.content);
-      if(!parsed.shifts || !parsed.ts) return;
-      var remoteTs = new Date(parsed.ts).getTime();
-      var localTs  = parseInt(localStorage.getItem('cuadrante_lastSave')||'0');
-      if(remoteTs > localTs){
-        shifts = parsed.shifts;
-        if(parsed.cfg) cfg = Object.assign(cfg, parsed.cfg);
-        try{
-          localStorage.setItem('cuadrante_shifts', JSON.stringify(shifts));
-          localStorage.setItem('cuadrante_cfg', JSON.stringify(cfg));
-          localStorage.setItem('cuadrante_lastSave', remoteTs.toString());
-        }catch(e){}
-        applyConfig();
-        renderAll();
-        updateAntiguedadInfo();
-        updateSyncBadge();
-      }
-    }).catch(function(){});
-  }
+  // Sincronización automática cifrada al arrancar
+  autoSyncGistOnLoad();
 };
 </script>
 </body>
