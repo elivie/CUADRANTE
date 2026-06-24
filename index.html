@@ -182,7 +182,7 @@ input:focus,select:focus{border-color:var(--verde);}
   <div class="h-top">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
-      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1</span></div>
+      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
@@ -238,6 +238,11 @@ input:focus,select:focus{border-color:var(--verde);}
 
   <div id="vNomina" style="display:none">
     <div class="sec-title">💰 Nómina estimada</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;background:#1e293b;border-radius:12px;padding:10px 16px;margin-bottom:12px">
+      <button onclick="nominaCambiarMes(-1)" style="background:rgba(255,255,255,.12);border:none;color:#fff;font-size:20px;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center">&#8249;</button>
+      <span id="nominaMesLabel" style="color:#fff;font-weight:700;font-size:15px;min-width:130px;text-align:center"></span>
+      <button onclick="nominaCambiarMes(1)" style="background:rgba(255,255,255,.12);border:none;color:#fff;font-size:20px;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center">&#8250;</button>
+    </div>
     <div style="display:flex;align-items:center;gap:8px;background:#f0f4ff;border-radius:10px;padding:8px 12px;margin-bottom:10px;flex-wrap:wrap">
       <label style="font-size:12px;font-weight:700;color:#1e3a6e;white-space:nowrap">IRPF este mes (%):</label>
       <input type="text" inputmode="decimal" id="irpfMesInput" style="width:80px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;font-weight:700" oninput="saveIrpfMes()">
@@ -248,13 +253,18 @@ input:focus,select:focus{border-color:var(--verde);}
       <input type="text" inputmode="decimal" id="socorrosMesInput" style="width:90px;padding:5px 8px;border:1px solid #fed7aa;border-radius:8px;font-size:14px;font-weight:700" oninput="saveSocorrosMes()">
       <span style="font-size:11px;color:#888">Guardado solo para esta nómina.</span>
     </div>
-    <div class="info-box">Variables mes a mes: <strong>INCENTIVOS</strong> (calculado automáticamente del cuadrante + modificaciones HMPS/HMNS), <strong>CREX</strong> (horas exceso hasta 40h/período: ≥30 min = 1h × 12 €), <strong>SERVICIOS EXTRAORDINARIOS</strong> DASR/DFR/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
+    <div id="prodEstructuralBox" style="display:none;align-items:center;gap:8px;background:#f0fdf4;border-radius:10px;padding:8px 12px;margin-bottom:10px;flex-wrap:wrap">
+      <label style="font-size:12px;font-weight:700;color:#065f46;white-space:nowrap">Productividad estructural este mes (€):<br><span style="font-weight:400;color:#888">Régimen 40h — EFA/EFM/EAD (introducir manualmente)</span></label>
+      <input type="text" inputmode="decimal" id="prodEstructuralInput" style="width:90px;padding:5px 8px;border:1px solid #6ee7b7;border-radius:8px;font-size:14px;font-weight:700" oninput="saveProdEstructural()">
+      <span style="font-size:11px;color:#888">Guardado solo para esta nómina.</span>
+    </div>
+    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (horas exceso hasta 40h/período: ≥30 min = 1h × 12 €), <strong>SERVICIOS EXTRAORDINARIOS</strong> DASR/DFR/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
     <div id="nominaCard"></div>
     <div class="bal-card"><h3>⚡ Detalle INCENTIVOS del mes</h3><div id="nominaIncentivosDetail"></div></div>
 
     <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0">
-      <div style="font-weight:800;font-size:13px;color:#0f766e;margin-bottom:6px">Modificaciones de servicio (HMPS / HMNS)</div>
-      <div style="font-size:11px;color:#666;margin-bottom:8px"><strong>HMPS</strong> = modif. que altera descanso semanal (× 0,75 pts/h). <strong>HMNS</strong> = modif. de servicio nombrado sin afectar descanso (× 0,50 pts/h). Los puntos se consultan en la tabla <strong>Modificaciones</strong> (separada del INCENTIVOS).</div>
+      <div style="font-weight:800;font-size:13px;color:#0f766e;margin-bottom:6px">Productividad ACEX4 — ICREM por modificaciones de servicio</div>
+      <div style="font-size:11px;color:#666;margin-bottom:8px"><strong>HMPS</strong> = modif. que altera descanso semanal (× 0,75 pts/h). <strong>HMNS</strong> = modif. de servicio nombrado sin afectar descanso (× 0,50 pts/h). Los puntos forman el <strong>ICREM</strong>, se redondean siempre al entero superior y se consultan en su tabla propia, separada del ICRES.</div>
       <div id="modListContainer" style="margin-bottom:8px"></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <input type="number" id="modHoras" value="7.5" min="0.5" max="24" step="0.5" style="width:70px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px">
@@ -320,6 +330,17 @@ input:focus,select:focus{border-color:var(--verde);}
       <label class="il">Lista de Compañeros (separados por comas)</label>
       <input type="text" id="cfgCompaneros" placeholder="Pérez, Gómez, Rodríguez, Martínez" oninput="saveCompaneros()">
     </div>
+    <div class="divider"></div>
+    <div class="sec-title" style="font-size:14px">&#x23F1; Régimen de jornada</div>
+    <div class="ig">
+      <label class="il">Modalidad de servicio<br><span style="font-size:10px;color:#888">Determina la jornada de referencia, el CREX y el cómputo de DSJ</span></label>
+      <select id="cfgRegimen" onchange="saveCfg(); renderAll(); actualizarVisibilidadNomina(); loadProdEstructural(); if(document.getElementById('vNomina').style.display!=='none') calcNomina();" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff">
+        <option value="general">General – Turnos (37,5 h/sem)</option>
+        <option value="admin">Administrativo / Específico (40 h/sem)</option>
+        <option value="especial">Mando / Especial (40 h/sem)</option>
+      </select>
+    </div>
+    <div id="regimenInfo" style="background:#f0f9ff;border-radius:8px;padding:8px 10px;font-size:11px;color:#0369a1;margin-bottom:4px"></div>
     <div class="divider"></div>
     <div class="sec-title" style="font-size:14px">Conceptos fijos nómina (de tu nómina real)</div>
     <div class="ig2">
@@ -561,7 +582,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>Festivo en sábado</span><strong>Desde las 15:00h del sábado (normativa aplicable)</strong></div>
       <div class="rule-row"><span>Redondeo</span><strong>Hacia arriba (10,15 pts → INCENTIVOS 11)</strong></div>
       <div class="rule-row"><span>Tabla oficial</span><strong>65 tramos</strong></div>
-      <div class="rule-row"><span>Modificaciones</span><strong>HMPS × 0,75 / HMNS × 0,50 (en Nómina)</strong></div>
+      <div class="rule-row"><span>ICREM por modificaciones</span><strong>HMPS × 0,75 / HMNS × 0,50 · redondeo al alza</strong></div>
     </div>
 
     <div class="sec-title" style="font-size:14px">📋 DAS (Descansos Adicionales)</div>
@@ -574,6 +595,7 @@ input:focus,select:focus{border-color:var(--verde);}
     </div>
 
     <div class="sec-title" style="font-size:14px">💰 CREX y DSJ</div>
+    <div style="background:#fef9c3;border-radius:8px;padding:7px 10px;font-size:11px;color:#854d0e;margin-bottom:6px">ℹ️ El cómputo varía según el régimen configurado en Ajustes.</div>
     <div class="rule-card" style="margin-bottom:10px">
       <div class="rule-row"><span>CREX</span><strong>Horas entre 37,5h y 40h/sem → 12€/h</strong></div>
       <div class="rule-row"><span>DSJ</span><strong>Horas sobre 40h/sem → descanso compensatorio</strong></div>
@@ -679,6 +701,17 @@ input:focus,select:focus{border-color:var(--verde);}
         <div class="comp-list" id="modalCompaneroListN"></div>
         <div class="comp-tags" id="modalCompTagsN"></div>
       </div>
+    </div>
+    <div id="modalModBlock" style="display:none;background:#fdf4ff;border:1px solid #d8b4fe;border-radius:10px;padding:8px 10px;margin-bottom:6px">
+      <div style="font-size:11px;font-weight:700;color:#7c3aed;margin-bottom:6px">⚡ Modificación de servicio (nómina)</div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-bottom:4px">
+        <input type="checkbox" id="modalHmps" style="width:16px;height:16px;accent-color:#7c3aed">
+        <span><strong>HMPS</strong> — altera descanso semanal (h × 0,75 pts)</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer">
+        <input type="checkbox" id="modalHmns" style="width:16px;height:16px;accent-color:#0f766e">
+        <span><strong>HMNS</strong> — modifica servicio nombrado (h × 0,50 pts)</span>
+      </label>
     </div>
     <div class="ig" style="margin-top:4px">
       <label class="il">Nota (opcional)</label>
@@ -858,6 +891,12 @@ function calcPeriodEnd(lastNatural){
   return end;
 }
 
+function getHoraRef(){
+  // Devuelve la jornada semanal de referencia según el régimen configurado
+  var r = (cfg && cfg.regimen) ? cfg.regimen : 'general';
+  return (r === 'general') ? 37.5 : 40;
+}
+
 function getPeriodForMonth(y,m){
   // Calcular el fin del periodo del mes ANTERIOR
   var prevLastNatural = new Date(y, m, 0); // Último día natural del mes anterior
@@ -876,7 +915,8 @@ function getPeriodForMonth(y,m){
     start: start,
     end: end,
     weeks: weeks,
-    requiredHours: weeks * 37.5
+    requiredHours: weeks * getHoraRef(),
+    horaRef: getHoraRef()
   };
 }
 
@@ -901,7 +941,7 @@ var shifts={};
 var selectedDay=null;
 var modalDay=null;
 var cfg={
-  base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '',
+  base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general',
   vacTotales:22, apTotales:6, pssTotales:3, pnavTotales:3, huerfanosOrd:9.01, huerfanosExtra:16.79, dedNoForm:0,
   iniM:'06:30', finM:'14:00', iniT:'14:00', finT:'21:30', iniN:'22:00', finN:'05:30',
   iniDM:'06:30', finDM:'14:00', iniDN:'22:00', finDN:'05:30',
@@ -941,6 +981,8 @@ function saveCfg(){
   cfg.cadenciaPatron=document.getElementById('cfgCadenciaPatron').value||'';
   cfg.cadenciaInicio=document.getElementById('cfgCadenciaInicio').value||'';
   cfg.cadenciaHasta=document.getElementById('cfgCadenciaHasta').value||'';
+  cfg.regimen=document.getElementById('cfgRegimen') ? document.getElementById('cfgRegimen').value : (cfg.regimen||'general');
+  actualizarRegimenInfo();
   cfg.irpf=parseFloat(document.getElementById('cfgIrpf').value)||20.32;
   cfg.pasivos=parseFloat(document.getElementById('cfgPasivos').value)||71.35;
   cfg.mutualidad=parseFloat(document.getElementById('cfgMutualidad').value)||31.24;
@@ -1035,6 +1077,22 @@ function applyConfig(){
   document.getElementById('cfgExtraTrienio').value=cfg.extraTrienio||28.2984;
   document.getElementById('cfgExtraDestino').value=cfg.extraDestino||463.32;
   document.getElementById('cfgExtraEspG').value=cfg.extraEspG||562.338;
+  var regEl = document.getElementById('cfgRegimen');
+  if(regEl) regEl.value = cfg.regimen || 'general';
+  actualizarRegimenInfo();
+}
+
+function actualizarRegimenInfo(){
+  var el = document.getElementById('regimenInfo');
+  if(!el) return;
+  var r = cfg.regimen || 'general';
+  var msgs = {
+    'general': '37,5 h/sem · Exceso hasta 40h → CREX (12 €/h) · Exceso sobre 40h → DSJ (1 día / 7,5h) · Descansos singularizados activados',
+    'admin':   '40 h/sem · Sin CREX · Exceso sobre 40h → DSJ (1 día / 8h) · Cómputo mensual',
+    'especial':'40 h/sem · Sin CREX · Exceso sobre 40h → DSJ (1 día / 8h) · Cómputo trimestral/cuatrimestral (orientativo)'
+  };
+  el.style.display = 'block';
+  el.innerHTML = msgs[r] || '';
 }
 
 // Gist Config & Sync cifrada (AES-256-GCM + PBKDF2-SHA-256)
@@ -1408,7 +1466,7 @@ function showView(v, btn){
   });
   if(v==='cuadrante') document.getElementById('vCuadrante').style.display='block';
   if(v==='resumen') { document.getElementById('vResumen').style.display='block'; calcResumen(); }
-  if(v==='nomina') { document.getElementById('vNomina').style.display='block'; loadIrpfMes(); calcNomina(); renderModificaciones(); }
+  if(v==='nomina') { document.getElementById('vNomina').style.display='block'; nominaMesOffset=0; actualizarPeriodoNominaPago(); loadIrpfMes(); loadSocorrosMes(); loadProdEstructural(); actualizarVisibilidadNomina(); calcNomina(); renderModificaciones(); }
   if(v==='incentivos') { document.getElementById('vIncentivos').style.display='block'; initIncentivosTab(); }
   if(v==='ajustes') { document.getElementById('vAjustes').style.display='block'; actualizarContadoresAjustes(); renderFestPanel(); }
   if(v==='ayuda') document.getElementById('vAyuda').style.display='block';
@@ -1807,9 +1865,11 @@ function calcHorasBajaEnPeriodo(fechaInicio, fechaFin){
       }
       d.setDate(d.getDate()+1);
     }
-    // Apply cap: full week (7 days baja) = 37.5h max
-    var horasSemana = diasBajaEnSemana * 7.5;
-    if(horasSemana > 37.5) horasSemana = 37.5;
+    // Apply cap: full week (7 days baja) = horaRef max
+    var _hr = getHoraRef();
+    var _hpd = _hr / 5; // horas por día laboral (7.5 o 8)
+    var horasSemana = diasBajaEnSemana * _hpd;
+    if(horasSemana > _hr) horasSemana = _hr;
     total += horasSemana;
     // Move to next week
     runner = new Date(domingo);
@@ -1913,6 +1973,9 @@ function openModal(key){
   document.getElementById('modalIniN').value=s.iniN||'22:30';
   document.getElementById('modalFinN').value=s.finN||'06:00';
   document.getElementById('modalNota').value=s.nota||'';
+  document.getElementById('modalHmps').checked = !!(s.hmps);
+  document.getElementById('modalHmns').checked = !!(s.hmns);
+  actualizarModBlock();
   
   onModalTurnoChange();
   if(s.t==='D'){
@@ -1960,6 +2023,7 @@ function onModalTurnoChange(){
     if(compNormal) compNormal.style.display='block';
     if(compD) compD.style.display='none';
   }
+  actualizarModBlock();
 }
 
 function renderModalCompaneros(checkedList, suffix){
@@ -2059,6 +2123,9 @@ function saveModal(){
       shifts[modalDay].ini=''; shifts[modalDay].fin=''; shifts[modalDay].h=0;
     }
     shifts[modalDay].nota=document.getElementById('modalNota').value;
+    shifts[modalDay].hmps = document.getElementById('modalHmps').checked;
+    shifts[modalDay].hmns = document.getElementById('modalHmns').checked;
+    sincronizarModDia(modalDay, shifts[modalDay]);
     
     if(tKey==='D'){
       shifts[modalDay].compM = getCheckedCompaneros('M');
@@ -2077,6 +2144,7 @@ function saveModal(){
 function deleteDay(){
   if(!modalDay) return;
   if(confirm('¿Eliminar el turno de este día?')){
+    sincronizarModDia(modalDay, {hmps:false, hmns:false, h:0});
     delete shifts[modalDay];
     save(); renderAll(); closeModal();
     showToast('Día limpiado');
@@ -2294,10 +2362,16 @@ function calcCrexMes(){
     runner.setDate(runner.getDate()+1);
   }
   totalH += calcHorasBajaEnPeriodo(p.start, p.end);
-  var ref   = p.requiredHours;        // 37,5 x semanas
-  var limit = p.weeks * 40;           // 40h x semanas (limite CREX)
+  var ref   = p.requiredHours;        // horaRef x semanas
+  var limit = p.weeks * 40;           // 40h x semanas (limite absoluto)
   var diff  = totalH - ref;
   if(diff <= 0) return {horas:0, importe:0, horasDSJ:0};
+  // Régimen 40h: no hay tramo CREX, DSJ desde la primera hora sobre 40h
+  if((cfg.regimen||'general') !== 'general'){
+    var horasSobreLimite40 = Math.max(0, totalH - limit);
+    return {horas:0, importe:0, horasDSJ: horasSobreLimite40};
+  }
+  // Régimen general (37,5h): CREX entre ref y 40h/sem
   // Horas pagables como CREX: solo hasta el limite de 40h/sem
   var horasCrexRaw = Math.min(diff, limit - ref);
   if(horasCrexRaw <= 0) return {horas:0, importe:0, horasDSJ: Math.max(0, diff)};
@@ -2333,6 +2407,90 @@ function calcServiciosExtraordinariosMes(){
   return {nDASR:nDASR, nDFR:nDFR, nESS:nESS, importe:(nDASR+nDFR+nESS)*96};
 }
 
+var nominaMesOffset = 0; // 0 = mismo mes visible en Cuadrante
+var nominaPagoYear = null;
+var nominaPagoMonth = null;
+
+function actualizarPeriodoNominaPago(){
+  var y = year;
+  var m = month + nominaMesOffset;
+  while(m < 0){ m += 12; y--; }
+  while(m > 11){ m -= 12; y++; }
+  nominaPagoYear = y;
+  nominaPagoMonth = m;
+  return {year:y, month:m};
+}
+
+function getPeriodoDevengoNomina(){
+  var pago = actualizarPeriodoNominaPago();
+  var y = pago.year;
+  var m = pago.month - 2;
+  while(m < 0){ m += 12; y--; }
+  return {year:y, month:m};
+}
+
+// Muestra u oculta el bloque HMPS/HMNS según si el turno tiene horas computables
+function actualizarModBlock(){
+  var tKey = document.getElementById('modalTurno').value;
+  var tieneHoras = tKey && TURNOS[tKey] && TURNOS[tKey].compHoras;
+  var block = document.getElementById('modalModBlock');
+  if(block) block.style.display = tieneHoras ? 'block' : 'none';
+}
+
+// Sincroniza las modificaciones del día en el array hmns_year_month
+// Elimina entradas previas con dia==key y añade las nuevas según checkboxes
+function sincronizarModDia(key, s){
+  // Las fechas del cuadrante usan formato YYYY-MM-DD.
+  // Se admite también YYYY_MM_DD por compatibilidad con copias antiguas.
+  var parts = String(key).split(/[-_]/);
+  var ky = parseInt(parts[0], 10);
+  var kmHumano = parseInt(parts[1], 10);
+  if(!Number.isFinite(ky) || !Number.isFinite(kmHumano)) return;
+  var km = kmHumano - 1; // las claves HMPS/HMNS usan mes JavaScript (0-11)
+  var mKey = 'hmns_' + ky + '_' + km;
+  if(!Array.isArray(shifts[mKey])) shifts[mKey] = [];
+  // Eliminar entradas automáticas previas de este día, conservando las manuales.
+  shifts[mKey] = shifts[mKey].filter(function(m){ return m.dia !== key; });
+  var h = (s && Number(s.h)) ? Number(s.h) : 0;
+  if(h <= 0) return;
+  if(s.hmps) shifts[mKey].push({horas:h, tipo:'HMPS', dia:key, origen:'cuadrante'});
+  if(s.hmns) shifts[mKey].push({horas:h, tipo:'HMNS', dia:key, origen:'cuadrante'});
+}
+
+// Reconstruye las entradas automáticas de un mes desde los check guardados en cada día.
+// Esto recupera también los check marcados antes de corregir el formato de la fecha.
+function reconstruirModificacionesMes(y, m){
+  var mKey = 'hmns_' + y + '_' + m;
+  var actuales = Array.isArray(shifts[mKey]) ? shifts[mKey] : [];
+  // Las entradas sin "dia" son las añadidas manualmente desde Nómina y se conservan.
+  var manuales = actuales.filter(function(mod){ return !mod || !mod.dia; });
+  var automaticas = [];
+  var prefijo = y + '-' + pad2(m + 1) + '-';
+  Object.keys(shifts).forEach(function(k){
+    if(k.indexOf(prefijo) !== 0 || !/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+    var s = shifts[k];
+    if(!s) return;
+    var h = Number(s.h) || 0;
+    if(h <= 0) return;
+    if(s.hmps) automaticas.push({horas:h, tipo:'HMPS', dia:k, origen:'cuadrante'});
+    if(s.hmns) automaticas.push({horas:h, tipo:'HMNS', dia:k, origen:'cuadrante'});
+  });
+  shifts[mKey] = manuales.concat(automaticas);
+  // Limpia la clave errónea generada por la versión anterior.
+  if(Array.isArray(shifts['hmns_NaN_NaN'])) delete shifts['hmns_NaN_NaN'];
+  return shifts[mKey];
+}
+
+function nominaCambiarMes(delta){
+  nominaMesOffset += delta;
+  actualizarPeriodoNominaPago();
+  loadIrpfMes();
+  loadSocorrosMes();
+  loadProdEstructural();
+  calcNomina();
+  renderModificaciones();
+}
+
 function calcNomina(noReloadInputs){
   if(!noReloadInputs){
     loadIrpfMes();
@@ -2340,18 +2498,27 @@ function calcNomina(noReloadInputs){
   }
   var baseBruto = cfg.base + cfg.destino + cfg.espG + cfg.espS + cfg.res + cfg.vest + (cfg.trienios * (cfg.importeTrienio||32.96)) + cfg.erg3 + (cfg.o3||0);
 
-  // INCENTIVOS, Modificaciones, CREX y Servicios Extraordinarios se cobran 2 meses despues
-  // La nomina de mayo muestra lo de marzo, etc.
-  var refYear = year;
-  var refMonth = month - 2;
-  if(refMonth < 0){ refMonth += 12; refYear -= 1; }
+  // La pestaña muestra el mismo mes de nómina que el Cuadrante.
+  // Los conceptos variables se calculan sobre el periodo de devengo de dos meses antes.
+  var pago = actualizarPeriodoNominaPago();
+  var pagoYear = pago.year, pagoMonth = pago.month;
+  var devengo = getPeriodoDevengoNomina();
+  var refYear = devengo.year, refMonth = devengo.month;
+  var lblEl = document.getElementById('nominaMesLabel');
+  if(lblEl){ var MESES_N=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']; lblEl.textContent = MESES_N[pagoMonth] + ' ' + pagoYear; }
 
-  // Temporarily swap year/month to calculate for reference period
+  // Cambiar temporalmente al mes de devengo para calcular INCENTIVOS/ICREM/CREX/Serv.Ext.
   var origYear = year, origMonth = month;
   year = refYear; month = refMonth;
 
-  var ptsIncentivos=calcIncentivosMesPoints();
-  var impIncentivos=getIncentivosImporte(ptsIncentivos);
+  var ptsIncentivos, impIncentivos;
+  if((cfg.regimen||'general') === 'general'){
+    ptsIncentivos = calcIncentivosMesPoints();
+    impIncentivos = getIncentivosImporte(ptsIncentivos);
+  } else {
+    ptsIncentivos = 0;
+    impIncentivos = getProdEstructuralMes();
+  }
   var ptsModificaciones=calcModificacionesMesPoints();
   var impModificaciones=getModificacionesImporte(ptsModificaciones);
   var crex=calcCrexMes();
@@ -2361,7 +2528,7 @@ function calcNomina(noReloadInputs){
   year = origYear; month = origMonth;
   
   // Paga extraordinaria: solo en junio (mes 5) y diciembre (mes 11)
-  var esMesExtra = (origMonth === 5 || origMonth === 11);
+  var esMesExtra = (pagoMonth === 5 || pagoMonth === 11);
   var pagaExtra = 0;
   var pagaExtraDetalle = null;
   if(esMesExtra){
@@ -2383,17 +2550,23 @@ function calcNomina(noReloadInputs){
   var neto=brutoTotal - retIrpf - (cfg.pasivos * factorExtra) - (cfg.mutualidad * factorExtra) - dedNF;
   
   var modificacionesRow = impModificaciones > 0
-    ? '<div class="nom-row var" style="color:#7c3aed"><span>+ Sobresfuerzos Modificaciones ('+ptsModificaciones.toFixed(2)+' pts):</span><strong>'+impModificaciones.toFixed(2)+' €</strong></div>'
-    : '<div class="nom-row" style="color:#aaa"><span>+ Sobresfuerzos Modificaciones (HMPS/HMNS):</span><strong>0,00 €</strong></div>';
+    ? '<div class="nom-row var" style="color:#7c3aed"><span>+ ICREM modificaciones ('+ptsModificaciones.toFixed(2)+' pts → tramo '+Math.ceil(ptsModificaciones)+'):</span><strong>'+impModificaciones.toFixed(2)+' €</strong></div>'
+    : '<div class="nom-row" style="color:#aaa"><span>+ ICREM modificaciones (HMPS/HMNS):</span><strong>0,00 €</strong></div>';
   var crexDSJnota = (crex.horasDSJ > 0) ? ' <span style="font-size:10px;color:#b45309">(+'+crex.horasDSJ.toFixed(1)+'h → DSJ)</span>' : '';
-  var crexRow = crex.horas > 0
-    ? '<div class="nom-row var"><span>+ CREX ('+crex.horas+'h × 12,00 €)'+crexDSJnota+':</span><strong>'+crex.importe.toFixed(2)+' €</strong></div>'
-    : '<div class="nom-row" style="color:#aaa"><span>+ CREX (horas de exceso hasta 40h/sem):</span><strong>0,00 €</strong></div>';
+  var crexRow = '';
+  if((cfg.regimen||'general') === 'general'){
+    crexRow = crex.horas > 0
+      ? '<div class="nom-row var"><span>+ CREX ('+crex.horas+'h × 12,00 €)'+crexDSJnota+':</span><strong>'+crex.importe.toFixed(2)+' €</strong></div>'
+      : '<div class="nom-row" style="color:#aaa"><span>+ CREX (horas de exceso hasta 40h/sem):</span><strong>0,00 €</strong></div>';
+  } else {
+    var dsjNota = crex.horasDSJ > 0 ? ' <span style="font-size:10px;color:#b45309">('+crex.horasDSJ.toFixed(1)+'h → DSJ)</span>' : '';
+    crexRow = '<div class="nom-row" style="color:#aaa"><span>Régimen 40h — sin CREX'+dsjNota+':</span><strong>—</strong></div>';
+  }
   
   var nSextTotal = sExt.nDASR+sExt.nDFR+sExt.nESS;
   var pagaExtraRow = '';
   if(pagaExtraDetalle){
-    var mesExtraLabel = origMonth === 5 ? 'Junio' : 'Diciembre';
+    var mesExtraLabel = pagoMonth === 5 ? 'Junio' : 'Diciembre';
     pagaExtraRow = '<div class="nom-row" style="color:#059669;margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><span>🎁 <strong>Paga Extra '+mesExtraLabel+':</strong></span><strong>'+pagaExtraDetalle.total.toFixed(2)+' €</strong></div>';
     pagaExtraRow += '<div class="nom-row" style="color:#6b7280;font-size:11px"><span>&nbsp;&nbsp;Salario Extra C1:</span><strong>'+pagaExtraDetalle.sal.toFixed(3)+' €</strong></div>';
     pagaExtraRow += '<div class="nom-row" style="color:#6b7280;font-size:11px"><span>&nbsp;&nbsp;Trienios Extra ('+cfg.trienios+'×'+cfg.extraTrienio.toFixed(4)+'€):</span><strong>'+pagaExtraDetalle.tri.toFixed(3)+' €</strong></div>';
@@ -2406,7 +2579,7 @@ function calcNomina(noReloadInputs){
   
   var div=document.getElementById('nominaCard');
   var refMesLabel = MESES[refMonth] + ' ' + refYear;
-  div.innerHTML='<div class="nom-card"><h3>💰 PREVISION NETO A PERCIBIR</h3><div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Conceptos variables (INCENTIVOS/CREX/Serv.Ext.) corresponden a: <strong style=\"color:#5eead4\">'+refMesLabel+'</strong></div><div class="nom-tot"><span class="ntl">Liquido estimado en cuenta:</span><strong class="ntv">'+neto.toFixed(2)+' €</strong></div><div style="margin-top:12px"><div class="nom-row"><span>Sueldo Bruto Fijo base:</span><strong>'+baseBruto.toFixed(2)+' €</strong></div><div class="nom-row var"><span>+ Complemento INCENTIVOS variable:</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>'+modificacionesRow+crexRow+sExtRow+pagaExtraRow+'<div class="nom-row"><span>Bruto Total del mes:</span><strong>'+brutoTotal.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Retencion IRPF ('+irpfMes+'%):</span><strong>-'+retIrpf.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Derechos Pasivos / Mutualidad'+(esMesExtra?' (×2 paga extra)':'')+' :</span><strong>-'+((cfg.pasivos+cfg.mutualidad)*factorExtra).toFixed(2)+' €</strong></div>'+(dedNF>0?'<div class="nom-row" style="color:#fca5a5"><span>- Deducciones no formalizables:</span><strong>-'+dedNF.toFixed(2)+' €</strong></div>':'')+'</div></div>';
+  div.innerHTML='<div class="nom-card"><h3>💰 PREVISION NETO A PERCIBIR</h3><div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Conceptos variables (INCENTIVOS/CREX/Serv.Ext.) corresponden a: <strong style=\"color:#5eead4\">'+refMesLabel+'</strong></div><div class="nom-tot"><span class="ntl">Liquido estimado en cuenta:</span><strong class="ntv">'+neto.toFixed(2)+' €</strong></div><div style="margin-top:12px"><div class="nom-row"><span>Sueldo Bruto Fijo base:</span><strong>'+baseBruto.toFixed(2)+' €</strong></div>'+((cfg.regimen||'general')==='general'?'<div class="nom-row var"><span>+ Complemento INCENTIVOS variable:</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="nom-row var" style="color:#065f46"><span>+ Productividad estructural (EFA/EFM):</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>')+''+modificacionesRow+crexRow+sExtRow+pagaExtraRow+'<div class="nom-row"><span>Bruto Total del mes:</span><strong>'+brutoTotal.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Retencion IRPF ('+irpfMes+'%):</span><strong>-'+retIrpf.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Derechos Pasivos / Mutualidad'+(esMesExtra?' (×2 paga extra)':'')+' :</span><strong>-'+((cfg.pasivos+cfg.mutualidad)*factorExtra).toFixed(2)+' €</strong></div>'+(dedNF>0?'<div class="nom-row" style="color:#fca5a5"><span>- Deducciones no formalizables:</span><strong>-'+dedNF.toFixed(2)+' €</strong></div>':'')+'</div></div>';
   
   // Detalle INCENTIVOS en nómina
   var det=document.getElementById('nominaIncentivosDetail');
@@ -2415,7 +2588,7 @@ function calcNomina(noReloadInputs){
   var sExtDetalle = sExt.importe > 0
     ? '<div class="br" style="color:#be185d"><span>Serv. Ext. DASR ('+sExt.nDASR+') + DFR ('+sExt.nDFR+') + ESS ('+sExt.nESS+') × 96 €:</span><strong>'+sExt.importe.toFixed(2)+' €</strong></div>'
     : '';
-  det.innerHTML='<div class="br" style="color:#5eead4;font-size:11px"><span>Calculado sobre: '+refMesLabel+'</span></div><div class="br"><span>Puntos INCENTIVOS:</span><strong>'+ptsIncentivos.toFixed(2)+' pts</strong></div><div class="br tot"><span>Retribución INCENTIVOS:</span><strong style="color:var(--azul)">'+impIncentivos.toFixed(2)+' €</strong></div>'+modificacionesDetalle+crexDetalle+sExtDetalle;
+  det.innerHTML=(((cfg.regimen||'general')==='general')?'<div class="br" style="color:#5eead4;font-size:11px"><span>Calculado sobre: '+refMesLabel+'</span></div><div class="br"><span>Puntos INCENTIVOS:</span><strong>'+ptsIncentivos.toFixed(2)+' pts</strong></div><div class="br tot"><span>Retribución INCENTIVOS:</span><strong style="color:var(--azul)">'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="br" style="color:#065f46;font-size:11px"><span>Régimen 40h — productividad estructural fija (EFA/EFM). Introduce el importe manualmente arriba.</span></div><div class="br tot"><span>Productividad estructural:</span><strong style="color:#065f46">'+impIncentivos.toFixed(2)+' €</strong></div>')+modificacionesDetalle+crexDetalle+sExtDetalle;
 }
 
 // ==========================================
@@ -2490,7 +2663,7 @@ var INCENTIVOS_TABLA=[
   {pts:65,imp:224.75,lbl:'INCENTIVOS 65'}
 ];
 
-// Tabla Modificaciones oficial (Sobresfuerzos por modificaciones HMPS/HMNS)
+// Tabla ICREM oficial (productividad ACEX4 por modificaciones HMPS/HMNS)
 var Modificaciones_TABLA = [
   {pts:0,  imp:0},
   {pts:1,  imp:4.09},   {pts:2,  imp:8.17},   {pts:3,  imp:12.26},
@@ -2515,7 +2688,7 @@ var Modificaciones_TABLA = [
 ];
 
 function getModificacionesImporte(pts){
-  var p = Math.floor(pts);
+  var p = Math.ceil(pts); // ICREM: cualquier decimal se redondea al entero superior
   for(var i=Modificaciones_TABLA.length-1; i>=0; i--){
     if(p >= Modificaciones_TABLA[i].pts) return Modificaciones_TABLA[i].imp;
   }
@@ -2707,10 +2880,10 @@ function calcDASAcumulado(){
 }
 
 
-// Calcula puntos Modificaciones del mes (solo modificaciones HMPS/HMNS)
+// Calcula el ICREM del mes (solo modificaciones HMPS/HMNS)
 function calcModificacionesMesPoints(){
   var modKey = 'hmns_'+year+'_'+month;
-  var mods = shifts[modKey] || [];
+  var mods = reconstruirModificacionesMes(year, month);
   var pts = 0;
   mods.forEach(function(mod){
     if(mod.tipo === 'HMPS') pts += mod.horas * 0.75;
@@ -3214,13 +3387,17 @@ function calcDSJGenerados(y){
     var exceso = totalH - ref;
     
     if(exceso > 0){
-      // Primero: las primeras (40 - ref) horas de exceso se pagan como CREX
-      var limCrex = 40 * p.weeks - ref; // horas hasta llegar a 40h×semanas
-      var excesoSobreCuarenta = Math.max(0, exceso - limCrex);
-      
-      // Cada 7.5h de exceso sobre 40h/período = 1 DSJ en períodos estándar (37.5h ref)
-      // Cada 8h de exceso sobre 40h/período = 1 DSJ en períodos de 40h ref
-      var divisor = ref > 0 && (ref / p.weeks) >= 39 ? 8 : 7.5;
+      var excesoSobreCuarenta;
+      if((cfg.regimen||'general') === 'general'){
+        // Régimen 37,5h: CREX absorbe el tramo hasta 40h, DSJ solo sobre 40h
+        var limCrex = 40 * p.weeks - ref;
+        excesoSobreCuarenta = Math.max(0, exceso - limCrex);
+      } else {
+        // Régimen 40h: no hay CREX, todo el exceso sobre 40h genera DSJ
+        excesoSobreCuarenta = Math.max(0, exceso);
+      }
+      // Divisor: 7,5h por DSJ en régimen general; 8h en régimen 40h
+      var divisor = (cfg.regimen||'general') !== 'general' ? 8 : 7.5;
       var dsj = Math.floor(excesoSobreCuarenta / divisor);
       totalDSJ += dsj;
     }
@@ -3420,10 +3597,11 @@ function actualizarContadoresAjustes(){
 // MODIFICACIONES HMPS / HMNS
 // ===========================================================================
 
-function getModKey(){ return 'hmns_'+year+'_'+month; }
+function getModKey(){ var p=getPeriodoDevengoNomina(); return 'hmns_'+p.year+'_'+p.month; }
 
 function getModificaciones(){
-  return shifts[getModKey()] || [];
+  var p=getPeriodoDevengoNomina();
+  return reconstruirModificacionesMes(p.year, p.month);
 }
 
 function agregarModificacion(){
@@ -3468,7 +3646,7 @@ function renderModificaciones(){
     html += '</div>';
   }
   var impMod = getModificacionesImporte(totalPts);
-  html += '<div style="font-size:12px;font-weight:800;color:#7c3aed;padding:4px 0">Modificaciones: '+totalPts.toFixed(2)+' pts → <strong>'+impMod.toFixed(2)+' €</strong></div>';
+  html += '<div style="font-size:12px;font-weight:800;color:#7c3aed;padding:4px 0">ICREM: '+totalPts.toFixed(2)+' pts → tramo '+Math.ceil(totalPts)+' → <strong>'+impMod.toFixed(2)+' €</strong></div>';
   container.innerHTML = html;
   var btns = container.querySelectorAll('.btn-del-mod');
   for(var j=0; j<btns.length; j++){
@@ -3736,7 +3914,7 @@ function formatNumeroInput(v){
 // ===========================================================================
 // IRPF POR MES
 // ===========================================================================
-function getIrpfKey(){ return 'irpf_'+year+'_'+month; }
+function getIrpfKey(){ var p=actualizarPeriodoNominaPago(); return 'irpf_'+p.year+'_'+p.month; }
 
 function getIrpfMes(){
   // Returns IRPF for current month: per-month value if set, else cfg.irpf
@@ -3764,7 +3942,7 @@ function loadIrpfMes(){
 // ===========================================================================
 // SOCORROS MUTUOS POR MES
 // ===========================================================================
-function getSocorrosKey(){ return 'socorros_'+year+'_'+month; }
+function getSocorrosKey(){ var p=actualizarPeriodoNominaPago(); return 'socorros_'+p.year+'_'+p.month; }
 
 function getSocorrosMes(){
   var key = getSocorrosKey();
@@ -3789,6 +3967,35 @@ function loadSocorrosMes(){
 }
 
 // Inicializacion
+function getProdEstructuralKey(){ var p=actualizarPeriodoNominaPago(); return 'prodest_'+p.year+'_'+p.month; }
+
+function getProdEstructuralMes(){
+  var key = getProdEstructuralKey();
+  if(shifts[key] !== undefined) return shifts[key];
+  return 0;
+}
+
+function saveProdEstructural(){
+  var input = document.getElementById('prodEstructuralInput');
+  var raw = input ? input.value : '';
+  var val = parseNumeroFlexible(raw);
+  if(isNaN(val)) return;
+  shifts[getProdEstructuralKey()] = val;
+  save();
+  calcNomina(true);
+}
+
+function loadProdEstructural(){
+  var input = document.getElementById('prodEstructuralInput');
+  if(input && document.activeElement !== input) input.value = formatNumeroInput(getProdEstructuralMes());
+}
+
+function actualizarVisibilidadNomina(){
+  var box = document.getElementById('prodEstructuralBox');
+  if(!box) return;
+  box.style.display = ((cfg.regimen||'general') !== 'general') ? 'flex' : 'none';
+}
+
 window.onload=function(){
   load();
   loadFestivosExtra();
