@@ -1,0 +1,33 @@
+LICENCIA DE USO DE CUADRANTE v1.5
+
+Copyright © 2026 Ivan DM. Todos los derechos reservados.
+
+1. TITULARIDAD
+CUADRANTE, su código fuente, diseño, estructura, textos y elementos propios son titularidad de Ivan DM, salvo los componentes de terceros que, en su caso, conserven sus respectivas licencias.
+
+2. USO AUTORIZADO
+Se concede al usuario un permiso gratuito, no exclusivo, intransferible y revocable para ejecutar y utilizar CUADRANTE con fines personales y no comerciales.
+
+3. COPIAS PRIVADAS
+Se permite realizar las copias privadas estrictamente necesarias para el uso personal o como copia de seguridad, siempre que se mantengan íntegros este aviso de autoría y esta licencia.
+
+4. USOS NO AUTORIZADOS
+Sin autorización previa y expresa del autor, no está permitido:
+
+- Suprimir, ocultar o modificar la autoría, el aviso legal o esta licencia.
+- Presentar CUADRANTE, total o parcialmente, como una creación propia o como una aplicación oficial.
+- Redistribuir, publicar, alojar, compartir o poner a disposición de terceros el código fuente, la aplicación o copias de esta.
+- Modificar, adaptar, traducir o crear versiones derivadas destinadas a su distribución, publicación o explotación.
+- Vender, alquilar, sublicenciar o explotar comercialmente CUADRANTE o cualquiera de sus partes.
+- Utilizar el nombre, la imagen o el contenido de CUADRANTE para inducir a error sobre su autoría, procedencia o vinculación con una Administración u organismo público.
+
+5. FUNCIONAMIENTO Y RESPONSABILIDAD
+CUADRANTE es una herramienta personal e independiente. No es una aplicación oficial ni está vinculada, avalada o supervisada por ninguna Administración u organismo público.
+
+La aplicación se proporciona «tal cual», sin garantía expresa o implícita de exactitud, disponibilidad o adecuación a un fin concreto. Los cálculos de jornada, descansos, incentivos y nómina son orientativos y deben contrastarse con la normativa vigente y la documentación oficial. El usuario es responsable del uso de la aplicación, de la información introducida y de sus copias de seguridad.
+
+6. RESERVA DE DERECHOS
+Todos los derechos no concedidos expresamente en esta licencia quedan reservados al autor. El incumplimiento de estas condiciones extingue automáticamente el permiso de uso concedido.
+
+7. LEGISLACIÓN APLICABLE
+Esta licencia se interpretará conforme a la legislación española.
