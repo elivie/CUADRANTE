@@ -1,3 +1,10 @@
+<!--
+CUADRANTE v1.5
+Copyright © 2026 Ivan DM. Todos los derechos reservados.
+Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
+No se autoriza la eliminación de la atribución, la redistribución, la modificación,
+la venta ni la publicación de la aplicación sin permiso previo y expreso del autor.
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -126,6 +133,21 @@ input:focus,select:focus{border-color:var(--verde);}
 
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--verde);color:#fff;padding:9px 20px;border-radius:13px;font-size:12px;font-weight:700;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.25);white-space:nowrap;transition: opacity 0.3s ease;pointer-events:none;}
 
+/* Autoría y licencia */
+.app-footer{max-width:700px;margin:0 auto;padding:14px 12px 22px;text-align:center;font-size:10px;color:#8790a5;letter-spacing:.25px;line-height:1.5;}
+.app-footer strong{color:#586174;}
+.license-link{background:none;border:none;padding:0;color:var(--azul);font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+.license-overlay{align-items:center;justify-content:center;padding:16px;}
+.license-modal{border-radius:18px;max-width:560px;max-height:86vh;overflow-y:auto;padding:20px 18px 22px;box-shadow:0 18px 60px rgba(0,0,0,.30);}
+.license-modal h3{text-align:left;margin-bottom:4px;}
+.license-subtitle{font-size:11px;color:#687086;margin-bottom:14px;}
+.license-content{font-size:12px;color:#354052;line-height:1.55;}
+.license-content h4{font-size:12px;color:var(--verde);margin:12px 0 4px;}
+.license-content p{margin-bottom:7px;}
+.license-content ul{padding-left:18px;margin:5px 0 8px;}
+.license-content li{margin-bottom:4px;}
+
+
 .comp-list{border:2px solid #ddd;border-radius:9px;background:#fff;max-height:160px;overflow-y:auto;padding:4px 0;}
 .comp-list:focus-within{border-color:var(--verde);}
 .comp-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid #f5f5f5;transition:background .1s;}
@@ -218,9 +240,6 @@ input:focus,select:focus{border-color:var(--verde);}
       <button id="btnExportPdf" style="background:#1e3a6e;color:#fff;border:none;border-radius:10px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
         📄 Exportar cuadrante PDF
       </button>
-    </div>
-    <div style="text-align:center;padding:6px 0 10px;font-size:10px;color:#aab;letter-spacing:0.4px">
-      Developed  &middot; 2026
     </div>
   </div>
 
@@ -647,13 +666,15 @@ input:focus,select:focus{border-color:var(--verde);}
       </div>
     </div>
 
-    <div style="text-align:center;padding:16px 0 8px;font-size:11px;color:#aab;letter-spacing:0.4px">
-      CUADRANTE · Developed  · 2026<br>
-      <span style="font-size:10px">Configuración editable de jornada e incentivos</span>
-    </div>
   </div>
 
 </main>
+
+
+<footer class="app-footer" aria-label="Autoría y licencia">
+  <strong>© 2026 Ivan DM · CUADRANTE v1.5</strong> · Todos los derechos reservados ·
+  <button type="button" class="license-link" onclick="openLicenseModal()">Licencia de uso</button>
+</footer>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal" id="modal">
@@ -725,6 +746,48 @@ input:focus,select:focus{border-color:var(--verde);}
   </div>
 </div>
 
+
+<div class="modal-overlay license-overlay" id="licenseModalOverlay" onclick="closeLicenseModalOutside(event)" role="dialog" aria-modal="true" aria-labelledby="licenseModalTitle">
+  <div class="modal license-modal">
+    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.5</h3>
+    <div class="license-subtitle">Copyright © 2026 Ivan DM. Todos los derechos reservados.</div>
+    <div class="license-content">
+      <h4>1. Titularidad</h4>
+      <p>CUADRANTE, su código fuente, diseño, estructura, textos y elementos propios son titularidad de Ivan DM, salvo los componentes de terceros que, en su caso, conserven sus respectivas licencias.</p>
+
+      <h4>2. Uso autorizado</h4>
+      <p>Se concede al usuario un permiso gratuito, no exclusivo, intransferible y revocable para ejecutar y utilizar CUADRANTE con fines personales y no comerciales.</p>
+
+      <h4>3. Copias privadas</h4>
+      <p>Se permite realizar las copias privadas estrictamente necesarias para el uso personal o como copia de seguridad, siempre que se mantengan íntegros este aviso de autoría y esta licencia.</p>
+
+      <h4>4. Usos no autorizados</h4>
+      <p>Sin autorización previa y expresa del autor, no está permitido:</p>
+      <ul>
+        <li>Suprimir, ocultar o modificar la autoría, el aviso legal o esta licencia.</li>
+        <li>Presentar CUADRANTE, total o parcialmente, como una creación propia o como una aplicación oficial.</li>
+        <li>Redistribuir, publicar, alojar, compartir o poner a disposición de terceros el código fuente, la aplicación o copias de esta.</li>
+        <li>Modificar, adaptar, traducir o crear versiones derivadas destinadas a su distribución, publicación o explotación.</li>
+        <li>Vender, alquilar, sublicenciar o explotar comercialmente CUADRANTE o cualquiera de sus partes.</li>
+        <li>Utilizar el nombre, la imagen o el contenido de CUADRANTE para inducir a error sobre su autoría, procedencia o vinculación con una Administración u organismo público.</li>
+      </ul>
+
+      <h4>5. Funcionamiento y responsabilidad</h4>
+      <p>CUADRANTE es una herramienta personal e independiente. No es una aplicación oficial ni está vinculada, avalada o supervisada por ninguna Administración u organismo público.</p>
+      <p>La aplicación se proporciona «tal cual», sin garantía expresa o implícita de exactitud, disponibilidad o adecuación a un fin concreto. Los cálculos de jornada, descansos, incentivos y nómina son orientativos y deben contrastarse con la normativa vigente y la documentación oficial. El usuario es responsable del uso de la aplicación, de la información introducida y de sus copias de seguridad.</p>
+
+      <h4>6. Reserva de derechos</h4>
+      <p>Todos los derechos no concedidos expresamente en esta licencia quedan reservados al autor. El incumplimiento de estas condiciones extingue automáticamente el permiso de uso concedido.</p>
+
+      <h4>7. Legislación aplicable</h4>
+      <p>Esta licencia se interpretará conforme a la legislación española.</p>
+    </div>
+    <div class="modal-btns" style="margin-top:16px">
+      <button type="button" class="btn-ok" onclick="closeLicenseModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" style="display:none"></div>
 
 <div class="modal-overlay" id="compModalOverlay" onclick="closeCompModal(event)" style="display:none;align-items:center;justify-content:center;">
@@ -739,6 +802,27 @@ input:focus,select:focus{border-color:var(--verde);}
 </div>
 
 <script>
+// ==========================================
+// AUTORÍA Y LICENCIA
+// ==========================================
+function openLicenseModal(){
+  var overlay = document.getElementById('licenseModalOverlay');
+  if(overlay) overlay.classList.add('open');
+}
+
+function closeLicenseModal(){
+  var overlay = document.getElementById('licenseModalOverlay');
+  if(overlay) overlay.classList.remove('open');
+}
+
+function closeLicenseModalOutside(event){
+  if(event && event.target && event.target.id === 'licenseModalOverlay') closeLicenseModal();
+}
+
+document.addEventListener('keydown', function(event){
+  if(event.key === 'Escape') closeLicenseModal();
+});
+
 // ==========================================
 // CONSTANTES
 // ==========================================
