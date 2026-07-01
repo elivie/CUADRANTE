@@ -259,6 +259,7 @@ input:focus,select:focus{border-color:var(--verde);}
     <div class="bal-card"><h3>📋 DAS generados (acumulado histórico)</h3><div id="dasContent"></div></div>
     <div class="bal-card"><h3>🏛️ Días Festivos (DF) — Contador anual</h3><div id="dfContent"></div></div>
     <div class="bal-card"><h3>📅 Vacaciones y AP — Saldo disponible</h3><div id="vacApContent"></div></div>
+    <div class="bal-card"><h3>🧭 Preferencias vacaciones / permisos</h3><div id="preferenciasContent"></div></div>
   </div>
 
   <div id="vNomina" style="display:none">
@@ -445,6 +446,11 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="ig"><label class="il">✝️ Permiso S.S. (días/año)</label><input type="number" id="cfgPssTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">🎄 Permiso Nav. (días/año)</label><input type="number" id="cfgPnavTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
     </div>
+    <div class="divider"></div>
+    <div class="sec-title" style="font-size:14px">🧭 Turnos de preferencia — vacaciones y fechas señaladas</div>
+    <div class="info-box">La app detecta automáticamente el turno disfrutado según las vacaciones/permisos grabados. Los turnos de verano vienen por defecto según la OG; Semana Santa y Navidad pueden variar cada año, por eso quedan editables.</div>
+    <div class="ig"><label class="il">Año de referencia</label><input type="number" id="cfgPrefYear" min="2020" max="2099" oninput="loadPreferenciasEditor()"></div>
+    <div id="preferenciasPeriodosEditor"></div>
     <div id="contadorLibres" style="margin-bottom:8px"></div>
     <div id="contadorDF" style="margin-bottom:8px"></div>
 
@@ -908,7 +914,7 @@ var TURNOS = {
   DSJ: {label:'DSJ',        icon:'⏳',   color:'#b45309', bg:'#fef3c7', pts_n:0, pts_f:0, compHoras:true},
   PSS: {label:'Perm.S.S.',  icon:'✝️',   color:'#6d28d9', bg:'#ede9fe', pts_n:0, pts_f:0, compHoras:true},
   PNV: {label:'Perm.Nav.',  icon:'🎄',   color:'#dc2626', bg:'#fee2e2', pts_n:0, pts_f:0, compHoras:true},
-  V:   {label:'Vacaciones', icon:'🏖️',  color:'#0369a1', bg:'#e0f2fe', pts_n:0, pts_f:0, compHoras:true},
+  V:   {label:'Vacaciones', icon:'🏖️',  color:'#0e7490', bg:'#a5f3fc', pts_n:0, pts_f:0, compHoras:true},
   L:   {label:'Libre',      icon:'✅',  color:'#15803d', bg:'#dcfce7', pts_n:0, pts_f:0, compHoras:false},
   B:   {label:'Baja',       icon:'🏥',  color:'#9f1239', bg:'#ffe4e6', pts_n:0, pts_f:0, compHoras:true},
   S:   {label:'Saliente',   icon:'🌙',  color:'#64748b', bg:'#f1f5f9', pts_n:0, pts_f:0, compHoras:false},
@@ -1118,7 +1124,8 @@ var cfg={
   iniM:'06:30', finM:'14:00', iniT:'14:00', finT:'21:30', iniN:'22:00', finN:'05:30',
   horasTurno:0, horasFijoM:0, horasFijoT:0, horasFijoN:0,
   iniDM:'06:30', finDM:'14:00', iniDN:'22:00', finDN:'05:30',
-  extraSalario:774.342, extraTrienio:28.2984, extraDestino:463.32, extraEspG:562.338
+  extraSalario:774.342, extraTrienio:28.2984, extraDestino:463.32, extraEspG:562.338,
+  prefYear: new Date().getFullYear(), prefPeriodos:{}
 };
 
 function load(){
@@ -1169,6 +1176,7 @@ function saveCfg(){
   cfg.diasCredito=parseInt(document.getElementById('cfgDiasCredito') ? document.getElementById('cfgDiasCredito').value : 0)||0;
   cfg.pssTotales=parseInt(document.getElementById('cfgPssTotales').value)||3;
   cfg.pnavTotales=parseInt(document.getElementById('cfgPnavTotales').value)||3;
+  savePreferenciasEditorToCfg();
   cfg.huerfanosOrd=parseFloat(document.getElementById('cfgHuerfanosOrd').value)||0;
   cfg.huerfanosExtra=parseFloat(document.getElementById('cfgHuerfanosExtra').value)||0;
   cfg.extraSalario=parseFloat(document.getElementById('cfgExtraSalario').value)||0;
@@ -1257,6 +1265,8 @@ function applyConfig(){
   TURNO_HORAS_DEF.D.iniM=cfg.iniDM||'06:30'; TURNO_HORAS_DEF.D.finM=cfg.finDM||'14:00';
   TURNO_HORAS_DEF.D.iniN=cfg.iniDN||'22:00'; TURNO_HORAS_DEF.D.finN=cfg.finDN||'05:30';
   document.getElementById('cfgPnavTotales').value=cfg.pnavTotales||3;
+  if(document.getElementById('cfgPrefYear')) document.getElementById('cfgPrefYear').value = cfg.prefYear || year;
+  loadPreferenciasEditor();
   document.getElementById('cfgHuerfanosOrd').value=(cfg.huerfanosOrd!==undefined?cfg.huerfanosOrd:9.01);
   document.getElementById('cfgHuerfanosExtra').value=(cfg.huerfanosExtra!==undefined?cfg.huerfanosExtra:16.79);
   document.getElementById('cfgExtraSalario').value=cfg.extraSalario||774.342;
@@ -1809,6 +1819,7 @@ function renderCalendar(){
       cell.style.background = isSpecialSvc ? '#fecaca' : tObj.bg;
       cell.style.borderColor = isSpecialSvc ? '#dc2626' : tObj.color;
       if(isSpecialSvc) cell.style.boxShadow = 'inset 0 0 0 3px #dc2626';
+      else if(s.t==='V') cell.style.boxShadow = 'inset 0 0 0 2px rgba(14,116,144,.35)';
       else cell.style.boxShadow = '';
     } else {
       if(fest) {
@@ -2432,7 +2443,7 @@ function calcQuickStats(){
   addChip('🌙', nN, 'Noches', '#4c1d95');
   addChip('📅', nF, 'Festivos/Sáb', '#b92b27');
   addChip('📋', nAP, 'Asuntos Part.', '#059669');
-  addChip('🏖️', nV, 'Vacaciones', '#0369a1');
+  addChip('🏖️', nV, 'Vacaciones', '#0e7490');
   // Count DF in period
   var nDF=0, nDASR=0, nDFR=0;
   var runner2=new Date(p.start);
@@ -2822,7 +2833,7 @@ function calcResumen(){
   var aDiff=Math.round((annH-annRefH)*10)/10;
   addAnnCard('⚖️', (aDiff>=0?'+':'')+aDiff+'h', 'Balance total', aDiff>=0?'var(--verde)':'var(--rojo)');
   addAnnCard('📋', annCounts.AP, 'Asuntos Propios', '#059669');
-  addAnnCard('🏖️', annCounts.V, 'Vacaciones disp.', '#0369a1');
+  addAnnCard('🏖️', annCounts.V, 'Vacaciones disp.', '#0e7490');
   addAnnCard('🏛️', annCounts.DF, 'Días Fest. (DF)', '#0f766e');
   if(annCounts.DASR+annCounts.DFR > 0){
     addAnnCard('💼', annCounts.DASR+annCounts.DFR, 'DASR+DFR', '#be185d');
@@ -2871,6 +2882,7 @@ function calcResumen(){
   // Renderizar DF y Vac/AP
   renderDFContent(year);
   renderVacApContent(year);
+  renderPreferenciasContent(year);
 
   // BLOQUE OFICIAL DE REFERENCIA — turno fijo cuatrimestral / mando-especial trimestral
   var cuatrimBlock = document.getElementById('resCuatrimBlock');
@@ -4079,12 +4091,162 @@ function renderDFContent(y){
       var label = pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();
       var ico, color;
       if(item.genera){ ico='🏛️ DF'; color='#0f766e'; }
-      else if(item.estado==='vacaciones'){ ico='🏖️ (Vac)'; color='#0369a1'; }
+      else if(item.estado==='vacaciones'){ ico='🏖️ (Vac)'; color='#0e7490'; }
       else { ico='📅 (finde)'; color='#888'; }
       html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid #f5f5f5"><span>'+label+'</span><span style="color:'+color+';font-weight:700">'+ico+'</span></div>';
     });
   }
   box.innerHTML = html;
+}
+
+
+// ===========================================================================
+// PREFERENCIAS VACACIONES / SEMANA SANTA / NAVIDAD
+// ===========================================================================
+function easterDate(y){
+  // Algoritmo Meeus/Jones/Butcher para calendario gregoriano
+  var a=y%19, b=Math.floor(y/100), c=y%100, d=Math.floor(b/4), e=b%4;
+  var f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3);
+  var h=(19*a+b-d-g+15)%30, i=Math.floor(c/4), k=c%4;
+  var l=(32+2*e+2*i-h-k)%7, m=Math.floor((a+11*h+22*l)/451);
+  var month=Math.floor((h+l-7*m+114)/31)-1;
+  var day=((h+l-7*m+114)%31)+1;
+  return new Date(y, month, day);
+}
+function isoDateObj(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function addDaysDate(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function getDefaultPreferenciaPeriodos(y){
+  var jun15 = new Date(y,5,15);
+  var veranoShift = (jun15.getDay()===3) ? 1 : 0; // si 15/06 cae miércoles, se desplazan un día
+  var easter = easterDate(y);
+  return {
+    verano:[
+      {ini:isoDateObj(new Date(y,5,15+veranoShift)), fin:isoDateObj(new Date(y,6,15+veranoShift))},
+      {ini:isoDateObj(new Date(y,6,16+veranoShift)), fin:isoDateObj(new Date(y,7,15+veranoShift))},
+      {ini:isoDateObj(new Date(y,7,16+veranoShift)), fin:isoDateObj(new Date(y,8,15+veranoShift))}
+    ],
+    ss:[
+      {ini:isoDateObj(addDaysDate(easter,-14)), fin:isoDateObj(addDaysDate(easter,-8))},
+      {ini:isoDateObj(addDaysDate(easter,-7)),  fin:isoDateObj(addDaysDate(easter,-1))},
+      {ini:isoDateObj(easter),                 fin:isoDateObj(addDaysDate(easter,6))}
+    ],
+    nav:[
+      {ini:y+'-12-20', fin:y+'-12-26'},
+      {ini:y+'-12-27', fin:(y+1)+'-01-02'},
+      {ini:(y+1)+'-01-03', fin:(y+1)+'-01-09'}
+    ]
+  };
+}
+function getPreferenciaPeriodos(y){
+  var def = getDefaultPreferenciaPeriodos(y);
+  var saved = (cfg.prefPeriodos && cfg.prefPeriodos[y]) ? cfg.prefPeriodos[y] : {};
+  ['verano','ss','nav'].forEach(function(tipo){
+    if(saved[tipo]){
+      for(var i=0;i<3;i++){
+        if(saved[tipo][i]){
+          def[tipo][i].ini = saved[tipo][i].ini || def[tipo][i].ini;
+          def[tipo][i].fin = saved[tipo][i].fin || def[tipo][i].fin;
+        }
+      }
+    }
+  });
+  return def;
+}
+function rangesOverlap(aIni,aFin,bIni,bFin){
+  var a1=new Date(aIni+'T12:00:00'), a2=new Date(aFin+'T12:00:00');
+  var b1=new Date(bIni+'T12:00:00'), b2=new Date(bFin+'T12:00:00');
+  return a1<=b2 && b1<=a2;
+}
+function findDisfruteRanges(y, tipoTurno){
+  var ranges=[]; var cur=null;
+  var start=new Date(y,0,1), end=new Date(y+1,0,31); // incluye navidades que cruzan enero
+  var r=new Date(start);
+  while(r<=end){
+    var k=dStr(r.getFullYear(),r.getMonth(),r.getDate());
+    var s=shifts[k];
+    var match=s && s.t===tipoTurno;
+    if(match && !cur) cur={ini:k, fin:k, dias:1};
+    else if(match && cur){ cur.fin=k; cur.dias++; }
+    else if(!match && cur){ ranges.push(cur); cur=null; }
+    r.setDate(r.getDate()+1);
+  }
+  if(cur) ranges.push(cur);
+  return ranges;
+}
+function detectarTurnoPreferencia(y, categoria){
+  var pp=getPreferenciaPeriodos(y);
+  var tipoTurno = categoria==='verano' ? 'V' : (categoria==='ss' ? 'PSS' : 'PNV');
+  var ranges=findDisfruteRanges(y, tipoTurno);
+  var best=null;
+  ranges.forEach(function(rg){
+    pp[categoria].forEach(function(per, idx){
+      if(rangesOverlap(rg.ini, rg.fin, per.ini, per.fin)){
+        var a1=Math.max(new Date(rg.ini+'T12:00:00'), new Date(per.ini+'T12:00:00'));
+        var a2=Math.min(new Date(rg.fin+'T12:00:00'), new Date(per.fin+'T12:00:00'));
+        var overlap=Math.round((a2-a1)/(1000*60*60*24))+1;
+        if(!best || overlap>best.overlap) best={turno:idx+1, ini:rg.ini, fin:rg.fin, overlap:overlap};
+      }
+    });
+  });
+  return best;
+}
+function turnoLabel(n){ return n ? (n+'º turno') : 'No detectado'; }
+function fmtDM(fecha){ var d=new Date(fecha+'T12:00:00'); return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear(); }
+function renderPreferenciasContent(y){
+  var box=document.getElementById('preferenciasContent'); if(!box) return;
+  var cats=[
+    {k:'verano', icon:'☀️', label:'Vacaciones verano', prev:y-1, actual:y},
+    {k:'ss', icon:'✝️', label:'Semana Santa', prev:y-1, actual:y},
+    {k:'nav', icon:'🎄', label:'Navidad', prev:y-1, actual:y}
+  ];
+  var html='<div style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#475569;margin-bottom:8px">Detecta el turno disfrutado según lo grabado en el cuadrante. La preferencia real dependerá de concurrencia, antigüedad, necesidades del servicio y criterios de la unidad.</div>';
+  cats.forEach(function(c){
+    var dAct=detectarTurnoPreferencia(c.actual,c.k);
+    var dPrev=detectarTurnoPreferencia(c.prev,c.k);
+    var prefer='—';
+    if(dPrev && dPrev.turno) prefer='Menor prioridad orientativa para repetir el '+dPrev.turno+'º; mejor opción: turnos no disfrutados recientemente.';
+    var detalleAct=dAct ? ' · '+fmtDM(dAct.ini)+'–'+fmtDM(dAct.fin) : '';
+    var detallePrev=dPrev ? ' · '+fmtDM(dPrev.ini)+'–'+fmtDM(dPrev.fin) : '';
+    html+='<div class="br"><span>'+c.icon+' '+c.label+' '+c.actual+'</span><strong>'+turnoLabel(dAct && dAct.turno)+detalleAct+'</strong></div>';
+    html+='<div class="br"><span>Referencia año anterior '+c.prev+'</span><strong>'+turnoLabel(dPrev && dPrev.turno)+detallePrev+'</strong></div>';
+    html+='<div class="br" style="font-size:11px;color:#64748b"><span>Preferencia orientativa</span><strong style="font-size:11px;color:#64748b;text-align:right">'+prefer+'</strong></div>';
+    html+='<div style="height:8px"></div>';
+  });
+  box.innerHTML=html;
+}
+function loadPreferenciasEditor(){
+  var cont=document.getElementById('preferenciasPeriodosEditor'); if(!cont) return;
+  var y=parseInt((document.getElementById('cfgPrefYear')||{}).value)||year;
+  cfg.prefYear=y;
+  var pp=getPreferenciaPeriodos(y);
+  function block(k,title,nota){
+    var html='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-bottom:10px">';
+    html+='<div style="font-size:12px;font-weight:800;color:var(--verde);margin-bottom:4px">'+title+'</div>';
+    if(nota) html+='<div style="font-size:10px;color:#64748b;margin-bottom:7px">'+nota+'</div>';
+    for(var i=0;i<3;i++){
+      var p=pp[k][i];
+      html+='<div class="ig2" style="margin-bottom:5px"><div class="ig"><label class="il">'+(i+1)+'º turno inicio</label><input type="date" data-pref="'+k+'" data-i="'+i+'" data-f="ini" value="'+p.ini+'" oninput="savePreferenciasEditorToCfg()"></div><div class="ig"><label class="il">'+(i+1)+'º turno fin</label><input type="date" data-pref="'+k+'" data-i="'+i+'" data-f="fin" value="'+p.fin+'" oninput="savePreferenciasEditorToCfg()"></div></div>';
+    }
+    html+='</div>'; return html;
+  }
+  cont.innerHTML=block('verano','☀️ Vacaciones de verano','Por defecto: 15/06–15/07, 16/07–15/08 y 16/08–15/09, con desplazamiento si procede.')+
+                 block('ss','✝️ Semana Santa','Fechas orientativas calculadas por Semana Santa. Revísalas si tu unidad publica otros turnos.')+
+                 block('nav','🎄 Navidad','Fechas orientativas/editables; muchas unidades las publican cada año.');
+}
+function savePreferenciasEditorToCfg(){
+  var yearEl=document.getElementById('cfgPrefYear'); if(!yearEl) return;
+  var y=parseInt(yearEl.value)||year; cfg.prefYear=y;
+  if(!cfg.prefPeriodos) cfg.prefPeriodos={};
+  var obj={verano:[{},{},{}], ss:[{},{},{}], nav:[{},{},{}]};
+  var inputs=document.querySelectorAll('[data-pref]');
+  inputs.forEach(function(inp){
+    var k=inp.getAttribute('data-pref'), i=parseInt(inp.getAttribute('data-i')), f=inp.getAttribute('data-f');
+    if(obj[k] && obj[k][i]) obj[k][i][f]=inp.value;
+  });
+  cfg.prefPeriodos[y]=obj;
+  try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
+  scheduleGistPush();
+  renderPreferenciasContent(year);
 }
 
 // Renderiza el saldo de Vacaciones, AP, PSS y PNV en Resumen
@@ -4346,7 +4508,7 @@ function exportarCuadrantePDF(){
       } else if(s.t === 'V'){
         // Vacaciones: solo etiqueta, sin horario ni horas
         // En finde de semana ni siquiera la etiqueta completa
-        html += '<div class="turno" style="color:#0369a1">Vacaciones</div>';
+        html += '<div class="turno" style="color:#0e7490">Vacaciones</div>';
       } else {
         html += '<div class="turno">' + tObj.label + '</div>';
         var h = getHorasComputablesRegistro(k, s);
