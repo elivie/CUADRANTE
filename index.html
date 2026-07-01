@@ -1,5 +1,5 @@
 <!--
-CUADRANTE v1.5.3
+CUADRANTE v1.5.4.3
 Copyright © 2026 Ivan DM. Todos los derechos reservados.
 Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
 No se autoriza la eliminación de la atribución, la redistribución, la modificación,
@@ -235,7 +235,7 @@ input:focus,select:focus{border-color:var(--verde);}
   <div class="h-top">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
-      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.3</span></div>
+      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.4</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
@@ -655,7 +655,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>🎄 Perm.Nav.</span><strong>Permiso Navidad · 3 días/año</strong></div>
       <div class="rule-row"><span>🏖️ Vacaciones</span><strong>No computa fines de semana ni festivos</strong></div>
       <div class="rule-row"><span>✅ Libre / 🌙 Saliente</span><strong>Descanso · no computa horas</strong></div>
-      <div class="rule-row"><span>🏥 Baja</span><strong>7,5h/día incluido fines de semana · semana completa (lun-dom) tope 37,5h</strong></div>
+      <div class="rule-row"><span>🏥 Baja</span><strong>Día deducible · general 7,5/8h con tope semanal · turno fijo según cadencia</strong></div>
     </div>
 
     <div class="sec-title" style="font-size:14px">⚡ INCENTIVOS</div>
@@ -2236,7 +2236,11 @@ function getHorasComputablesRegistro(dateStr, registro){
   if(!registro || !registro.t) return 0;
   var tKey = registro.t;
   var tObj = TURNOS[tKey];
-  if(!tObj || !tObj.compHoras || tKey==='B') return 0;
+  if(!tObj || !tObj.compHoras) return 0;
+
+  // Baja médica: es día deducible. En turno fijo computa las horas del servicio
+  // planificado por cadencia que deja de prestarse; en el resto, la referencia diaria.
+  if(tKey === 'B') return getHorasBajaDia(dateStr);
 
   if(tKey === 'V' && (cfg.regimen||'general') === 'fijo'){
     var tCad = getTurnoCadenciaParaFecha(dateStr);
@@ -2672,7 +2676,41 @@ function esFindeEnVacaciones(dateStr){
 // - Cada dia de baja computa 7,5h
 // - PERO si toda la semana (lun-dom) esta de baja, el tope es 37,5h (no 7x7,5=52,5h)
 // - Es decir: semana completa de baja = 37,5h; semana parcial = dias x 7,5h
+function getHorasBajaDia(dateStr){
+  var regimen = cfg.regimen || 'general';
+  if(regimen === 'fijo'){
+    var tCad = getTurnoCadenciaParaFecha(dateStr);
+    if(esTurnoServicioCadencia(tCad)){
+      return getHorasCadenciaFijo(tCad, TURNO_HORAS_DEF[tCad]);
+    }
+    // Si en la cadencia tocaba saliente/libre, la baja mantiene la cadencia pero no suma horas.
+    return 0;
+  }
+  // Régimen 37,5h = 7,5h/día; regímenes 40h = 8h/día.
+  var hr = getHoraRef();
+  return Math.round((hr / 5) * 10) / 10;
+}
+
+// Calcula horas de baja como día deducible:
+// - Régimen general 37,5h: 7,5h por día deducible, con semana completa limitada a 37,5h.
+// - Regímenes 40h: 8h por día deducible, con semana completa limitada a 40h.
+// - Turno fijo/cadencia: computa las horas del servicio planificado que se deja de prestar;
+//   salientes y libres quedan a 0h, igual que vacaciones/comisión deducible.
 function calcHorasBajaEnPeriodo(fechaInicio, fechaFin){
+  var regimen = cfg.regimen || 'general';
+
+  if(regimen === 'fijo'){
+    var totalFijo = 0;
+    var rFijo = new Date(fechaInicio);
+    while(rFijo <= fechaFin){
+      var kFijo = dStr(rFijo.getFullYear(), rFijo.getMonth(), rFijo.getDate());
+      var sFijo = shifts[kFijo];
+      if(sFijo && sFijo.t === 'B') totalFijo += getHorasBajaDia(kFijo);
+      rFijo.setDate(rFijo.getDate()+1);
+    }
+    return Math.round(totalFijo*10)/10;
+  }
+
   var total = 0;
   // Iterate week by week
   var runner = new Date(fechaInicio);
@@ -2695,9 +2733,9 @@ function calcHorasBajaEnPeriodo(fechaInicio, fechaFin){
       }
       d.setDate(d.getDate()+1);
     }
-    // Apply cap: full week (7 days baja) = horaRef max
+    // Apply cap: full week (7 days baja) = reference weekly hours, not 7 natural days x daily hours.
     var _hr = getHoraRef();
-    var _hpd = _hr / 5; // horas por día laboral (7.5 o 8)
+    var _hpd = _hr / 5; // 7.5 or 8
     var horasSemana = diasBajaEnSemana * _hpd;
     if(horasSemana > _hr) horasSemana = _hr;
     total += horasSemana;
@@ -2705,7 +2743,7 @@ function calcHorasBajaEnPeriodo(fechaInicio, fechaFin){
     runner = new Date(domingo);
     runner.setDate(runner.getDate()+1);
   }
-  return total;
+  return Math.round(total*10)/10;
 }
 // Quick stats pie cuadrante
 function calcQuickStats(){
