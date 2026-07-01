@@ -1,5 +1,5 @@
 <!--
-CUADRANTE v1.5
+CUADRANTE v1.5.1
 Copyright © 2026 Ivan DM. Todos los derechos reservados.
 Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
 No se autoriza la eliminación de la atribución, la redistribución, la modificación,
@@ -204,7 +204,7 @@ input:focus,select:focus{border-color:var(--verde);}
   <div class="h-top">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
-      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5</span></div>
+      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.1</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
@@ -247,6 +247,12 @@ input:focus,select:focus{border-color:var(--verde);}
     <div class="sec-title" id="resTit"></div>
     <div class="card-grid" id="resCards"></div>
     <div class="bal-card" id="balHoras"><h3>⏱️ Balance de jornada</h3><div id="balContent"></div></div>
+    <div id="resCuatrimBlock" style="display:none">
+      <div class="divider"></div>
+      <div class="sec-title" id="cuatrimTit"></div>
+      <div class="card-grid" id="cuatrimCards"></div>
+      <div class="bal-card"><h3>⏱️ Balance cuatrimestral</h3><div id="cuatrimContent"></div></div>
+    </div>
     <div class="divider"></div>
     <div class="sec-title" id="annTit"></div>
     <div class="card-grid" id="annCards"></div>
@@ -353,13 +359,45 @@ input:focus,select:focus{border-color:var(--verde);}
     <div class="sec-title" style="font-size:14px">&#x23F1; Régimen de jornada</div>
     <div class="ig">
       <label class="il">Modalidad de servicio<br><span style="font-size:10px;color:#888">Determina la jornada de referencia, el CREX y el cómputo de DSJ</span></label>
-      <select id="cfgRegimen" onchange="saveCfg(); renderAll(); actualizarVisibilidadNomina(); loadProdEstructural(); if(document.getElementById('vNomina').style.display!=='none') calcNomina();" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff">
+      <select id="cfgRegimen" style="display:none" onchange="renderRegimenCards(); syncBloquesRegimen(); renderAll(); actualizarVisibilidadNomina(); loadProdEstructural(); if(document.getElementById('vNomina').style.display!=='none') calcNomina();">
         <option value="general">General – Turnos (37,5 h/sem)</option>
         <option value="admin">Administrativo / Específico (40 h/sem)</option>
         <option value="especial">Mando / Especial (40 h/sem)</option>
+        <option value="fijo">Turno fijo (cadencia) – Sin DAS/DF</option>
       </select>
+      <div id="regimenCards" style="display:flex;flex-direction:column;gap:7px"></div>
     </div>
     <div id="regimenInfo" style="background:#f0f9ff;border-radius:8px;padding:8px 10px;font-size:11px;color:#0369a1;margin-bottom:4px"></div>
+
+    <div class="divider"></div>
+    <div id="cadenciaBlock">
+    <div class="sec-title" style="font-size:14px">🔁 Cadencia de turno fijo</div>
+    <div class="info-box" style="margin-bottom:8px">Define tu patrón rotativo (ej. <strong>M-M-M-T-T-N-S-L-L-L-L</strong>) separado por guiones, las horas base del turno fijo y la fecha en la que empieza el patrón. El botón rellenará el cuadrante repitiendo el patrón desde esa fecha. <strong>Solo rellena días vacíos</strong>: si un día ya tiene un turno asignado (vacaciones, AP, baja, Saliente manual...) no lo toca. En esta modalidad <strong>no se generan DAS ni DF</strong>, sea cual sea el turno trabajado. El <strong>Saliente (S)</strong> mantiene la cadencia, pero se computa a <strong>0 h</strong>.</div>
+    <div class="ig"><label class="il">Patrón (códigos separados por guion)</label><input type="text" id="cfgCadenciaPatron" placeholder="M-M-M-T-T-N-S-L-L-L-L" oninput="saveCfg()" style="text-transform:uppercase"></div>
+    <div class="ig">
+      <label class="il">Horas base por turno fijo<br><span style="font-size:10px;color:#888">Si no rellenas las excepciones de abajo, M/T/N se generarán con estas horas. El Saliente (S) siempre se genera a 0 h.</span></label>
+      <input type="number" id="cfgHorasTurno" step="0.5" min="4" max="12" placeholder="8 o 8.5" oninput="saveCfg(); calcVacTurnoFijo()">
+    </div>
+    <div class="ig3">
+      <div class="ig"><label class="il">Horas turno mañana diferente<br><span style="font-size:10px;color:#888">Opcional. Si está vacío, usa las horas base del turno fijo.</span></label><input type="number" id="cfgHorasFijoM" step="0.5" min="0" max="12" placeholder="Usar base" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il">Horas turno tarde diferente<br><span style="font-size:10px;color:#888">Opcional. Si está vacío, usa las horas base del turno fijo.</span></label><input type="number" id="cfgHorasFijoT" step="0.5" min="0" max="12" placeholder="Usar base" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il">Horas turno noche diferente<br><span style="font-size:10px;color:#888">Opcional. Si está vacío, usa las horas base del turno fijo.</span></label><input type="number" id="cfgHorasFijoN" step="0.5" min="0" max="12" placeholder="Usar base" oninput="saveCfg()"></div>
+    </div>
+    <div class="info-box" style="font-size:11px;margin-top:-2px">Ejemplo: pones <strong>8,5</strong> como base y dejas las tres casillas vacías → todas las mañanas, tardes y noches se crean con 8,5 h. Si en algún momento la tarde tiene 9 h, pones <strong>9</strong> solo en “Horas turno tarde diferente” y M/N seguirán usando las horas base.</div>
+    <div class="ig2">
+      <div class="ig"><label class="il">Fecha de inicio del patrón</label><input type="date" id="cfgCadenciaInicio" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il">Aplicar hasta</label><input type="date" id="cfgCadenciaHasta" oninput="saveCfg()"></div>
+    </div>
+    <button class="btn-ok" style="width:100%;margin-top:4px" onclick="aplicarCadencia()">🔁 Generar cuadrante con esta cadencia</button>
+    <div class="divider" style="margin:14px 0 10px"></div>
+    <div class="sec-title" style="font-size:13px;margin-bottom:6px">🏖️ Vacaciones en turno fijo</div>
+    <div class="ig">
+      <label class="il">Días de crédito vacacional (los tuyos por años de servicio)<br><span style="font-size:10px;color:#888">Se convierten a días de cuadrante usando las “Horas base por turno fijo” indicadas arriba.</span></label>
+      <input type="number" id="cfgDiasCredito" step="1" min="22" max="40" placeholder="24" oninput="saveCfg(); calcVacTurnoFijo()">
+    </div>
+    <div class="info-box" style="margin-top:4px">✅ <strong>Saliente (S):</strong> no computa horas de jornada ni genera DAS/DF. Se mantiene dentro de la cadencia para que, si el nocturno anterior se cubre con AP o Vacaciones, la secuencia continúe correctamente y solo compute el crédito del AP/Vacaciones.</div>
+    <div id="vacTurnoFijoResult" style="display:none;background:#eafaf1;border-left:4px solid var(--verde);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;color:#1a3a2a;margin-top:4px"></div>
+    </div>
     <div class="divider"></div>
     <div class="sec-title" style="font-size:14px">Conceptos fijos nómina (de tu nómina real)</div>
     <div class="ig2">
@@ -371,7 +409,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="ig"><label class="il">Espec. Singular</label><input type="number" id="cfgEspS" value="759.14" step="0.01" oninput="saveCfg()"></div>
     </div>
     <div class="ig2">
-      <div class="ig"><label class="il">Ind. Res. Mallorca</label><input type="number" id="cfgRes" value="80.53" step="0.01" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il">Indemnización por residencia</label><input type="number" id="cfgRes" value="80.53" step="0.01" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">Vestuario</label><input type="number" id="cfgVest" value="6.17" step="0.01" oninput="saveCfg()"></div>
     </div>
     <div class="ig2">
@@ -410,6 +448,7 @@ input:focus,select:focus{border-color:var(--verde);}
     <div id="contadorLibres" style="margin-bottom:8px"></div>
     <div id="contadorDF" style="margin-bottom:8px"></div>
 
+    <div id="horariosDefectoBlock">
     <div class="divider"></div>
     <div class="sec-title" style="font-size:14px">Horarios por defecto de tus turnos</div>
     <div class="info-box" style="margin-bottom:8px">Si cambian los horarios de tu unidad, actualízalos aquí. Se aplicarán automáticamente al asignar nuevos turnos.</div>
@@ -467,20 +506,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>🎄 Permiso Nav.</span><strong>7,5h (hasta 3 días/año, Navidad)</strong></div>
       <div class="rule-row"><span>⏳ DSJ</span><strong>7,5h (descanso por superación de jornada)</strong></div>
     </div>
-
-    <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">🔁 Cadencia de turno fijo (opcional)</div>
-    <div class="info-box" style="margin-bottom:8px">Define tu patrón rotativo (ej. <strong>M-M-M-T-T-N-S-L-L-L-L</strong>) separado por guiones, y la fecha en la que empieza ese patrón. El botón rellenará el cuadrante repitiendo el patrón desde esa fecha. <strong>Solo rellena días vacíos</strong>: si un día ya tiene un turno asignado (vacaciones, AP, baja, Saliente manual...) no lo toca.</div>
-    <div class="ig"><label class="il">Patrón (códigos separados por guion)</label><input type="text" id="cfgCadenciaPatron" placeholder="M-M-M-T-T-N-S-L-L-L-L" oninput="saveCfg()" style="text-transform:uppercase"></div>
-    <div class="ig2">
-      <div class="ig"><label class="il">Fecha de inicio del patrón</label><input type="date" id="cfgCadenciaInicio" oninput="saveCfg()"></div>
-      <div class="ig"><label class="il">Aplicar hasta</label><input type="date" id="cfgCadenciaHasta" oninput="saveCfg()"></div>
-    </div>
-    <button class="btn-ok" style="width:100%;margin-top:4px" onclick="aplicarCadencia()">🔁 Generar cuadrante con esta cadencia</button>
-
-    <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">Leyenda de turnos</div>
-    <div class="leg" id="legendBox"></div>
+    </div><!-- /horariosDefectoBlock -->
 
     <div class="divider"></div>
     <div class="sec-title" style="font-size:14px">📅 Gestión de Festivos por Año</div>
@@ -563,13 +589,16 @@ input:focus,select:focus{border-color:var(--verde);}
       CUADRANTE es una herramienta personal e independiente de apoyo para organizar turnos y realizar cálculos orientativos. <strong>No es una aplicación oficial</strong> ni está vinculada, avalada o supervisada por ninguna Administración u organismo público. Los resultados sobre jornada, descansos, incentivos y nómina son estimaciones y deben comprobarse con la normativa vigente, las instrucciones aplicables y la documentación oficial.
     </div>
 
+    <div class="sec-title" style="font-size:14px">🎨 Leyenda de turnos</div>
+    <div class="leg" id="legendBox"></div>
+
     <div class="sec-title" style="font-size:14px">📅 Cuadrante</div>
     <div class="rule-card" style="margin-bottom:10px">
       <div class="rule-row"><span>Selecciona un día</span><strong>Toca una celda del calendario</strong></div>
       <div class="rule-row"><span>Asignar turno</span><strong>Toca el botón del turno arriba</strong></div>
       <div class="rule-row"><span>Editar detalles</span><strong>Toca dos veces el mismo día</strong></div>
       <div class="rule-row"><span>Celda roja 🚨</span><strong>Día con nota especial</strong></div>
-      <div class="rule-row"><span>Celda gris "Saliente"</span><strong>Día después de Noche o Doblete</strong></div>
+      <div class="rule-row"><span>Celda gris "Saliente"</span><strong>Día después de Noche o Doblete · 0h</strong></div>
       <div class="rule-row"><span>🏛️ en la celda</span><strong>Festivo laborable (genera DF)</strong></div>
     </div>
 
@@ -588,7 +617,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>✝️ Perm.S.S.</span><strong>Permiso Semana Santa · 3 días/año</strong></div>
       <div class="rule-row"><span>🎄 Perm.Nav.</span><strong>Permiso Navidad · 3 días/año</strong></div>
       <div class="rule-row"><span>🏖️ Vacaciones</span><strong>No computa fines de semana ni festivos</strong></div>
-      <div class="rule-row"><span>✅ Libre</span><strong>Descanso semanal · no computa horas</strong></div>
+      <div class="rule-row"><span>✅ Libre / 🌙 Saliente</span><strong>Descanso · no computa horas</strong></div>
       <div class="rule-row"><span>🏥 Baja</span><strong>7,5h/día incluido fines de semana · semana completa (lun-dom) tope 37,5h</strong></div>
     </div>
 
@@ -672,7 +701,7 @@ input:focus,select:focus{border-color:var(--verde);}
 
 
 <footer class="app-footer" aria-label="Autoría y licencia">
-  <strong>© 2026 Ivan DM · CUADRANTE v1.5</strong> · Todos los derechos reservados ·
+  <strong>© 2026 Ivan DM · CUADRANTE v1.5.2</strong> · Todos los derechos reservados ·
   <button type="button" class="license-link" onclick="openLicenseModal()">Licencia de uso</button>
 </footer>
 
@@ -684,7 +713,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <select id="modalTurno" onchange="onModalTurnoChange()"></select>
     </div>
     <div id="modalSalienteHint" style="display:none;font-size:11px;color:#475569;background:#f1f5f9;border:1px solid #94a3b8;border-radius:7px;padding:6px 9px;margin-bottom:8px">
-      🌙 <strong>Saliente</strong>: computa horas para el cómputo mensual pero no descuenta ningún día de crédito (vacaciones, AP, etc.). Úsalo cuando el día de "saliente" no coincide con un Noche/Doblete realmente trabajado el día anterior (p. ej. vacaciones o AP en el nocturno).
+      🌙 <strong>Saliente</strong>: no computa horas de jornada, no descuenta ningún día de crédito (vacaciones, AP, etc.) y <strong>no genera DF ni DAS</strong>. Úsalo para mantener la cadencia cuando el día de saliente corresponde al descanso posterior a un nocturno planificado, incluso si ese nocturno se cubre con AP o Vacaciones.
     </div>
     <div id="modalHoras">
       <div class="ig2">
@@ -747,9 +776,26 @@ input:focus,select:focus{border-color:var(--verde);}
 </div>
 
 
+<div class="modal-overlay" id="vacRangeOverlay" onclick="closeVacRangeOutside(event)">
+  <div class="modal" style="border-radius:20px;max-width:500px;padding:20px 16px 24px">
+    <h3>🏖️ Aplicar vacaciones por periodo</h3>
+    <div class="info-box" id="vacRangeInfo" style="margin-bottom:10px"></div>
+    <div class="ig2">
+      <div class="ig"><label class="il">Fecha inicio</label><input type="date" id="vacRangeInicio" oninput="previewVacRange()"></div>
+      <div class="ig"><label class="il">Fecha fin</label><input type="date" id="vacRangeFin" oninput="previewVacRange()"></div>
+    </div>
+    <div id="vacRangePreview" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:9px 11px;font-size:12px;color:#334155;margin-top:4px"></div>
+    <div class="modal-btns" style="margin-top:14px;gap:8px">
+      <button class="btn-cancel" onclick="closeVacRangeModal()">Cancelar</button>
+      <button class="btn-ok" style="background:#0369a1" onclick="aplicarVacacionesRangoDesdeModal()">Aplicar vacaciones</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal-overlay license-overlay" id="licenseModalOverlay" onclick="closeLicenseModalOutside(event)" role="dialog" aria-modal="true" aria-labelledby="licenseModalTitle">
   <div class="modal license-modal">
-    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.5</h3>
+    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.5.2</h3>
     <div class="license-subtitle">Copyright © 2026 Ivan DM. Todos los derechos reservados.</div>
     <div class="license-content">
       <h4>1. Titularidad</h4>
@@ -845,7 +891,7 @@ var TURNO_HORAS_DEF = {
   PNV: {ini:'',      fin:'',      h:7.5},   // Permiso Navidad (3 días/año)
   L:   {ini:'',      fin:'',      h:0},
   B:   {ini:'',      fin:'',      h:7.5},
-  S:   {ini:'',      fin:'',      h:7.5},   // Saliente manual (no consume crédito, sí computa horas)
+  S:   {ini:'',      fin:'',      h:0},     // Saliente manual (no consume crédito, no computa horas)
 };
 
 var TURNOS = {
@@ -865,7 +911,7 @@ var TURNOS = {
   V:   {label:'Vacaciones', icon:'🏖️',  color:'#0369a1', bg:'#e0f2fe', pts_n:0, pts_f:0, compHoras:true},
   L:   {label:'Libre',      icon:'✅',  color:'#15803d', bg:'#dcfce7', pts_n:0, pts_f:0, compHoras:false},
   B:   {label:'Baja',       icon:'🏥',  color:'#9f1239', bg:'#ffe4e6', pts_n:0, pts_f:0, compHoras:true},
-  S:   {label:'Saliente',   icon:'🌙',  color:'#64748b', bg:'#f1f5f9', pts_n:0, pts_f:0, compHoras:true},
+  S:   {label:'Saliente',   icon:'🌙',  color:'#64748b', bg:'#f1f5f9', pts_n:0, pts_f:0, compHoras:false},
 };
 
 // -- Festivos base por año (editables desde Ajustes) --------------------------
@@ -978,7 +1024,7 @@ function calcPeriodEnd(lastNatural){
 function getHoraRef(){
   // Devuelve la jornada semanal de referencia según el régimen configurado
   var r = (cfg && cfg.regimen) ? cfg.regimen : 'general';
-  return (r === 'general') ? 37.5 : 40;
+  return (r === 'general' || r === 'fijo') ? 37.5 : 40;
 }
 
 function getPeriodForMonth(y,m){
@@ -1002,6 +1048,48 @@ function getPeriodForMonth(y,m){
     requiredHours: weeks * getHoraRef(),
     horaRef: getHoraRef()
   };
+}
+
+function isTurnoFijo(){
+  return (cfg && (cfg.regimen || 'general') === 'fijo');
+}
+
+function getCuatrimestreTurnos(y,m){
+  var cm = m, cy = y;
+  var qStart, qEnd, qLabel;
+  if(cm >= 1 && cm <= 4){
+    qStart = new Date(cy, 1, 1); qEnd = new Date(cy, 4, 31); qLabel = 'Febrero – Mayo '+cy;
+  } else if(cm >= 5 && cm <= 8){
+    qStart = new Date(cy, 5, 1); qEnd = new Date(cy, 8, 30); qLabel = 'Junio – Septiembre '+cy;
+  } else {
+    if(cm >= 9){ qStart = new Date(cy, 9, 1); qEnd = new Date(cy+1, 0, 31); qLabel = 'Octubre '+cy+' – Enero '+(cy+1); }
+    else       { qStart = new Date(cy-1, 9, 1); qEnd = new Date(cy, 0, 31); qLabel = 'Octubre '+(cy-1)+' – Enero '+cy; }
+  }
+  var qJueves = 0;
+  var qContador = new Date(qStart);
+  while(qContador <= qEnd){ if(qContador.getDay()===4) qJueves++; qContador.setDate(qContador.getDate()+1); }
+  var qRefHours = (qJueves >= 18) ? 592 : 559;
+  return {start:qStart, end:qEnd, label:qLabel, weeks:qJueves, requiredHours:qRefHours};
+}
+
+function isRegimenEspecial(){
+  return (cfg && (cfg.regimen || 'general') === 'especial');
+}
+
+function getTrimestreEspecial(y,m){
+  // Régimen especial / mando: 40 h semanales en periodo de referencia trimestral.
+  // Para mantener la misma lógica de periodos completos de la app, el trimestre agrupa
+  // los tres periodos mensuales correspondientes.
+  var firstMonth = Math.floor(m / 3) * 3;
+  var lastMonth = firstMonth + 2;
+  var startInfo = getPeriodForMonth(y, firstMonth);
+  var endInfo = getPeriodForMonth(y, lastMonth);
+  var start = startInfo.start;
+  var end = endInfo.end;
+  var weeks = Math.round(((end - start) / (1000*60*60*24) + 1) / 7);
+  var labels = ['Enero – Marzo ', 'Abril – Junio ', 'Julio – Septiembre ', 'Octubre – Diciembre '];
+  var idx = Math.floor(m / 3);
+  return {start:start, end:end, label:labels[idx] + y, weeks:weeks, requiredHours:weeks * 40, horaRef:40};
 }
 
 function isOutsidePeriod(y,m,d){
@@ -1028,6 +1116,7 @@ var cfg={
   base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general',
   vacTotales:22, apTotales:6, pssTotales:3, pnavTotales:3, huerfanosOrd:9.01, huerfanosExtra:16.79, dedNoForm:0,
   iniM:'06:30', finM:'14:00', iniT:'14:00', finT:'21:30', iniN:'22:00', finN:'05:30',
+  horasTurno:0, horasFijoM:0, horasFijoT:0, horasFijoN:0,
   iniDM:'06:30', finDM:'14:00', iniDN:'22:00', finDN:'05:30',
   extraSalario:774.342, extraTrienio:28.2984, extraDestino:463.32, extraEspG:562.338
 };
@@ -1072,6 +1161,12 @@ function saveCfg(){
   cfg.mutualidad=parseFloat(document.getElementById('cfgMutualidad').value)||31.24;
   cfg.vacTotales=parseInt(document.getElementById('cfgVacTotales').value)||22;
   cfg.apTotales=parseInt(document.getElementById('cfgApTotales').value)||6;
+  cfg.horasTurno=parseFloat(document.getElementById('cfgHorasTurno') ? document.getElementById('cfgHorasTurno').value : 0)||0;
+  cfg.horasFijoM=parseFloat(document.getElementById('cfgHorasFijoM') ? document.getElementById('cfgHorasFijoM').value : 0)||0;
+  cfg.horasFijoT=parseFloat(document.getElementById('cfgHorasFijoT') ? document.getElementById('cfgHorasFijoT').value : 0)||0;
+  cfg.horasFijoN=parseFloat(document.getElementById('cfgHorasFijoN') ? document.getElementById('cfgHorasFijoN').value : 0)||0;
+  cfg.horasSaliente='0';
+  cfg.diasCredito=parseInt(document.getElementById('cfgDiasCredito') ? document.getElementById('cfgDiasCredito').value : 0)||0;
   cfg.pssTotales=parseInt(document.getElementById('cfgPssTotales').value)||3;
   cfg.pnavTotales=parseInt(document.getElementById('cfgPnavTotales').value)||3;
   cfg.huerfanosOrd=parseFloat(document.getElementById('cfgHuerfanosOrd').value)||0;
@@ -1136,6 +1231,13 @@ function applyConfig(){
   document.getElementById('cfgMutualidad').value=cfg.mutualidad;
   document.getElementById('cfgVacTotales').value=cfg.vacTotales||22;
   document.getElementById('cfgApTotales').value=cfg.apTotales||6;
+  if(document.getElementById('cfgHorasTurno')) document.getElementById('cfgHorasTurno').value=cfg.horasTurno||'';
+  if(document.getElementById('cfgHorasFijoM')) document.getElementById('cfgHorasFijoM').value=cfg.horasFijoM||'';
+  if(document.getElementById('cfgHorasFijoT')) document.getElementById('cfgHorasFijoT').value=cfg.horasFijoT||'';
+  if(document.getElementById('cfgHorasFijoN')) document.getElementById('cfgHorasFijoN').value=cfg.horasFijoN||'';
+  
+  if(document.getElementById('cfgDiasCredito')) document.getElementById('cfgDiasCredito').value=cfg.diasCredito||'';
+  calcVacTurnoFijo();
   document.getElementById('cfgPssTotales').value=cfg.pssTotales||3;
   document.getElementById('cfgIniM').value=cfg.iniM||'06:30';
   document.getElementById('cfgFinM').value=cfg.finM||'14:00';
@@ -1166,6 +1268,67 @@ function applyConfig(){
   actualizarRegimenInfo();
 }
 
+var REGIMEN_DEFS = [
+  {v:'general',  icon:'🔄', t:'General – Turnos',          h:'37,5 h/sem'},
+  {v:'admin',    icon:'🗂️', t:'Administrativo / Específico', h:'40 h/sem'},
+  {v:'especial', icon:'⭐', t:'Mando / Especial',           h:'40 h/sem'},
+  {v:'fijo',     icon:'🔁', t:'Turno fijo (cadencia)',      h:'Sin DAS ni DF'}
+];
+function setRegimen(v){
+  var sel = document.getElementById('cfgRegimen');
+  if(!sel) return;
+  sel.value = v;
+  saveCfg();
+  renderRegimenCards();
+  sel.dispatchEvent(new Event('change'));
+}
+function renderRegimenCards(){
+  var cont = document.getElementById('regimenCards');
+  if(!cont) return;
+  var actual = (document.getElementById('cfgRegimen')||{}).value || cfg.regimen || 'general';
+  cont.innerHTML = REGIMEN_DEFS.map(function(r){
+    var on = (r.v === actual);
+    return '<div onclick="setRegimen(\''+r.v+'\')" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:2px solid '+(on?'var(--verde)':'#e5e5e5')+';background:'+(on?'#eafaf1':'#fff')+';transition:all .15s">'
+      + '<div style="font-size:20px;line-height:1">'+r.icon+'</div>'
+      + '<div style="flex:1"><div style="font-weight:'+(on?'800':'600')+';color:'+(on?'var(--verde)':'var(--texto)')+';font-size:13px">'+r.t+'</div><div style="font-size:11px;color:#888">'+r.h+'</div></div>'
+      + '<div style="width:18px;height:18px;border-radius:50%;border:2px solid '+(on?'var(--verde)':'#ccc')+';display:flex;align-items:center;justify-content:center">'+(on?'<div style="width:9px;height:9px;border-radius:50%;background:var(--verde)"></div>':'')+'</div>'
+      + '</div>';
+  }).join('');
+  syncBloquesRegimen();
+}
+
+function syncBloquesRegimen(){
+  var sel = document.getElementById('cfgRegimen');
+  var actual = sel ? sel.value : (cfg.regimen || 'general');
+
+  var bloque = document.getElementById('cadenciaBlock');
+  if(bloque) bloque.style.display = (actual === 'fijo') ? 'block' : 'none';
+
+  // Solo se oculta en Turno fijo (cadencia).
+  // En General, Administrativo y Especial debe verse siempre.
+  var horariosBlock = document.getElementById('horariosDefectoBlock');
+  if(horariosBlock){
+    horariosBlock.style.display = (actual === 'fijo') ? 'none' : 'block';
+  }
+}
+function calcVacTurnoFijo(){
+  var res = document.getElementById('vacTurnoFijoResult');
+  if(!res) return;
+  var hT = parseFloat((document.getElementById('cfgHorasTurno')||{}).value||0);
+  var diasCredito = parseInt((document.getElementById('cfgDiasCredito')||{}).value||0) || cfg.diasCredito || 0;
+  if(!hT || hT <= 0 || !diasCredito){ res.style.display='none'; return; }
+  var raw = (diasCredito * 7.5) / hT;
+  var diasVac = Math.ceil(raw);
+  // Auto-actualizar el campo de vacaciones del cuadrante
+  var elVac = document.getElementById('cfgVacTotales');
+  if(elVac){ elVac.value = diasVac; saveCfg(); }
+  res.style.display = 'block';
+  res.innerHTML = '<strong>Vacaciones en el cuadrante:</strong> '
+    + diasCredito + ' días crédito × 7,5 h ÷ ' + hT.toFixed(1) + ' h/turno'
+    + ' = <strong style="color:var(--verde);font-size:15px"> ' + diasVac + ' días</strong>'
+    + ' <span style="color:#666">('+raw.toFixed(2)+' → redondeo superior)</span>'
+    + '<br><span style="font-size:10px;color:#555">✅ Campo "Vacaciones (días/año)" actualizado automáticamente a <strong>'+diasVac+'</strong> — la app llevará la cuenta sobre ese número.</span>';
+}
 function actualizarRegimenInfo(){
   var el = document.getElementById('regimenInfo');
   if(!el) return;
@@ -1173,10 +1336,12 @@ function actualizarRegimenInfo(){
   var msgs = {
     'general': '37,5 h/sem · Exceso hasta 40h → CREX (12 €/h) · Exceso sobre 40h → DSJ (1 día / 7,5h) · Descansos singularizados activados',
     'admin':   '40 h/sem · Sin CREX · Exceso sobre 40h → DSJ (1 día / 8h) · Cómputo mensual',
-    'especial':'40 h/sem · Sin CREX · Exceso sobre 40h → DSJ (1 día / 8h) · Cómputo trimestral/cuatrimestral (orientativo)'
+    'especial':'40 h/sem · Cómputo <strong>trimestral</strong> · al menos 33 h/sem presenciales/combinadas cuando proceda · disponibilidad hasta 7 h/sem · Sin CREX · Exceso → DSJ (1 día / 8h)',
+    'fijo':    '37,5 h/sem · Cómputo <strong>cuatrimestral</strong> · CREX entre 37,5h y 40h/sem (12 €/h) · Sin DAS ni DF (integrados en la cadencia)'
   };
   el.style.display = 'block';
   el.innerHTML = msgs[r] || '';
+  renderRegimenCards();
 }
 
 // Gist Config & Sync cifrada (AES-256-GCM + PBKDF2-SHA-256)
@@ -1552,7 +1717,7 @@ function showView(v, btn){
   if(v==='resumen') { document.getElementById('vResumen').style.display='block'; calcResumen(); }
   if(v==='nomina') { document.getElementById('vNomina').style.display='block'; nominaMesOffset=0; actualizarPeriodoNominaPago(); loadIrpfMes(); loadSocorrosMes(); loadProdEstructural(); actualizarVisibilidadNomina(); calcNomina(); renderModificaciones(); }
   if(v==='incentivos') { document.getElementById('vIncentivos').style.display='block'; initIncentivosTab(); }
-  if(v==='ajustes') { document.getElementById('vAjustes').style.display='block'; actualizarContadoresAjustes(); renderFestPanel(); }
+  if(v==='ajustes') { document.getElementById('vAjustes').style.display='block'; renderRegimenCards(); syncBloquesRegimen(); actualizarContadoresAjustes(); renderFestPanel(); }
   if(v==='ayuda') document.getElementById('vAyuda').style.display='block';
   
   if(btn){
@@ -1590,7 +1755,7 @@ function renderTurnoBar(){
     div.className='tb';
     div.style.borderColor=t.color;
     div.style.color=t.color;
-    div.onclick=function(){ assignSelected(k); };
+    div.onclick=function(){ if(k==='V'){ openVacRangeModal(selectedDay); } else { assignSelected(k); } };
     div.innerHTML='<span class="ti">'+t.icon+'</span><span class="tk">'+t.label+'</span>';
     bar.appendChild(div);
   });
@@ -1601,7 +1766,15 @@ function renderCalendar(){
   var p=getPeriodForMonth(year,month);
   
   var banner=document.getElementById('periodBanner');
-  banner.innerHTML='⏱️ Periodo: <strong>'+pad2(p.start.getDate())+'/'+pad2(p.start.getMonth()+1)+'</strong> al <strong>'+pad2(p.end.getDate())+'/'+pad2(p.end.getMonth()+1)+'</strong> ('+p.weeks+' sem) · Ref: <strong>'+p.requiredHours+'h</strong>';
+  if(isTurnoFijo()){
+    var qInfoBanner = getCuatrimestreTurnos(year, month);
+    banner.innerHTML='🔁 Turno fijo: el cómputo oficial es <strong>cuatrimestral</strong> · '+qInfoBanner.label+' · Ref: <strong>'+qInfoBanner.requiredHours+'h</strong>';
+  } else if(isRegimenEspecial()){
+    var tInfoBanner = getTrimestreEspecial(year, month);
+    banner.innerHTML='⭐ Mando / especial: el cómputo oficial es <strong>trimestral</strong> · '+tInfoBanner.label+' · Ref: <strong>'+tInfoBanner.requiredHours+'h</strong>';
+  } else {
+    banner.innerHTML='⏱️ Periodo: <strong>'+pad2(p.start.getDate())+'/'+pad2(p.start.getMonth()+1)+'</strong> al <strong>'+pad2(p.end.getDate())+'/'+pad2(p.end.getMonth()+1)+'</strong> ('+p.weeks+' sem) · Ref: <strong>'+p.requiredHours+'h</strong>';
+  }
   
   var cal=document.getElementById('calendar');
   cal.innerHTML='';
@@ -1652,8 +1825,15 @@ function renderCalendar(){
     dn.innerText=cur.getDate()+(esp?' 🎄':'')+(esFestLab&&!s.t?' 🏛️':'');
     cell.appendChild(dn);
     
-    // Si hay nota: fondo rojo + sirena
-    if (s.nota && s.nota.trim() !== '') {
+    // Si hay nota manual, se avisa visualmente.
+    // Las notas automáticas del periodo vacacional en turno fijo NO se pintan en rojo
+    // para evitar que las vacaciones parezcan una incidencia/servicio especial.
+    var notaTxt = (s.nota || '').trim();
+    var notaVacFijo = /^Vacaciones sobre servicio planificado/.test(notaTxt)
+      || /^Vacaciones sobre doblete planificado/.test(notaTxt)
+      || /^Incluido en periodo de vacaciones/.test(notaTxt)
+      || /^Periodo de vacaciones/.test(notaTxt);
+    if (notaTxt !== '' && !notaVacFijo) {
       cell.style.background = '#fecaca';
       cell.style.borderColor = '#dc2626';
       cell.style.boxShadow   = 'inset 0 0 0 2px #dc2626';
@@ -1661,6 +1841,13 @@ function renderCalendar(){
       sirena.className = 'sirena-nota';
       sirena.innerText = '🚨';
       cell.appendChild(sirena);
+    } else if (notaVacFijo) {
+      var badge = document.createElement('span');
+      badge.className = 'sirena-nota';
+      badge.innerText = '🏖️';
+      badge.title = notaTxt;
+      badge.style.opacity = '0.75';
+      cell.appendChild(badge);
     }
     
     var ci=document.createElement('div');
@@ -1690,7 +1877,7 @@ function renderCalendar(){
     ck.innerText = tObj ? tObj.label : (esSaliente ? 'Saliente' : (esFestivoReal ? 'Festivo' : ''));
     cell.appendChild(ck);
     
-    if(s.t && tObj && tObj.compHoras && !(s.t==='V' && isWeekend(key))){
+    if(s.t && tObj && tObj.compHoras && !(s.t==='V' && isWeekend(key) && (cfg.regimen||'general') !== 'fijo')){
       var ch=document.createElement('div');
       ch.className='ch';
       if(s.t==='D'){
@@ -1699,7 +1886,7 @@ function renderCalendar(){
         ch.innerText=iniM+'-'+finM+'\n'+iniN+'-'+finN;
         ch.style.whiteSpace='pre';
       } else {
-        var hVal = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+        var hVal = getHorasComputablesRegistro(key, s);
         ch.innerText=hVal+'h';
       }
       cell.appendChild(ch);
@@ -1765,6 +1952,7 @@ function renderCalendar(){
 }
 
 function assignSelected(tKey){
+  if(tKey==='V'){ openVacRangeModal(selectedDay); return; }
   if(!selectedDay){ alert('Selecciona primero un día en el calendario'); return; }
   
   // Aviso si se intenta gastar un DF sin tener disponibles
@@ -1835,6 +2023,241 @@ function assignSelected(tKey){
   showToast(msg);
 }
 
+// Horas que debe usar la generación de cadencia en turno fijo.
+// Prioridad: excepción del turno M/T/N > horas base de turno fijo > horario definido en Ajustes.
+function getHorasCadenciaFijo(tKey, def){
+  if(tKey==='S' || tKey==='L') return 0;
+
+  var base = parseFloat((document.getElementById('cfgHorasTurno')||{}).value || cfg.horasTurno || 0) || 0;
+
+  if(tKey==='M' || tKey==='T' || tKey==='N'){
+    var map = {M:'cfgHorasFijoM', T:'cfgHorasFijoT', N:'cfgHorasFijoN'};
+    var cfgMap = {M:'horasFijoM', T:'horasFijoT', N:'horasFijoN'};
+    var ex = parseFloat((document.getElementById(map[tKey])||{}).value || cfg[cfgMap[tKey]] || 0) || 0;
+    if(ex > 0) return ex;
+    if(base > 0) return base;
+    return def ? calcHoras(def.ini, def.fin) : 7.5;
+  }
+
+  if(tKey==='D'){
+    // Si aparece un Doblete en el patrón, se calcula como mañana + noche según las mismas reglas.
+    var hM = getHorasCadenciaFijo('M', TURNO_HORAS_DEF.M);
+    var hN = getHorasCadenciaFijo('N', TURNO_HORAS_DEF.N);
+    return hM + hN;
+  }
+
+  return def ? def.h : 7.5;
+}
+
+// Devuelve el código que correspondería por cadencia a una fecha concreta.
+// Sirve para aplicar vacaciones sin romper la secuencia M-M-M-T-T-N-S-L-L-L-L.
+function getTurnoCadenciaParaFecha(dateStr){
+  var patronRaw = (document.getElementById('cfgCadenciaPatron')||{}).value || cfg.cadenciaPatron || '';
+  var inicioStr = (document.getElementById('cfgCadenciaInicio')||{}).value || cfg.cadenciaInicio || '';
+  if(!patronRaw || !inicioStr) return '';
+  var tokens = patronRaw.toUpperCase().split(/[\s,\-]+/).filter(function(x){ return x!=='' && TURNOS[x]; });
+  if(!tokens.length) return '';
+  var inicio = new Date(inicioStr+'T12:00:00');
+  var d = new Date(dateStr+'T12:00:00');
+  var diasDesdeInicio = Math.round((d-inicio)/86400000);
+  var idx = ((diasDesdeInicio % tokens.length)+tokens.length) % tokens.length;
+  return tokens[idx];
+}
+
+function esTurnoServicioCadencia(tKey){
+  return tKey==='M' || tKey==='T' || tKey==='N' || tKey==='D';
+}
+
+
+// Horas computables de un registro del cuadrante.
+// En turno fijo, una V computa las horas del servicio de cadencia que sustituye,
+// aunque caiga en sábado/domingo/festivo. El saliente y los libres no computan.
+function getHorasComputablesRegistro(dateStr, registro){
+  if(!registro || !registro.t) return 0;
+  var tKey = registro.t;
+  var tObj = TURNOS[tKey];
+  if(!tObj || !tObj.compHoras || tKey==='B') return 0;
+
+  if(tKey === 'V' && (cfg.regimen||'general') === 'fijo'){
+    var tCad = getTurnoCadenciaParaFecha(dateStr);
+    if(esTurnoServicioCadencia(tCad)){
+      return getHorasCadenciaFijo(tCad, TURNO_HORAS_DEF[tCad]);
+    }
+    return 0;
+  }
+
+  if(tKey === 'V' && isWeekend(dateStr)) return 0;
+
+  if(tKey === 'D'){
+    if(registro.h !== undefined) return registro.h;
+    return (TURNO_HORAS_DEF.D ? TURNO_HORAS_DEF.D.h : 15);
+  }
+
+  return registro.h !== undefined ? registro.h : (TURNO_HORAS_DEF[tKey] ? TURNO_HORAS_DEF[tKey].h : 0);
+}
+
+
+function fmtFechaES(str){
+  if(!str) return '';
+  var p=str.split('-');
+  return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : str;
+}
+
+function openVacRangeModal(prefillDate){
+  var ov=document.getElementById('vacRangeOverlay');
+  if(!ov) return;
+  var ini=document.getElementById('vacRangeInicio');
+  var fin=document.getElementById('vacRangeFin');
+  var base = prefillDate || dStr(year, month, 1);
+  if(ini && !ini.value) ini.value = base;
+  if(fin && !fin.value) fin.value = base;
+  var info=document.getElementById('vacRangeInfo');
+  if(info){
+    if((cfg.regimen||'general')==='fijo'){
+      info.innerHTML='Modo <strong>Turno fijo con cadencia</strong>: solo se convierten en vacaciones los días con servicio planificado (<strong>M/T/N/D</strong>). Los <strong>Salientes</strong> y <strong>Libres</strong> se mantienen visibles, no computan horas y no consumen crédito.';
+    } else {
+      info.innerHTML='Modo <strong>régimen general</strong>: se marcará el periodo completo como vacaciones, pero el contador de crédito mantiene la regla de no descontar sábados, domingos ni festivos.';
+    }
+  }
+  previewVacRange();
+  ov.classList.add('open');
+}
+function closeVacRangeModal(){
+  var ov=document.getElementById('vacRangeOverlay');
+  if(ov) ov.classList.remove('open');
+}
+function closeVacRangeOutside(e){ if(e.target.id==='vacRangeOverlay') closeVacRangeModal(); }
+
+function previewVacRange(){
+  var box=document.getElementById('vacRangePreview');
+  if(!box) return;
+  var inicioStr=(document.getElementById('vacRangeInicio')||{}).value||'';
+  var hastaStr=(document.getElementById('vacRangeFin')||{}).value||'';
+  if(!inicioStr || !hastaStr){ box.innerHTML='Indica inicio y fin para ver el resumen.'; return; }
+  if(hastaStr < inicioStr){ box.innerHTML='<span style="color:var(--rojo);font-weight:700">La fecha fin no puede ser anterior a la fecha inicio.</span>'; return; }
+  var inicio=new Date(inicioStr+'T12:00:00');
+  var hasta=new Date(hastaStr+'T12:00:00');
+  var total=0, consume=0, salientes=0, libres=0, festivos=0;
+  var fijo=(cfg.regimen||'general')==='fijo';
+  var runner=new Date(inicio);
+  while(runner<=hasta){
+    total++;
+    var k=dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    if(fijo){
+      var tCad=getTurnoCadenciaParaFecha(k);
+      if(esTurnoServicioCadencia(tCad)) consume++;
+      else if(tCad==='S') salientes++;
+      else if(tCad==='L') libres++;
+    } else {
+      var dow=runner.getDay();
+      if(dow!==0 && dow!==6 && !isFestNac(k)) consume++;
+      if(isFestNac(k)) festivos++;
+    }
+    runner.setDate(runner.getDate()+1);
+  }
+  if(fijo){
+    box.innerHTML='Resumen: <strong>'+total+' días</strong> de periodo · consumirán crédito <strong style="color:var(--verde)">'+consume+'</strong> · salientes mantenidos <strong>'+salientes+'</strong> · libres mantenidos <strong>'+libres+'</strong>.';
+  } else {
+    box.innerHTML='Resumen: <strong>'+total+' días</strong> de periodo · consumirán crédito aprox. <strong style="color:var(--verde)">'+consume+'</strong> · festivos detectados <strong>'+festivos+'</strong>.';
+  }
+}
+
+function aplicarVacacionesRangoDesdeModal(){
+  var inicioStr=(document.getElementById('vacRangeInicio')||{}).value||'';
+  var hastaStr=(document.getElementById('vacRangeFin')||{}).value||'';
+  if(!inicioStr || !hastaStr){ alert('Indica fecha de inicio y fin de vacaciones.'); return; }
+  if(hastaStr < inicioStr){ alert('La fecha fin no puede ser anterior a la fecha de inicio.'); return; }
+  var fijo=(cfg.regimen||'general')==='fijo';
+  if(fijo){
+    aplicarVacacionesTurnoFijoRango(inicioStr, hastaStr);
+  } else {
+    aplicarVacacionesGeneralRango(inicioStr, hastaStr);
+  }
+}
+
+function aplicarVacacionesGeneralRango(inicioStr, hastaStr){
+  var inicio=new Date(inicioStr+'T12:00:00');
+  var hasta=new Date(hastaStr+'T12:00:00');
+  var total=0, consume=0;
+  var runner=new Date(inicio);
+  while(runner<=hasta){
+    total++;
+    var k=dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var dow=runner.getDay();
+    if(dow!==0 && dow!==6 && !isFestNac(k)) consume++;
+    runner.setDate(runner.getDate()+1);
+  }
+  var txt='Se aplicará el periodo de vacaciones del '+fmtFechaES(inicioStr)+' al '+fmtFechaES(hastaStr)+'.\n\n'
+    +'Régimen general: se marcará el periodo completo como vacaciones, pero consumirán crédito '+consume+' días laborables no festivos.\n\n'
+    +'Se sobrescribirán los turnos existentes dentro de ese rango. ¿Continuar?';
+  if(!confirm(txt)) return;
+  var def=TURNO_HORAS_DEF.V;
+  runner=new Date(inicio);
+  while(runner<=hasta){
+    var k=dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var dow=runner.getDay();
+    var h=(dow!==0 && dow!==6 && !isFestNac(k)) ? (def?def.h:7.5) : 0;
+    shifts[k]={t:'V', ini:def?def.ini:'', fin:def?def.fin:'', h:h, companeros:[], nota:'Periodo de vacaciones'};
+    runner.setDate(runner.getDate()+1);
+  }
+  save(); renderAll(); closeVacRangeModal();
+  showToast('Vacaciones aplicadas: '+consume+' días consumen crédito');
+}
+
+function aplicarVacacionesTurnoFijoRango(inicioStr, hastaStr){
+  saveCfg();
+  if(!cfg.cadenciaPatron || !cfg.cadenciaInicio){
+    alert('Antes debes indicar el patrón y la fecha de inicio de la cadencia en Ajustes.');
+    return;
+  }
+  var inicio = new Date(inicioStr+'T12:00:00');
+  var hasta  = new Date(hastaStr+'T12:00:00');
+  var servicio = 0, salientes = 0, libres = 0, otros = 0;
+  var detalle = [];
+  var runner = new Date(inicio);
+  while(runner <= hasta){
+    var k = dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var tCad = getTurnoCadenciaParaFecha(k);
+    if(esTurnoServicioCadencia(tCad)) servicio++;
+    else if(tCad==='S') salientes++;
+    else if(tCad==='L') libres++;
+    else otros++;
+    detalle.push({fecha:k, t:tCad});
+    runner.setDate(runner.getDate()+1);
+  }
+  var txt = 'Se aplicará el periodo de vacaciones del '+fmtFechaES(inicioStr)+' al '+fmtFechaES(hastaStr)+'.\n\n'
+    + 'Turno fijo: consumirán crédito '+servicio+' días con servicio planificado (M/T/N/D).\n'
+    + 'Salientes mantenidos sin consumir crédito: '+salientes+'.\n'
+    + 'Libres mantenidos sin consumir crédito: '+libres+'.\n\n'
+    + 'Se sobrescribirán los turnos existentes dentro de ese rango para respetar la cadencia. ¿Continuar?';
+  if(!confirm(txt)) return;
+  detalle.forEach(function(item){
+    var k = item.fecha;
+    var tCad = item.t;
+    var def = TURNO_HORAS_DEF[tCad];
+    if(esTurnoServicioCadencia(tCad)){
+      shifts[k] = {t:'V', ini:TURNO_HORAS_DEF.V.ini, fin:TURNO_HORAS_DEF.V.fin, h:getHorasCadenciaFijo(tCad, def), companeros:[], nota:'Vacaciones sobre servicio planificado '+tCad};
+      if(tCad==='D') shifts[k].nota = 'Vacaciones sobre doblete planificado';
+    } else if(tCad==='S' || tCad==='L'){
+      shifts[k] = {t:tCad, ini:def?def.ini:'', fin:def?def.fin:'', h:0, companeros:[], nota:'Incluido en periodo de vacaciones sin consumir crédito'};
+    } else {
+      shifts[k] = {t:tCad || 'L', ini:def?def.ini:'', fin:def?def.fin:'', h:def?def.h:0, companeros:[], nota:'Incluido en periodo de vacaciones'};
+    }
+  });
+  save(); renderAll(); closeVacRangeModal();
+  showToast('Vacaciones aplicadas: '+servicio+' días consumen crédito · '+salientes+' salientes mantenidos');
+}
+
+function aplicarVacacionesTurnoFijo(){
+  var inicioStr = (document.getElementById('vacFijoInicio')||{}).value || '';
+  var hastaStr  = (document.getElementById('vacFijoHasta')||{}).value || '';
+  if(inicioStr && hastaStr){
+    aplicarVacacionesTurnoFijoRango(inicioStr, hastaStr);
+  } else {
+    openVacRangeModal(selectedDay);
+  }
+}
+
 // ==========================================
 // CADENCIA DE TURNO FIJO — genera el cuadrante repitiendo un patrón
 // (ej. M-M-M-T-T-N-S-L-L-L-L) desde una fecha de inicio dada.
@@ -1886,13 +2309,14 @@ function aplicarCadencia(){
     var idx = ((diasDesdeInicio % cycle)+cycle) % cycle;
     var tKey = tokens[idx];
     var def = TURNO_HORAS_DEF[tKey];
-    shifts[k] = {t:tKey, ini: def?def.ini:'', fin: def?def.fin:'', h: def?((tKey==='M'||tKey==='T'||tKey==='N')?calcHoras(def.ini,def.fin):def.h):7.5, companeros:[], nota:''};
+    var horas = getHorasCadenciaFijo(tKey, def);
+    shifts[k] = {t:tKey, ini: def?def.ini:'', fin: def?def.fin:'', h: horas, companeros:[], nota:''};
     if(tKey==='D'){
       shifts[k].iniM = cfg.iniDM || '06:30';
       shifts[k].finM = cfg.finDM || '14:00';
       shifts[k].iniN = cfg.iniDN || '22:00';
       shifts[k].finN = cfg.finDN || '05:30';
-      shifts[k].h = calcHoras(shifts[k].iniM,shifts[k].finM) + calcHoras(shifts[k].iniN,shifts[k].finN);
+      shifts[k].h = getHorasCadenciaFijo('D', TURNO_HORAS_DEF.D);
     }
   });
 
@@ -1972,8 +2396,7 @@ function calcQuickStats(){
     if(s && s.t){
       var tObj=TURNOS[s.t];
       if(tObj && tObj.compHoras && s.t!=='B'){
-        var horas = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
-        if(s.t==='V' && isWeekend(k)) horas = 0;
+        var horas = getHorasComputablesRegistro(k, s);
         totalH += horas;
       }
       if(s.t==='N'||s.t==='D') nN++;
@@ -1998,10 +2421,14 @@ function calcQuickStats(){
   }
   
   addChip('⏱️', totalH+'h', 'Horas Realizadas', 'var(--verde)');
-  var sSign=diff>=0?'+':'';
-  var sCol=diff>=0?'var(--verde)':'var(--rojo)';
-  var sBg=diff>=0?'#e8f4f0':'#fff0f0';
-  addChip('⚖️', sSign+diff+'h', 'Balance periodo', sCol, sBg);
+  if(isTurnoFijo()){
+    addChip('🔁', 'Cuatrim.', 'Balance oficial', 'var(--azul)', '#f0f4ff');
+  } else {
+    var sSign=diff>=0?'+':'';
+    var sCol=diff>=0?'var(--verde)':'var(--rojo)';
+    var sBg=diff>=0?'#e8f4f0':'#fff0f0';
+    addChip('⚖️', sSign+diff+'h', 'Balance periodo', sCol, sBg);
+  }
   addChip('🌙', nN, 'Noches', '#4c1d95');
   addChip('📅', nF, 'Festivos/Sáb', '#b92b27');
   addChip('📋', nAP, 'Asuntos Part.', '#059669');
@@ -2295,8 +2722,7 @@ function calcResumen(){
     if(s && s.t && counts[s.t]!==undefined){
       counts[s.t]++;
       if(TURNOS[s.t].compHoras && s.t!=='B'){
-        var hRes = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
-        if(s.t==='V' && isWeekend(k)) hRes = 0;
+        var hRes = getHorasComputablesRegistro(k, s);
         totalH += hRes;
       }
       if(s.t==='N'||s.t==='D') noches++;
@@ -2314,10 +2740,22 @@ function calcResumen(){
     rGrid.appendChild(c);
   }
   
+  totalH += calcHorasBajaEnPeriodo(p.start, p.end);
   addResCard('⏱️', totalH+'h', 'Horas Totales', 'var(--verde)');
-  addResCard('🎯', p.requiredHours+'h', 'Referencia mes', 'var(--azul)');
-  var diff=Math.round((totalH-p.requiredHours)*10)/10;
-  addResCard('⚖️', (diff>=0?'+':'')+diff+'h', 'Balance horas', diff>=0?'var(--verde)':'var(--rojo)');
+  var diff=0;
+  if(isTurnoFijo()){
+    var qInfoRes = getCuatrimestreTurnos(year, month);
+    addResCard('🔁', qInfoRes.requiredHours+'h', 'Referencia cuatrimestre', 'var(--azul)');
+    addResCard('⚖️', '—', 'Balance mensual no aplicable', '#777');
+  } else if(isRegimenEspecial()){
+    var tInfoRes = getTrimestreEspecial(year, month);
+    addResCard('⭐', tInfoRes.requiredHours+'h', 'Referencia trimestre', 'var(--azul)');
+    addResCard('⚖️', '—', 'Balance mensual no aplicable', '#777');
+  } else {
+    addResCard('🎯', p.requiredHours+'h', 'Referencia mes', 'var(--azul)');
+    diff=Math.round((totalH-p.requiredHours)*10)/10;
+    addResCard('⚖️', (diff>=0?'+':'')+diff+'h', 'Balance horas', diff>=0?'var(--verde)':'var(--rojo)');
+  }
   addResCard('🌙', noches, 'Noches totales', '#4c1d95');
   addResCard('📅', festivos, 'Serv. Festivos/Sáb', '#b92b27');
   
@@ -2331,10 +2769,23 @@ function calcResumen(){
   Object.keys(TURNOS).forEach(function(k){
     if(counts[k]>0) addRow(TURNOS[k].icon+' '+TURNOS[k].label, counts[k]+' días', false);
   });
-  totalH += calcHorasBajaEnPeriodo(p.start, p.end);
-  addRow('Horas teóricas requeridas', p.requiredHours+'h', false);
-  addRow('Horas reales acumuladas', totalH+'h', false);
-  addRow('Diferencia de horas', (diff>=0?'+':'')+diff+'h', true, true);
+  if(isTurnoFijo()){
+    var qInfoRows = getCuatrimestreTurnos(year, month);
+    addRow('Referencia mensual', 'No aplicable en turno fijo', false);
+    addRow('Referencia oficial del cuatrimestre', qInfoRows.requiredHours+'h ('+qInfoRows.label+')', false);
+    addRow('Horas reales acumuladas del mes', totalH+'h', false);
+    addRow('Balance oficial', 'Ver cómputo cuatrimestral', true, true);
+  } else if(isRegimenEspecial()){
+    var tInfoRows = getTrimestreEspecial(year, month);
+    addRow('Referencia mensual', 'No aplicable en mando/especial', false);
+    addRow('Referencia oficial del trimestre', tInfoRows.requiredHours+'h ('+tInfoRows.label+')', false);
+    addRow('Horas reales acumuladas del mes', totalH+'h', false);
+    addRow('Balance oficial', 'Ver cómputo trimestral', true, true);
+  } else {
+    addRow('Horas teóricas requeridas', p.requiredHours+'h', false);
+    addRow('Horas reales acumuladas', totalH+'h', false);
+    addRow('Diferencia de horas', (diff>=0?'+':'')+diff+'h', true, true);
+  }
   
   // ANUAL
   document.getElementById('annTit').innerText='📅 Acumulados del año '+year;
@@ -2350,7 +2801,7 @@ function calcResumen(){
       var s=shifts[k];
       if(s && s.t && annCounts[s.t]!==undefined){
         annCounts[s.t]++;
-        if(TURNOS[s.t].compHoras) annH+= s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+        if(TURNOS[s.t].compHoras) annH += getHorasComputablesRegistro(k, s);
         if(s.t==='N'||s.t==='D') annN++;
         if(s.t==='ES'||isFestivo(k,s.t)){
           if(s.t!=='L'&&s.t!=='B'&&s.t!=='AP'&&s.t!=='V'&&s.t!=='S') annF++;
@@ -2420,6 +2871,72 @@ function calcResumen(){
   // Renderizar DF y Vac/AP
   renderDFContent(year);
   renderVacApContent(year);
+
+  // BLOQUE OFICIAL DE REFERENCIA — turno fijo cuatrimestral / mando-especial trimestral
+  var cuatrimBlock = document.getElementById('resCuatrimBlock');
+  if(!cuatrimBlock) return;
+  var esFijo = isTurnoFijo();
+  var esEsp = isRegimenEspecial();
+  if(!esFijo && !esEsp){ cuatrimBlock.style.display='none'; return; }
+  cuatrimBlock.style.display = 'block';
+
+  var qInfo = esFijo ? getCuatrimestreTurnos(year, month) : getTrimestreEspecial(year, month);
+  var qStart = qInfo.start, qEnd = qInfo.end, qLabel = qInfo.label;
+  var qJueves = qInfo.weeks;
+  var qRefHours = qInfo.requiredHours;
+  document.getElementById('cuatrimTit').innerText = (esFijo ? '🔁 Cómputo cuatrimestral — ' : '⭐ Cómputo trimestral — ') + qLabel;
+
+  var qH = 0, qCounts = {};
+  var qRun = new Date(qStart);
+  while(qRun <= qEnd){
+    var qMon = qRun.getMonth(), qYr = qRun.getFullYear();
+    var qk = dStr(qYr, qMon, qRun.getDate());
+    var qs = shifts[qk];
+    if(qs && qs.t){
+      if(!qCounts[qs.t]) qCounts[qs.t] = 0;
+      qCounts[qs.t]++;
+      var qTO = TURNOS[qs.t];
+      if(qTO && qTO.compHoras && qs.t !== 'B'){
+        var qh = getHorasComputablesRegistro(qk, qs);
+        qH += qh;
+      }
+    }
+    qRun.setDate(qRun.getDate()+1);
+  }
+
+  var qDiff = Math.round((qH - qRefHours) * 10) / 10;
+  var qLimit = esFijo ? Math.round((qRefHours / 37.5) * 40 * 10) / 10 : qRefHours;
+  var qCrexH = esFijo ? Math.max(0, Math.min(qDiff, qLimit - qRefHours)) : 0;
+  qCrexH = Math.floor(qCrexH) + (qCrexH % 1 >= 0.5 ? 1 : 0);
+  var qDsj = (!esFijo && qDiff > 0) ? Math.floor(qDiff / 8) : 0;
+
+  var cGrid = document.getElementById('cuatrimCards'); cGrid.innerHTML = '';
+  function addCCard(icon, val, lbl, col){
+    var c = document.createElement('div'); c.className = 'info-card';
+    c.innerHTML = '<div class="ic-i">'+icon+'</div><div class="ic-v" style="color:'+col+'">'+val+'</div><div class="ic-l">'+lbl+'</div>';
+    cGrid.appendChild(c);
+  }
+  addCCard('⏱️', qH+'h', 'Horas acumuladas', 'var(--verde)');
+  addCCard('🎯', qRefHours+'h', 'Ref. ('+qJueves+' sem)', 'var(--azul)');
+  addCCard('⚖️', (qDiff>=0?'+':'')+qDiff+'h', 'Balance', qDiff>=0?'var(--verde)':'var(--rojo)');
+  if(esFijo) addCCard('💰', qCrexH+'h', 'CREX estimado', qCrexH>0?'#b45309':'#aaa');
+  else addCCard('⏳', qDsj, 'DSJ orientativo', qDsj>0?'#b45309':'#aaa');
+
+  var cCont = document.getElementById('cuatrimContent'); cCont.innerHTML = '';
+  function addCRow(l, v, tot){
+    var r = document.createElement('div'); r.className = 'br'+(tot?' tot':'');
+    r.innerHTML = '<span>'+l+'</span><strong>'+v+'</strong>'; cCont.appendChild(r);
+  }
+  Object.keys(qCounts).forEach(function(k){
+    if(qCounts[k]>0 && TURNOS[k]) addCRow(TURNOS[k].icon+' '+TURNOS[k].label, qCounts[k]+' días', false);
+  });
+  addCRow(esFijo ? 'Semanas del cuatrimestre' : 'Semanas del trimestre', qJueves, false);
+  addCRow(esFijo ? 'Horas de referencia (OG 27/2023 Art.7.5)' : 'Horas de referencia (40 h/sem · régimen especial)', qRefHours+'h', false);
+  if(!esFijo) addCRow('Referencia presencial/combinada', 'mín. 33 h/sem cuando proceda; resto disponibilidad', false);
+  addCRow('Horas acumuladas', qH+'h', false);
+  addCRow('Balance ('+(qDiff>=0?'exceso':'déficit')+')', (qDiff>=0?'+':'')+qDiff+'h', true);
+  if(esFijo && qCrexH > 0) addCRow('CREX estimado ('+qCrexH+'h × 12 €)', (qCrexH*12).toFixed(2)+' €', false);
+  if(!esFijo && qDiff > 0) addCRow('DSJ orientativo', qDsj+' día(s) completo(s) por exceso sobre 40 h/sem', false);
 }
 
 // ==========================================
@@ -2438,8 +2955,7 @@ function calcCrexMes(){
     if(s && s.t){
       var tObj=TURNOS[s.t];
       if(tObj && tObj.compHoras && s.t!=='B'){
-        var hCrex = s.h!==undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
-        if(s.t==='V' && isWeekend(k)) hCrex = 0;
+        var hCrex = getHorasComputablesRegistro(k, s);
         totalH += hCrex;
       }
     }
@@ -2451,7 +2967,8 @@ function calcCrexMes(){
   var diff  = totalH - ref;
   if(diff <= 0) return {horas:0, importe:0, horasDSJ:0};
   // Régimen 40h: no hay tramo CREX, DSJ desde la primera hora sobre 40h
-  if((cfg.regimen||'general') !== 'general'){
+  var r = cfg.regimen || 'general';
+  if(r !== 'general' && r !== 'fijo'){
     var horasSobreLimite40 = Math.max(0, totalH - limit);
     return {horas:0, importe:0, horasDSJ: horasSobreLimite40};
   }
@@ -2936,6 +3453,10 @@ function puntosIncentivosDelDia(dateStr, turno){
 // Calcula servicios festivos y nocturnos acumulados en todo el historial
 // Devuelve {festivos: N, nocturnos: N, dasFest: N, dasNoc: N, festPend: N, nocPend: N}
 function calcDASAcumulado(){
+  // Régimen "Turno fijo (cadencia)": los descansos ya están integrados en el patrón, no genera DAS.
+  if((cfg.regimen||'general') === 'fijo'){
+    return {festivos:0, nocturnos:0, dasFest:0, dasNoc:0, festPend:0, nocPend:0, totalDAS:0};
+  }
   var totalFest = 0;
   var totalNoc  = 0;
   // Scan all shifts
@@ -2945,8 +3466,8 @@ function calcDASAcumulado(){
     if(!s || !s.t) return;
     var t = s.t;
     if(!TURNOS[t] || !TURNOS[t].compHoras) return;
-    // DAS consumed days don't count
-    if(t==='DA'||t==='L'||t==='B'||t==='AP'||t==='V'||t==='DF'||t==='DSJ'||t==='PSS'||t==='PNV') return;
+    // DAS consumed days don't count. 'S' (Saliente, incl. cadencia fija) tampoco genera DAS.
+    if(t==='DA'||t==='L'||t==='B'||t==='AP'||t==='V'||t==='DF'||t==='DSJ'||t==='PSS'||t==='PNV'||t==='S') return;
     if(esServicioFestivo(k,t))  totalFest++;
     else if(esServicioNocturno(k,t)) totalNoc++;
   });
@@ -3257,6 +3778,10 @@ function isFestivoNacional(fechaStr){
   return true;
 }
 function calcDFAnio(y){
+  // Régimen "Turno fijo (cadencia)": los descansos ya están integrados en el patrón, no genera DF.
+  if((cfg.regimen||'general') === 'fijo'){
+    return {generados:0, consumidos:0, disponibles:0, detalle:[]};
+  }
   var festivos = getFestivosAnio(y);
   var generados = 0;
   var detalleGenerados = [];
@@ -3364,12 +3889,16 @@ function calcVacConsumidas(y){
     var k = dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
     var s = shifts[k];
     if(s && s.t==='V'){
-      // No cuenta si es finde
-      var dow = runner.getDay();
-      if(dow!==0 && dow!==6){
-        // No cuenta si es festivo
-        if(!isFestNac(k)){
-          dias++;
+      if((cfg.regimen||'general') === 'fijo'){
+        // En turno fijo el crédito se consume si la V sustituye un servicio real de la cadencia,
+        // aunque ese servicio caiga en sábado, domingo o festivo. Salientes y libres no se marcan como V.
+        var tCad = getTurnoCadenciaParaFecha(k);
+        if(!tCad || esTurnoServicioCadencia(tCad)) dias++;
+      } else {
+        // En régimen general se mantiene la regla anterior: no cuentan findes ni festivos.
+        var dow = runner.getDay();
+        if(dow!==0 && dow!==6){
+          if(!isFestNac(k)) dias++;
         }
       }
     }
@@ -3380,7 +3909,7 @@ function calcVacConsumidas(y){
 
 // Calcula AP consumidos en el año
 
-// Calcula los dias extra de AP por festivos nacionales que caen en sabado
+// Calcula los dias extra de AP por festivos que caen en sabado
 // (solo nacionales, no autonomicos ni locales)
 function calcApExtraPorFestivosSabado(y){
   var base = FEST_BASE[String(y)] || [];
@@ -3461,7 +3990,7 @@ function calcDSJGenerados(y){
       if(s && s.t){
         var tObj = TURNOS[s.t];
         if(tObj && tObj.compHoras){
-          totalH += s.h !== undefined ? s.h : TURNO_HORAS_DEF[s.t].h;
+          totalH += getHorasComputablesRegistro(k, s);
         }
       }
       runner.setDate(runner.getDate()+1);
@@ -3609,7 +4138,7 @@ function renderVacApContent(y){
       var kx = dStr(runx.getFullYear(), runx.getMonth(), runx.getDate());
       var sx = shifts[kx];
       if(sx && sx.t && TURNOS[sx.t] && TURNOS[sx.t].compHoras){
-        totalHx += sx.h !== undefined ? sx.h : TURNO_HORAS_DEF[sx.t].h;
+        totalHx += getHorasComputablesRegistro(kx, sx);
       }
       runx.setDate(runx.getDate()+1);
     }
@@ -3617,10 +4146,10 @@ function renderVacApContent(y){
     if(totalHx > limitx) horasExcesoAcum += Math.round((totalHx - limitx)*10)/10;
   }
   html += '<div style="background:#fef9c3;border-radius:8px;padding:6px 8px;font-size:10px;color:#92400e;margin-bottom:6px">';
-  html += '⏳ <strong>DSJ (Descanso por Superación de Jornada):</strong> Las horas de exceso sobre 40h/período se acumulan entre períodos hasta completar una jornada (7,5h = 1 DSJ). Las horas sobrantes que no completan un DSJ se acumulan al siguiente período. Los DSJ generados deben disfrutarse en el trimestre o se pierden (art. 21 normativa de jornada).';
+  html += '⏳ <strong>DSJ (Descanso por Superación de Jornada):</strong> Las horas de exceso sobre 40h/período se acumulan entre períodos hasta completar una jornada (7,5h en régimen general; 8h en régimen 40h = 1 DSJ). Las horas sobrantes que no completan un DSJ se acumulan al siguiente período. Los DSJ generados deben disfrutarse en el trimestre o se pierden (art. 21 normativa de jornada).';
   html += '</div>';
   html += '<div class="br"><span>⏳ Horas de exceso acumuladas (&gt;40h/período):</span><strong style="color:#b45309">'+horasExcesoAcum+'h</strong></div>';
-  html += '<div class="br"><span>DSJ generados (cada 7,5h de exceso):</span><strong>'+dsjGen+' días</strong></div>';
+  html += '<div class="br"><span>DSJ generados:</span><strong>'+dsjGen+' días</strong></div>';
   html += '<div class="br"><span>DSJ consumidos:</span><strong style="color:var(--rojo)">'+dsjCons+' días</strong></div>';
   html += '<div class="br tot"><span>DSJ disponibles:</span><strong style="color:'+cDSJ+';font-size:15px">'+dsjDisp+' días</strong></div>';
   box.innerHTML = html;
@@ -3777,7 +4306,15 @@ function exportarCuadrantePDF(){
   // Period info
   var pStart = pad2(p.start.getDate())+'/'+pad2(p.start.getMonth()+1)+'/'+p.start.getFullYear();
   var pEnd   = pad2(p.end.getDate())+'/'+pad2(p.end.getMonth()+1)+'/'+p.end.getFullYear();
-  html += '<div class="periodo">Periodo: <strong>' + pStart + ' al ' + pEnd + '</strong> · ' + p.weeks + ' semanas · Referencia: ' + p.requiredHours + 'h</div>';
+  if(isTurnoFijo()){
+    var qInfoPdf = getCuatrimestreTurnos(year, month);
+    html += '<div class="periodo">Turno fijo: cómputo oficial <strong>cuatrimestral</strong> · ' + qInfoPdf.label + ' · Referencia: ' + qInfoPdf.requiredHours + 'h</div>';
+  } else if(isRegimenEspecial()){
+    var tInfoPdf = getTrimestreEspecial(year, month);
+    html += '<div class="periodo">Mando / especial: cómputo oficial <strong>trimestral</strong> · ' + tInfoPdf.label + ' · Referencia: ' + tInfoPdf.requiredHours + 'h</div>';
+  } else {
+    html += '<div class="periodo">Periodo: <strong>' + pStart + ' al ' + pEnd + '</strong> · ' + p.weeks + ' semanas · Referencia: ' + p.requiredHours + 'h</div>';
+  }
 
   // Calendar grid
   html += '<div class="grid">';
@@ -3812,7 +4349,7 @@ function exportarCuadrantePDF(){
         html += '<div class="turno" style="color:#0369a1">Vacaciones</div>';
       } else {
         html += '<div class="turno">' + tObj.label + '</div>';
-        var h = s.h !== undefined ? s.h : (TURNO_HORAS_DEF[s.t] ? TURNO_HORAS_DEF[s.t].h : 0);
+        var h = getHorasComputablesRegistro(k, s);
         if(h > 0) html += '<div class="horas">' + h + 'h</div>';
         if(s.ini && s.fin) html += '<div class="horas">' + s.ini + '-' + s.fin + '</div>';
       }
@@ -3858,7 +4395,7 @@ function exportarCuadrantePDF(){
     var ss = shifts[kk];
     if(ss && ss.t){
       var tt = TURNOS[ss.t];
-      if(tt && tt.compHoras) totalH += ss.h !== undefined ? ss.h : (TURNO_HORAS_DEF[ss.t] ? TURNO_HORAS_DEF[ss.t].h : 0);
+      if(tt && tt.compHoras) totalH += getHorasComputablesRegistro(kk, ss);
       if(ss.t === 'N' || ss.t === 'D') nNoches++;
       if(ss.t === 'L') nLibres++;
       if(esServicioFestivo(kk, ss.t)) nFest++;
@@ -3868,8 +4405,18 @@ function exportarCuadrantePDF(){
   var diff = totalH - p.requiredHours;
   html += '<div class="stats">';
   html += '<div class="stat"><strong>' + totalH + 'h</strong>Horas realizadas</div>';
-  html += '<div class="stat"><strong>' + p.requiredHours + 'h</strong>Horas referencia</div>';
-  html += '<div class="stat"><strong>' + (diff >= 0 ? '+' : '') + diff + 'h</strong>Balance</div>';
+  if(isTurnoFijo()){
+    var qInfoPdfStats = getCuatrimestreTurnos(year, month);
+    html += '<div class="stat"><strong>' + qInfoPdfStats.requiredHours + 'h</strong>Ref. cuatrimestre</div>';
+    html += '<div class="stat"><strong>—</strong>Balance mensual no aplicable</div>';
+  } else if(isRegimenEspecial()){
+    var tInfoPdfStats = getTrimestreEspecial(year, month);
+    html += '<div class="stat"><strong>' + tInfoPdfStats.requiredHours + 'h</strong>Ref. trimestre</div>';
+    html += '<div class="stat"><strong>—</strong>Balance mensual no aplicable</div>';
+  } else {
+    html += '<div class="stat"><strong>' + p.requiredHours + 'h</strong>Horas referencia</div>';
+    html += '<div class="stat"><strong>' + (diff >= 0 ? '+' : '') + diff + 'h</strong>Balance</div>';
+  }
   html += '<div class="stat"><strong>' + nNoches + '</strong>Noches</div>';
   html += '<div class="stat"><strong>' + nFest + '</strong>Serv. festivos</div>';
   html += '<div class="stat"><strong>' + nLibres + '</strong>Libres</div>';
@@ -4086,6 +4633,8 @@ window.onload=function(){
   loadGistCfg();
   buildLegend();
   renderAll();
+  renderRegimenCards();
+  syncBloquesRegimen();
   var btnMod = document.getElementById('btnAddMod');
   if(btnMod) btnMod.addEventListener('click', agregarModificacion);
   var btnPdf = document.getElementById('btnExportPdf');
