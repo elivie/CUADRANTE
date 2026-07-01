@@ -1,5 +1,5 @@
 <!--
-CUADRANTE v1.5.1
+CUADRANTE v1.5.3
 Copyright © 2026 Ivan DM. Todos los derechos reservados.
 Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
 No se autoriza la eliminación de la atribución, la redistribución, la modificación,
@@ -42,10 +42,10 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 .month-nav h2{font-size:18px;font-weight:800;color:var(--verde);min-width:170px;text-align:center;}
 .arr{background:var(--verde);color:#fff;border:none;border-radius:8px;width:34px;height:34px;font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-.turno-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px;}
+.turno-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px;}
 .tb{border:2px solid;border-radius:9px;padding:5px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;background:#fff;width:100%;}
 .tb .ti{font-size:16px;line-height:1;}
-.tb .tk{font-size:9px;font-weight:800;}
+.tb .tk{font-size:8.5px;font-weight:800;}
 .sel-hint{text-align:center;font-size:12px;color:#2d7a50;background:#e0ede7;padding:5px 10px;border-radius:8px;margin-bottom:6px;font-weight:600;}
 
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
@@ -61,6 +61,8 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 
 /* Sirena de Servicio Especial / Nota en Calendario */
 .cal-cell .sirena-nota {position:absolute;top:2px;right:4px;font-size:10px;}
+.cal-cell .rem-badge{position:absolute;top:2px;left:4px;background:#16a34a;color:#fff;border-radius:999px;padding:1px 5px;font-size:9px;font-weight:900;line-height:1.25;box-shadow:0 1px 3px rgba(0,0,0,.22);}
+.cal-cell .cs-badge{position:absolute;bottom:2px;right:4px;font-size:10px;opacity:.85;}
 
 .stat-strip{display:flex;gap:5px;flex-wrap:wrap;}
 .chip{display:flex;gap:6px;align-items:center;background:#fff;border:2px solid;border-radius:9px;padding:6px 9px;flex:1 1 85px;box-shadow:var(--sombra);}
@@ -196,7 +198,7 @@ input:focus,select:focus{border-color:var(--verde);}
 }
 
 @media(max-width:360px){
-  .turno-bar{grid-template-columns:repeat(4,1fr);gap:3px;}
+  .turno-bar{grid-template-columns:repeat(5,1fr);gap:3px;}
   .tb{padding:4px 2px;}
   .tb .ti{font-size:14px;}
   .cal-cell{min-height:52px;}
@@ -233,7 +235,7 @@ input:focus,select:focus{border-color:var(--verde);}
   <div class="h-top">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
-      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.1</span></div>
+      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.3</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
@@ -313,7 +315,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <input type="text" inputmode="decimal" id="prodEstructuralInput" style="width:90px;padding:5px 8px;border:1px solid #6ee7b7;border-radius:8px;font-size:14px;font-weight:700" oninput="saveProdEstructural()">
       <span style="font-size:11px;color:#888">Guardado solo para esta nómina.</span>
     </div>
-    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (horas exceso hasta 40h/período: ≥30 min = 1h × 12 €), <strong>SERVICIOS EXTRAORDINARIOS</strong> DASR/DFR/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
+    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (horas exceso hasta 40h/período: ≥30 min = 1h × 12 €), <strong>SERVICIOS EXTRAORDINARIOS</strong> DAS/DF remunerados/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
     <div id="nominaCard"></div>
     <div class="bal-card"><h3>⚡ Detalle INCENTIVOS del mes</h3><div id="nominaIncentivosDetail"></div></div>
 
@@ -536,7 +538,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>🌅🌙 Doblete</span><strong>Mañana + noche configuradas arriba</strong></div>
       <div class="rule-row"><span>✅ Vacaciones / AP</span><strong>7,5h (cómputo)</strong></div>
       <div class="rule-row"><span>🏛️ DF</span><strong>7,5h (día libre por festivo trabajado)</strong></div>
-      <div class="rule-row"><span>💼 DASR / DFR / ESS</span><strong>7,5h + 96,00 € servicios extraordinarios</strong></div>
+      <div class="rule-row"><span>💼 DAS/DF remunerado / ESS</span><strong>+96,00 € cuando se marque como remunerado</strong></div>
       <div class="rule-row"><span>✝️ Permiso S.S.</span><strong>7,5h (hasta 3 días/año, Semana Santa)</strong></div>
       <div class="rule-row"><span>🎄 Permiso Nav.</span><strong>7,5h (hasta 3 días/año, Navidad)</strong></div>
       <div class="rule-row"><span>⏳ DSJ</span><strong>7,5h (descanso por superación de jornada)</strong></div>
@@ -645,7 +647,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>🌅🌙 Doblete (D)</span><strong>Mañana + noche según Ajustes</strong></div>
       <div class="rule-row"><span>📄 DAS</span><strong>Descanso Adicional Singularizado</strong></div>
       <div class="rule-row"><span>🏛️ DF</span><strong>Día Festivo libre · 7,5h</strong></div>
-      <div class="rule-row"><span>💼 DASR / DFR</span><strong>Servicio en DAS o DF · 96€</strong></div>
+      <div class="rule-row"><span>💼 DAS/DF remunerado</span><strong>DAS o DF con marca R · 96€</strong></div>
       <div class="rule-row"><span>🌟 Esp.Sing.</span><strong>Especial Singularización · 96€</strong></div>
       <div class="rule-row"><span>⏳ DSJ</span><strong>Descanso por superación de jornada</strong></div>
       <div class="rule-row"><span>📋 AP</span><strong>Asunto Particular · 7,5h</strong></div>
@@ -736,7 +738,7 @@ input:focus,select:focus{border-color:var(--verde);}
 
 
 <footer class="app-footer" aria-label="Autoría y licencia">
-  <strong>© 2026 Ivan DM · CUADRANTE v1.5.2</strong> · Todos los derechos reservados ·
+  <strong>© 2026 Ivan DM · CUADRANTE v1.5.3</strong> · Todos los derechos reservados ·
   <button type="button" class="license-link" onclick="openLicenseModal()">Licencia de uso</button>
 </footer>
 
@@ -749,6 +751,12 @@ input:focus,select:focus{border-color:var(--verde);}
     </div>
     <div id="modalSalienteHint" style="display:none;font-size:11px;color:#475569;background:#f1f5f9;border:1px solid #94a3b8;border-radius:7px;padding:6px 9px;margin-bottom:8px">
       🌙 <strong>Saliente</strong>: no computa horas de jornada, no descuenta ningún día de crédito (vacaciones, AP, etc.) y <strong>no genera DF ni DAS</strong>. Úsalo para mantener la cadencia cuando el día de saliente corresponde al descanso posterior a un nocturno planificado, incluso si ese nocturno se cubre con AP o Vacaciones.
+    </div>
+    <div id="modalRemBlock" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:8px 10px;margin-bottom:8px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer">
+        <input type="checkbox" id="modalRemunerado" style="width:17px;height:17px;accent-color:#16a34a">
+        <span><strong>Servicio remunerado</strong> — añadir 96 € en nómina y mostrar marca <strong>R</strong> en el cuadrante.</span>
+      </label>
     </div>
     <div id="modalHoras">
       <div class="ig2">
@@ -828,9 +836,50 @@ input:focus,select:focus{border-color:var(--verde);}
 </div>
 
 
+<div class="modal-overlay" id="csRangeOverlay" onclick="closeCsRangeOutside(event)">
+  <div class="modal" style="border-radius:20px;max-width:520px;padding:20px 16px 24px">
+    <h3>🧳 Aplicar comisión de servicio</h3>
+    <div class="info-box" id="csRangeInfo" style="margin-bottom:10px">Elige fechas y tipo de comisión. Si es deducible, no se suman 7,5/8 h a todos los días naturales: se aplica la regla de jornada computable y las semanas completas se limitan a 37,5/40 h.</div>
+    <div class="ig2">
+      <div class="ig"><label class="il">Fecha inicio</label><input type="date" id="csRangeInicio" oninput="previewCsRange()"></div>
+      <div class="ig"><label class="il">Fecha fin</label><input type="date" id="csRangeFin" oninput="previewCsRange()"></div>
+    </div>
+    <div class="ig">
+      <label class="il">Tipo de comisión</label>
+      <select id="csRangeTipo" onchange="onCsTipoChange(); previewCsRange();">
+        <option value="deducible">Comisión deducible / efecto neutro</option>
+        <option value="reales">Comisión con horas reales por día</option>
+        <option value="manual">Comisión manual / caso especial</option>
+      </select>
+    </div>
+    <div class="ig" id="csHorasBlock" style="display:none">
+      <label class="il">Horas por día de comisión</label>
+      <input type="number" id="csRangeHoras" value="7.5" step="0.5" min="0" max="24" oninput="previewCsRange()">
+    </div>
+    <div id="csRangePreview" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:9px 11px;font-size:12px;color:#334155;margin-top:4px"></div>
+    <div class="modal-btns" style="margin-top:14px;gap:8px">
+      <button class="btn-cancel" onclick="closeCsRangeModal()">Cancelar</button>
+      <button class="btn-ok" style="background:#334155" onclick="aplicarComisionRangoDesdeModal()">Aplicar comisión</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="remuneradoOverlay" onclick="closeRemuneradoOutside(event)">
+  <div class="modal" style="border-radius:20px;max-width:430px;padding:20px 16px 24px">
+    <h3 id="remuneradoTitle">¿Servicio remunerado?</h3>
+    <div id="remuneradoInfo" class="info-box" style="margin-bottom:10px">Marca si este DAS/DF debe añadir 96 € en nómina y mostrar la R en el cuadrante.</div>
+    <div class="modal-btns" style="margin-top:14px;gap:8px">
+      <button class="btn-cancel" onclick="responderRemunerado(false)" style="font-weight:800">NO</button>
+      <button class="btn-ok" onclick="responderRemunerado(true)" style="background:#16a34a;font-weight:900">SÍ · +96 €</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal-overlay license-overlay" id="licenseModalOverlay" onclick="closeLicenseModalOutside(event)" role="dialog" aria-modal="true" aria-labelledby="licenseModalTitle">
   <div class="modal license-modal">
-    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.5.2</h3>
+    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.5.3</h3>
     <div class="license-subtitle">Copyright © 2026 Ivan DM. Todos los derechos reservados.</div>
     <div class="license-content">
       <h4>1. Titularidad</h4>
@@ -917,6 +966,7 @@ var TURNO_HORAS_DEF = {
   AP:  {ini:'07:00', fin:'14:30', h:7.5},
   V:   {ini:'07:00', fin:'14:30', h:7.5},
   ESS: {ini:'',      fin:'',      h:7.5},   // Especial Singularizacion (96EUR)
+  CS:  {ini:'',      fin:'',      h:7.5},   // Comisión de servicio
   DA:  {ini:'',      fin:'',      h:7.5},
   DF:  {ini:'',      fin:'',      h:7.5},   // Día Festivo libre
   DASR:{ini:'',      fin:'',      h:7.5},   // DAS Retribuido (trabaja en DAS)
@@ -935,6 +985,7 @@ var TURNOS = {
   N:   {label:'Noche',      icon:'🌙',  color:'#4c1d95', bg:'#ede9fe', pts_n:2, pts_f:6, compHoras:true},
   D:   {label:'Doblete',    icon:'🌅🌙', color:'#92400e', bg:'#fde68a', pts_n:2, pts_f:0, compHoras:true},
   ESS: {label:'Esp.Sing.',  icon:'🌟',  color:'#dc2626', bg:'#fee2e2', pts_n:0, pts_f:0, compHoras:true},
+  CS:  {label:'Comisión',   icon:'🧳',  color:'#334155', bg:'#e2e8f0', pts_n:0, pts_f:0, compHoras:true},
   AP:  {label:'AP',         icon:'📋',  color:'#059669', bg:'#d1fae5', pts_n:0, pts_f:0, compHoras:true},
   DA:  {label:'DAS',        icon:'📄',  color:'#7c3aed', bg:'#ede9fe', pts_n:0, pts_f:0, compHoras:true},
   DF:  {label:'DF',  icon:'🏛️',  color:'#0f766e', bg:'#ccfbf1', pts_n:0, pts_f:0, compHoras:true},
@@ -948,6 +999,23 @@ var TURNOS = {
   B:   {label:'Baja',       icon:'🏥',  color:'#9f1239', bg:'#ffe4e6', pts_n:0, pts_f:0, compHoras:true},
   S:   {label:'Saliente',   icon:'🌙',  color:'#64748b', bg:'#f1f5f9', pts_n:0, pts_f:0, compHoras:false},
 };
+
+// Orden de botones: 15 botones en 3 filas de 5. DAS/DF rem. quedan como compatibilidad interna,
+// pero ahora se gestionan como DAS/DF + marca de remunerado.
+var TURNO_BAR_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSS','PNV','V','L','B'];
+var MODAL_TURNOS_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSS','PNV','V','L','B','S'];
+
+function esTurnoRemunerable(tKey){ return tKey==='DA' || tKey==='DF'; }
+function esServicioExtraordinarioRegistro(s){ return !!(s && (s.t==='ESS' || s.t==='DASR' || s.t==='DFR' || ((s.t==='DA' || s.t==='DF') && s.remunerado))); }
+function normalizarServiciosRemuneradosLegacy(){
+  if(!shifts) return;
+  Object.keys(shifts).forEach(function(k){
+    var s=shifts[k];
+    if(!s || !s.t) return;
+    if(s.t==='DASR'){ s.t='DA'; s.remunerado=true; s.nota=s.nota||'DAS remunerado'; }
+    if(s.t==='DFR'){ s.t='DF'; s.remunerado=true; s.nota=s.nota||'DF remunerado'; }
+  });
+}
 
 // -- Festivos base por año (editables desde Ajustes) --------------------------
 // Formato: { "YYYY": ["YYYY-MM-DD", ...] }
@@ -1163,6 +1231,7 @@ function load(){
     if(s) shifts=JSON.parse(s);
     var c=localStorage.getItem('cuadrante_cfg');
     if(c) cfg=Object.assign(cfg,JSON.parse(c));
+    normalizarServiciosRemuneradosLegacy();
     if(cfg.huerfanosOrd===undefined) cfg.huerfanosOrd=9.01;
     if(cfg.huerfanosExtra===undefined) cfg.huerfanosExtra=16.79;
     applyConfig();
@@ -1786,15 +1855,18 @@ function renderAll(){
 function renderTurnoBar(){
   var bar=document.getElementById('turnoBar');
   bar.innerHTML='';
-  // 'S' (Saliente) se excluye de la barra rápida para no descuadrar el grid de 4x4.
-  // Se asigna de forma manual desde el desplegable del modal "Editar día".
-  Object.keys(TURNOS).filter(function(k){ return k!=='S'; }).forEach(function(k){
+  TURNO_BAR_ORDER.forEach(function(k){
     var t=TURNOS[k];
+    if(!t) return;
     var div=document.createElement('div');
     div.className='tb';
     div.style.borderColor=t.color;
     div.style.color=t.color;
-    div.onclick=function(){ if(k==='V'){ openVacRangeModal(selectedDay); } else { assignSelected(k); } };
+    div.onclick=function(){
+      if(k==='V'){ openVacRangeModal(selectedDay); }
+      else if(k==='CS'){ openCsRangeModal(selectedDay); }
+      else { assignSelected(k); }
+    };
     div.innerHTML='<span class="ti">'+t.icon+'</span><span class="tk">'+t.label+'</span>';
     bar.appendChild(div);
   });
@@ -1844,7 +1916,7 @@ function renderCalendar(){
     var tObj=TURNOS[s.t];
     if(tObj){
       // Special services get red highlight
-      var isSpecialSvc = (s.t==='ESS'||s.t==='DASR'||s.t==='DFR');
+      var isSpecialSvc = (s.t==='ESS');
       cell.style.background = isSpecialSvc ? '#fecaca' : tObj.bg;
       cell.style.borderColor = isSpecialSvc ? '#dc2626' : tObj.color;
       if(isSpecialSvc) cell.style.boxShadow = 'inset 0 0 0 3px #dc2626';
@@ -1888,6 +1960,14 @@ function renderCalendar(){
       badge.title = notaTxt;
       badge.style.opacity = '0.75';
       cell.appendChild(badge);
+    }
+
+    if(esServicioExtraordinarioRegistro(s) && (s.t==='DA' || s.t==='DF')){
+      var rb = document.createElement('span');
+      rb.className = 'rem-badge';
+      rb.innerText = 'R';
+      rb.title = 'Servicio remunerado';
+      cell.appendChild(rb);
     }
     
     var ci=document.createElement('div');
@@ -1993,6 +2073,7 @@ function renderCalendar(){
 
 function assignSelected(tKey){
   if(tKey==='V'){ openVacRangeModal(selectedDay); return; }
+  if(tKey==='CS'){ openCsRangeModal(selectedDay); return; }
   if(!selectedDay){ alert('Selecciona primero un día en el calendario'); return; }
   
   // Aviso si se intenta gastar un DF sin tener disponibles
@@ -2036,27 +2117,66 @@ function assignSelected(tKey){
     }
   }
 
-  if(!shifts[selectedDay]) shifts[selectedDay]={t:''};
-  shifts[selectedDay].t=tKey;
-  var def = TURNO_HORAS_DEF[tKey];
-  shifts[selectedDay].ini = def ? def.ini : '';
-  shifts[selectedDay].fin = def ? def.fin : '';
-  // Vacaciones en finde de semana: 0 horas
-  var hDef = def ? def.h : 7.5;
-  if(tKey==='V' && isWeekend(selectedDay)) hDef = 0;
-  shifts[selectedDay].h = hDef;
-  if(tKey==='D'){
-    shifts[selectedDay].iniM = shifts[selectedDay].iniM || cfg.iniDM || '06:30';
-    shifts[selectedDay].finM = shifts[selectedDay].finM || cfg.finDM || '14:00';
-    shifts[selectedDay].iniN = shifts[selectedDay].iniN || cfg.iniDN || '22:00';
-    shifts[selectedDay].finN = shifts[selectedDay].finN || cfg.finDN || '05:30';
+  var dayToAssign = selectedDay;
+  if(esTurnoRemunerable(tKey)){
+    preguntarRemunerado(tKey, function(rem){
+      guardarTurnoAsignado(dayToAssign, tKey, rem);
+    });
+    return;
   }
-  if(!shifts[selectedDay].companeros) shifts[selectedDay].companeros=[];
-  if(!shifts[selectedDay].nota) shifts[selectedDay].nota='';
+  guardarTurnoAsignado(dayToAssign, tKey, false);
+}
+
+var remuneradoCallback = null;
+function preguntarRemunerado(tKey, cb){
+  remuneradoCallback = cb;
+  var ov=document.getElementById('remuneradoOverlay');
+  var title=document.getElementById('remuneradoTitle');
+  var info=document.getElementById('remuneradoInfo');
+  var label=(TURNOS[tKey] && TURNOS[tKey].label) ? TURNOS[tKey].label : 'servicio';
+  if(title) title.innerText = '¿'+label+' remunerado?';
+  if(info) info.innerHTML = 'Marca <strong>SÍ</strong> si este '+label+' debe añadir <strong>96 €</strong> en nómina y mostrar la marca <strong>R</strong> en el cuadrante. Marca <strong>NO</strong> si solo quieres registrarlo como '+label+' normal.';
+  if(ov) ov.classList.add('open');
+}
+function responderRemunerado(si){
+  var ov=document.getElementById('remuneradoOverlay');
+  if(ov) ov.classList.remove('open');
+  var cb=remuneradoCallback;
+  remuneradoCallback=null;
+  if(cb) cb(!!si);
+}
+function closeRemuneradoOutside(e){
+  if(e.target && e.target.id==='remuneradoOverlay') responderRemunerado(false);
+}
+
+function guardarTurnoAsignado(day, tKey, remuneradoFlag){
+  if(!day) return;
+  if(!shifts[day]) shifts[day]={t:''};
+  shifts[day].t=tKey;
+  var def = TURNO_HORAS_DEF[tKey];
+  shifts[day].ini = def ? def.ini : '';
+  shifts[day].fin = def ? def.fin : '';
+  // Vacaciones en finde de semana: 0 horas, salvo turno fijo, donde se recalcula por cadencia cuando procede
+  var hDef = def ? def.h : 7.5;
+  if(tKey==='V' && isWeekend(day) && (cfg.regimen||'general') !== 'fijo') hDef = 0;
+  shifts[day].h = hDef;
+  if(tKey==='D'){
+    shifts[day].iniM = shifts[day].iniM || cfg.iniDM || '06:30';
+    shifts[day].finM = shifts[day].finM || cfg.finDM || '14:00';
+    shifts[day].iniN = shifts[day].iniN || cfg.iniDN || '22:00';
+    shifts[day].finN = shifts[day].finN || cfg.finDN || '05:30';
+  }
+  if(!shifts[day].companeros) shifts[day].companeros=[];
+  if(!shifts[day].nota) shifts[day].nota='';
+  if(esTurnoRemunerable(tKey)){
+    shifts[day].remunerado = !!remuneradoFlag;
+  } else {
+    delete shifts[day].remunerado;
+  }
   
   save(); renderAll();
   var msg = 'Turno asignado con éxito';
-  if(tKey==='DASR'||tKey==='DFR'||tKey==='ESS') msg += ' · +96,00 € en nómina';
+  if(tKey==='ESS' || (esTurnoRemunerable(tKey) && shifts[day] && shifts[day].remunerado)) msg += ' · +96,00 € en nómina';
   if(tKey==='DSJ') msg += ' · Descanso compensatorio';
   if(tKey==='PSS') msg += ' · Permiso S.S. consumido';
   if(tKey==='PNV') msg += ' · Permiso Nav. consumido';
@@ -2288,6 +2408,168 @@ function aplicarVacacionesTurnoFijoRango(inicioStr, hastaStr){
   showToast('Vacaciones aplicadas: '+servicio+' días consumen crédito · '+salientes+' salientes mantenidos');
 }
 
+
+function openCsRangeModal(prefillDate){
+  var ov=document.getElementById('csRangeOverlay');
+  if(!ov) return;
+  var ini=document.getElementById('csRangeInicio');
+  var fin=document.getElementById('csRangeFin');
+  var base = prefillDate || dStr(year, month, 1);
+  if(ini && !ini.value) ini.value = base;
+  if(fin && !fin.value) fin.value = base;
+  onCsTipoChange();
+  previewCsRange();
+  ov.classList.add('open');
+}
+function closeCsRangeModal(){ var ov=document.getElementById('csRangeOverlay'); if(ov) ov.classList.remove('open'); }
+function closeCsRangeOutside(e){ if(e.target.id==='csRangeOverlay') closeCsRangeModal(); }
+function onCsTipoChange(){
+  var tipo=(document.getElementById('csRangeTipo')||{}).value||'deducible';
+  var hb=document.getElementById('csHorasBlock');
+  if(hb) hb.style.display=(tipo==='deducible')?'none':'block';
+  var info=document.getElementById('csRangeInfo');
+  if(info){
+    if(tipo==='deducible') info.innerHTML='Comisión <strong>deducible / efecto neutro</strong>: en régimen general no computa sábados, domingos ni festivos sueltos; si cubre una semana completa, se limita a 37,5 h o 40 h según régimen. En turno fijo respeta la cadencia y solo suma las horas del servicio planificado.';
+    else if(tipo==='reales') info.innerHTML='Comisión con <strong>horas reales</strong>: se aplicará el número de horas indicado a cada día del periodo.';
+    else info.innerHTML='Comisión <strong>manual / caso especial</strong>: usar solo si la comisión no encaja claramente como deducible ni como horas reales. Introduce las horas manualmente.';
+  }
+}
+function getHorasDeduciblesRegimen(){
+  var r=cfg.regimen||'general';
+  if(r==='admin' || r==='especial') return 8;
+  return 7.5;
+}
+
+function getWeekMonday(d){
+  var x=new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12,0,0);
+  var day=x.getDay();
+  var diff=(day===0 ? -6 : 1-day);
+  x.setDate(x.getDate()+diff);
+  return x;
+}
+
+function isFullCalendarWeekInsideRange(dateObj, inicioObj, hastaObj){
+  var monday=getWeekMonday(dateObj);
+  var sunday=new Date(monday);
+  sunday.setDate(sunday.getDate()+6);
+  return monday>=inicioObj && sunday<=hastaObj;
+}
+
+function weekKeyFromDateObj(dateObj){
+  var m=getWeekMonday(dateObj);
+  return dStr(m.getFullYear(), m.getMonth(), m.getDate());
+}
+
+function getComisionDeducibleGeneralDiaInfo(k, inicioStr, hastaStr){
+  var d=new Date(k+'T12:00:00');
+  var inicio=new Date(inicioStr+'T12:00:00');
+  var hasta=new Date(hastaStr+'T12:00:00');
+  var dow=d.getDay();
+  var base=getHorasDeduciblesRegimen();
+  var semanaCompleta=isFullCalendarWeekInsideRange(d, inicio, hasta);
+
+  // Si la comisión cubre una semana natural completa (lunes-domingo),
+  // se reparte la referencia semanal entre los cinco días laborables.
+  // Así nunca se inflan 7 días x 7,5/8 h.
+  if(semanaCompleta){
+    if(dow>=1 && dow<=5){
+      return {h:base, computa:true, semanaCompleta:true, nota:'Comisión deducible · semana completa'};
+    }
+    return {h:0, computa:false, semanaCompleta:true, nota:'Comisión deducible · fin de semana dentro de semana completa'};
+  }
+
+  // En semanas parciales, solo computan los días laborables no festivos.
+  // Si realmente se presta servicio en sábado, domingo o festivo, usar "horas reales".
+  if(dow!==0 && dow!==6 && !isFestNac(k)){
+    return {h:base, computa:true, semanaCompleta:false, nota:'Comisión deducible · día computable'};
+  }
+  return {h:0, computa:false, semanaCompleta:false, nota:'Comisión deducible en día no computable'};
+}
+function previewCsRange(){
+  var box=document.getElementById('csRangePreview');
+  if(!box) return;
+  var inicioStr=(document.getElementById('csRangeInicio')||{}).value||'';
+  var hastaStr=(document.getElementById('csRangeFin')||{}).value||'';
+  var tipo=(document.getElementById('csRangeTipo')||{}).value||'deducible';
+  if(!inicioStr || !hastaStr){ box.innerHTML='Indica inicio y fin para ver el resumen.'; return; }
+  if(hastaStr < inicioStr){ box.innerHTML='<span style="color:var(--rojo);font-weight:700">La fecha fin no puede ser anterior a la fecha inicio.</span>'; return; }
+  var inicio=new Date(inicioStr+'T12:00:00'), hasta=new Date(hastaStr+'T12:00:00');
+  var total=0, computan=0, h=0, sal=0, libres=0, festivosNoComp=0;
+  var semanasCompletas={};
+  var fijo=(cfg.regimen||'general')==='fijo';
+  var runner=new Date(inicio);
+  while(runner<=hasta){
+    total++;
+    var k=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
+    if(tipo==='deducible' && fijo){
+      var tCad=getTurnoCadenciaParaFecha(k);
+      if(esTurnoServicioCadencia(tCad)){ computan++; h+=getHorasCadenciaFijo(tCad, TURNO_HORAS_DEF[tCad]); }
+      else if(tCad==='S') sal++;
+      else if(tCad==='L') libres++;
+    } else if(tipo==='deducible'){
+      var info=getComisionDeducibleGeneralDiaInfo(k, inicioStr, hastaStr);
+      if(info.computa){ computan++; h+=info.h; }
+      if(info.semanaCompleta) semanasCompletas[weekKeyFromDateObj(runner)]=true;
+      if(!info.computa && isFestNac(k) && !info.semanaCompleta) festivosNoComp++;
+    } else {
+      var hm=parseFloat((document.getElementById('csRangeHoras')||{}).value||0)||0;
+      computan++; h+=hm;
+    }
+    runner.setDate(runner.getDate()+1);
+  }
+  var semanasTxt='';
+  if(tipo==='deducible' && !fijo){
+    var nSem=Object.keys(semanasCompletas).length;
+    if(nSem) semanasTxt=' · semanas completas '+nSem;
+    if(festivosNoComp) semanasTxt+=' · festivos no computables '+festivosNoComp;
+  }
+  box.innerHTML='Resumen: <strong>'+total+' días</strong> de periodo · días que computan <strong style="color:var(--verde)">'+computan+'</strong> · horas estimadas <strong>'+Math.round(h*10)/10+'h</strong>'+semanasTxt+(fijo&&tipo==='deducible'?' · salientes '+sal+' · libres '+libres:'')+'.';
+}
+function aplicarComisionRangoDesdeModal(){
+  var inicioStr=(document.getElementById('csRangeInicio')||{}).value||'';
+  var hastaStr=(document.getElementById('csRangeFin')||{}).value||'';
+  var tipo=(document.getElementById('csRangeTipo')||{}).value||'deducible';
+  if(!inicioStr || !hastaStr){ alert('Indica fecha de inicio y fin de la comisión.'); return; }
+  if(hastaStr < inicioStr){ alert('La fecha fin no puede ser anterior a la fecha de inicio.'); return; }
+  var aviso='Se aplicará comisión de servicio del '+fmtFechaES(inicioStr)+' al '+fmtFechaES(hastaStr)+'.\n\n'
+    + (tipo==='deducible' ? 'Comisión deducible: no se computan todos los días naturales; en semanas completas se aplica la referencia semanal y en semanas parciales solo días computables.\n\n' : '')
+    + 'Se sobrescribirán los turnos existentes dentro de ese rango. ¿Continuar?';
+  if(!confirm(aviso)) return;
+  var fijo=(cfg.regimen||'general')==='fijo';
+  var inicio=new Date(inicioStr+'T12:00:00'), hasta=new Date(hastaStr+'T12:00:00');
+  var runner=new Date(inicio), computan=0;
+  while(runner<=hasta){
+    var k=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
+    var h=0, nota='Comisión de servicio', t='CS';
+    if(tipo==='deducible' && fijo){
+      var tCad=getTurnoCadenciaParaFecha(k);
+      if(esTurnoServicioCadencia(tCad)){
+        h=getHorasCadenciaFijo(tCad, TURNO_HORAS_DEF[tCad]);
+        nota='Comisión deducible sobre servicio planificado '+tCad;
+        computan++;
+      } else if(tCad==='S' || tCad==='L'){
+        t=tCad; h=0; nota='Incluido en comisión de servicio sin cómputo de jornada';
+      } else {
+        t='L'; h=0; nota='Incluido en comisión de servicio';
+      }
+    } else if(tipo==='deducible'){
+      var infoGen=getComisionDeducibleGeneralDiaInfo(k, inicioStr, hastaStr);
+      h=infoGen.h;
+      nota=infoGen.nota;
+      if(infoGen.computa) computan++;
+    } else {
+      h=parseFloat((document.getElementById('csRangeHoras')||{}).value||0)||0;
+      computan++;
+      nota=(tipo==='reales')?'Comisión con horas reales':'Comisión manual / caso especial';
+    }
+    var def=TURNO_HORAS_DEF[t] || TURNO_HORAS_DEF.CS;
+    shifts[k]={t:t, ini:def?def.ini:'', fin:def?def.fin:'', h:Math.round(h*10)/10, companeros:[], nota:nota, csTipo:tipo};
+    runner.setDate(runner.getDate()+1);
+  }
+  save(); renderAll(); closeCsRangeModal();
+  showToast('Comisión aplicada · '+computan+' días computables');
+}
+
 function aplicarVacacionesTurnoFijo(){
   var inicioStr = (document.getElementById('vacFijoInicio')||{}).value || '';
   var hastaStr  = (document.getElementById('vacFijoHasta')||{}).value || '';
@@ -2480,17 +2762,17 @@ function calcQuickStats(){
     var k2=dStr(runner2.getFullYear(),runner2.getMonth(),runner2.getDate());
     var s2=shifts[k2];
     if(s2){
-      if(s2.t==='DF') nDF++;
-      if(s2.t==='DASR') nDASR++;
-      if(s2.t==='DFR') nDFR++;
+      if(s2.t==='DF' && !s2.remunerado) nDF++;
+      if(s2.t==='DA' && s2.remunerado) nDASR++;
+      if(s2.t==='DF' && s2.remunerado) nDFR++;
     }
     runner2.setDate(runner2.getDate()+1);
   }
-  if(nDF>0||nDASR>0||nDFR>0){
+  if(nDF>0){
     addChip('🏛️', nDF, 'Días Fest.', '#0f766e');
   }
   if(nDASR>0||nDFR>0){
-    addChip('💼', nDASR+nDFR, 'DASR+DFR', '#be185d');
+    addChip('💼', nDASR+nDFR, 'DAS/DF R', '#16a34a');
   }
 }
 
@@ -2503,10 +2785,10 @@ function openModal(key){
   
   var sel=document.getElementById('modalTurno');
   sel.innerHTML='<option value="">-- Sin turno --</option>';
-  Object.keys(TURNOS).forEach(function(k){
-    sel.innerHTML+='<option value="'+k+'">'+TURNOS[k].icon+' '+TURNOS[k].label+'</option>';
+  MODAL_TURNOS_ORDER.forEach(function(k){
+    if(TURNOS[k]) sel.innerHTML+='<option value="'+k+'">'+TURNOS[k].icon+' '+TURNOS[k].label+'</option>';
   });
-  sel.value=s.t;
+  sel.value=(s.t==='DASR'?'DA':(s.t==='DFR'?'DF':s.t));
   // Sugerencia (no automática-obligatoria): si el día está vacío y el anterior fue N/D,
   // preseleccionar 'Saliente' como ayuda. El usuario puede cambiarlo libremente.
   if(!s.t){
@@ -2526,6 +2808,8 @@ function openModal(key){
   document.getElementById('modalNota').value=s.nota||'';
   document.getElementById('modalHmps').checked = !!(s.hmps);
   document.getElementById('modalHmns').checked = !!(s.hmns);
+  var remChk=document.getElementById('modalRemunerado');
+  if(remChk) remChk.checked = !!(s.remunerado || s.t==='DASR' || s.t==='DFR');
   actualizarModBlock();
   
   onModalTurnoChange();
@@ -2552,7 +2836,9 @@ function onModalTurnoChange(){
   var compNormal=document.getElementById('modalCompBlock');
   var compD=document.getElementById('modalCompBlockD');
   var salHint=document.getElementById('modalSalienteHint');
+  var remBlock=document.getElementById('modalRemBlock');
   if(salHint) salHint.style.display=(tKey==='S')?'block':'none';
+  if(remBlock) remBlock.style.display=esTurnoRemunerable(tKey)?'block':'none';
   if(tKey==='D'){
     box.style.display='none';
     boxD.style.display='block';
@@ -2676,6 +2962,11 @@ function saveModal(){
     shifts[modalDay].nota=document.getElementById('modalNota').value;
     shifts[modalDay].hmps = document.getElementById('modalHmps').checked;
     shifts[modalDay].hmns = document.getElementById('modalHmns').checked;
+    if(esTurnoRemunerable(tKey)){
+      shifts[modalDay].remunerado = !!(document.getElementById('modalRemunerado') && document.getElementById('modalRemunerado').checked);
+    } else {
+      delete shifts[modalDay].remunerado;
+    }
     sincronizarModDia(modalDay, shifts[modalDay]);
     
     if(tKey==='D'){
@@ -2829,7 +3120,7 @@ function calcResumen(){
   
   // ANUAL
   document.getElementById('annTit').innerText='📅 Acumulados del año '+year;
-  var annCounts={M:0,T:0,N:0,D:0,ESS:0,AP:0,DA:0,DF:0,DASR:0,DFR:0,DSJ:0,PSS:0,PNV:0,V:0,L:0,B:0,S:0};
+  var annCounts={M:0,T:0,N:0,D:0,ESS:0,CS:0,AP:0,DA:0,DF:0,DASR:0,DFR:0,DSJ:0,PSS:0,PNV:0,V:0,L:0,B:0,S:0};
   var annH=0; var annRefH=0; var annN=0; var annF=0;
   
   for(var m=0; m<12; m++){
@@ -2864,8 +3155,10 @@ function calcResumen(){
   addAnnCard('📋', annCounts.AP, 'Asuntos Propios', '#059669');
   addAnnCard('🏖️', annCounts.V, 'Vacaciones disp.', '#0e7490');
   addAnnCard('🏛️', annCounts.DF, 'Días Fest. (DF)', '#0f766e');
-  if(annCounts.DASR+annCounts.DFR > 0){
-    addAnnCard('💼', annCounts.DASR+annCounts.DFR, 'DASR+DFR', '#be185d');
+  var annRem=0;
+  Object.keys(shifts).forEach(function(k){ var ss=shifts[k]; if(ss && ((ss.t==='DA'||ss.t==='DF') && ss.remunerado)) annRem++; });
+  if(annRem > 0){
+    addAnnCard('💼', annRem, 'DAS/DF rem.', '#16a34a');
   }
   if(annCounts.DSJ>0) addAnnCard('⏳', annCounts.DSJ, 'DSJ usados', '#b45309');
   if(annCounts.PSS>0) addAnnCard('✝️', annCounts.PSS, 'Perm. S.S.', '#6d28d9');
@@ -2893,7 +3186,7 @@ function calcResumen(){
   // Count consumed DAS (DA turno in all shifts)
   var dasCons = 0;
   Object.keys(shifts).forEach(function(k){
-    if(shifts[k] && shifts[k].t === 'DA') dasCons++;
+    if(shifts[k] && shifts[k].t === 'DA' && !shifts[k].remunerado) dasCons++;
   });
   var dasDisp = dasAcc.totalDAS - dasCons;
 
@@ -3025,25 +3318,19 @@ function calcCrexMes(){
 }
 
 function calcServiciosExtraordinariosMes(){
-  // Cuenta DASR y DFR en el mes actual (no el periodo, sino el mes natural)
-  var nDASR=0, nDFR=0;
+  // Cuenta DAS/DF marcados como remunerados y ESS en el mes actual (mes natural)
+  var nDASR=0, nDFR=0, nESS=0;
   var firstDay=new Date(year,month,1);
   var lastDay=new Date(year,month+1,0);
   var runner=new Date(firstDay);
   while(runner<=lastDay){
     var k=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
     var s=shifts[k];
-    if(s && s.t==='DASR') nDASR++;
-    if(s && s.t==='DFR') nDFR++;
-    runner.setDate(runner.getDate()+1);
-  }
-  // Also count ESS (Especial Singularizacion)
-  var nESS=0;
-  runner=new Date(firstDay);
-  while(runner<=lastDay){
-    var k2=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
-    var s2=shifts[k2];
-    if(s2 && s2.t==='ESS') nESS++;
+    if(s){
+      if((s.t==='DA' && s.remunerado) || s.t==='DASR') nDASR++;
+      if((s.t==='DF' && s.remunerado) || s.t==='DFR') nDFR++;
+      if(s.t==='ESS') nESS++;
+    }
     runner.setDate(runner.getDate()+1);
   }
   return {nDASR:nDASR, nDFR:nDFR, nESS:nESS, importe:(nDASR+nDFR+nESS)*96};
@@ -3217,7 +3504,7 @@ function calcNomina(noReloadInputs){
   }
   var sExtRow = sExt.importe > 0
     ? '<div class="nom-row var" style="color:#be185d"><span>+ SERVICIOS EXTRAORDINARIOS ('+nSextTotal+' serv. × 96,00 €):</span><strong>'+sExt.importe.toFixed(2)+' €</strong></div>'
-    : '<div class="nom-row" style="color:#aaa"><span>+ Servicios Extraordinarios (DASR/DFR/ESS):</span><strong>0,00 €</strong></div>';
+    : '<div class="nom-row" style="color:#aaa"><span>+ Servicios Extraordinarios (DAS/DF rem./ESS):</span><strong>0,00 €</strong></div>';
   
   var div=document.getElementById('nominaCard');
   var refMesLabel = MESES[refMonth] + ' ' + refYear;
@@ -3228,7 +3515,7 @@ function calcNomina(noReloadInputs){
   var modificacionesDetalle = ptsModificaciones > 0 ? '<div class="br" style="color:#7c3aed"><span>Modificaciones — Puntos modificaciones ('+ptsModificaciones.toFixed(2)+' pts):</span><strong>'+impModificaciones.toFixed(2)+' €</strong></div>' : '';
   var crexDetalle = '<div class="br"><span>CREX — Horas de exceso del periodo:</span><strong>'+crex.horas+' h</strong></div><div class="br"><span>Importe CREX ('+crex.horas+' × 12,00 €):</span><strong style="color:var(--verde)">'+crex.importe.toFixed(2)+' €</strong></div>';
   var sExtDetalle = sExt.importe > 0
-    ? '<div class="br" style="color:#be185d"><span>Serv. Ext. DASR ('+sExt.nDASR+') + DFR ('+sExt.nDFR+') + ESS ('+sExt.nESS+') × 96 €:</span><strong>'+sExt.importe.toFixed(2)+' €</strong></div>'
+    ? '<div class="br" style="color:#be185d"><span>Serv. Ext. DAS rem. ('+sExt.nDASR+') + DF rem. ('+sExt.nDFR+') + ESS ('+sExt.nESS+') × 96 €:</span><strong>'+sExt.importe.toFixed(2)+' €</strong></div>'
     : '';
   det.innerHTML=(((cfg.regimen||'general')==='general')?'<div class="br" style="color:#5eead4;font-size:11px"><span>Calculado sobre: '+refMesLabel+'</span></div><div class="br"><span>Puntos INCENTIVOS:</span><strong>'+ptsIncentivos.toFixed(2)+' pts</strong></div><div class="br tot"><span>Retribución INCENTIVOS:</span><strong style="color:var(--azul)">'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="br" style="color:#065f46;font-size:11px"><span>Régimen 40h — productividad estructural fija (EFA/EFM). Introduce el importe manualmente arriba.</span></div><div class="br tot"><span>Productividad estructural:</span><strong style="color:#065f46">'+impIncentivos.toFixed(2)+' €</strong></div>')+modificacionesDetalle+crexDetalle+sExtDetalle;
 }
@@ -3562,9 +3849,11 @@ function calcIncentivosMesPoints(){
 // LEYENDA EN AJUSTES
 function buildLegend(){
   var box=document.getElementById('legendBox'); box.innerHTML='';
-  Object.keys(TURNOS).forEach(function(k){
-    var t=TURNOS[k]; var r=document.createElement('div'); r.className='leg-row';
-    r.innerHTML='<div class="leg-dot" style="background:'+t.bg+';border-color:'+t.color+';color:'+t.color+'">'+t.icon+'</div><div><strong>'+t.label+'</strong><div style="font-size:10px;color:#777">Puntos INCENTIVOS: Noche: '+t.pts_n+' | Festivo: '+t.pts_f+'</div></div>';
+  MODAL_TURNOS_ORDER.forEach(function(k){
+    var t=TURNOS[k]; if(!t) return;
+    var r=document.createElement('div'); r.className='leg-row';
+    var extra = esTurnoRemunerable(k) ? ' · puede marcarse como remunerado (R)' : '';
+    r.innerHTML='<div class="leg-dot" style="background:'+t.bg+';border-color:'+t.color+';color:'+t.color+'">'+t.icon+'</div><div><strong>'+t.label+'</strong><div style="font-size:10px;color:#777">Puntos INCENTIVOS: Noche: '+t.pts_n+' | Festivo: '+t.pts_f+extra+'</div></div>';
     box.appendChild(r);
   });
 }
@@ -3857,7 +4146,7 @@ function calcDFAnio(y){
     for(var d=1; d<=diasMes; d++){
       var k = dStr(y, mes, d);
       var s = shifts[k];
-      if(s && s.t==='DF') consumidos++;
+      if(s && s.t==='DF' && !s.remunerado) consumidos++;
     }
   }
 
