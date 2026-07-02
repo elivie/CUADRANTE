@@ -1,5 +1,5 @@
 <!--
-CUADRANTE v1.5.4.7
+CUADRANTE v1.5.5.1
 Copyright © 2026 Ivan DM. Todos los derechos reservados.
 Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
 No se autoriza la eliminación de la atribución, la redistribución, la modificación,
@@ -250,7 +250,7 @@ input:focus,select:focus{border-color:var(--verde);}
   <div class="h-top">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
-      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.4.7</span></div>
+      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.5.1</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
@@ -440,10 +440,10 @@ input:focus,select:focus{border-color:var(--verde);}
     <div class="divider" style="margin:14px 0 10px"></div>
     <div class="sec-title" style="font-size:13px;margin-bottom:6px">🏖️ Vacaciones en turno fijo</div>
     <div class="ig">
-      <label class="il">Días de crédito vacacional (los tuyos por años de servicio)<br><span style="font-size:10px;color:#888">Se convierten a días de cuadrante usando las “Horas base por turno fijo” indicadas arriba.</span></label>
+      <label class="il">Días de crédito vacacional (los tuyos por años de servicio)<br><span style="font-size:10px;color:#888">Se convierten a horas: cada día de crédito equivale a 7,5 h. En turno fijo se consumen las horas reales del servicio planificado que se deja de prestar.</span></label>
       <input type="number" id="cfgDiasCredito" step="1" min="22" max="40" placeholder="24" oninput="saveCfg(); calcVacTurnoFijo()">
     </div>
-    <div class="info-box" style="margin-top:4px">✅ <strong>Saliente (S):</strong> no computa horas de jornada ni genera DAS/DF. Se mantiene dentro de la cadencia para que, si el nocturno anterior se cubre con AP o Vacaciones, la secuencia continúe correctamente y solo compute el crédito del AP/Vacaciones.</div>
+    <div class="info-box" style="margin-top:4px">✅ <strong>Saliente (S) y Libres (L):</strong> pueden quedar incluidos dentro del periodo vacacional, pero no consumen crédito. En turno fijo la solicitud debe empezar y terminar en días con servicio planificado, y el crédito se consume por las horas de esos servicios.</div>
     <div id="vacTurnoFijoResult" style="display:none;background:#eafaf1;border-left:4px solid var(--verde);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;color:#1a3a2a;margin-top:4px"></div>
     </div>
     <div class="divider"></div>
@@ -484,7 +484,7 @@ input:focus,select:focus{border-color:var(--verde);}
 
     <div class="divider"></div>
     <div class="sec-title" style="font-size:14px">📅 Días libres y permisos del año</div>
-    <div class="info-box" style="margin-bottom:10px">Introduce los días totales que te corresponden. El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. Los fines de semana y festivos dentro de un periodo de vacaciones no consumen crédito.</div>
+    <div class="info-box" style="margin-bottom:10px">Introduce los días totales que te corresponden. El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. En régimen general no consumen crédito los fines de semana y festivos; en turno fijo/cadencia las vacaciones se llevan por horas y solo consumen los servicios planificados que se dejan de prestar.</div>
     <div class="ig2">
       <div class="ig"><label class="il">🏖️ Vacaciones (días/año)</label><input type="number" id="cfgVacTotales" value="22" min="0" max="60" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">📋 Asuntos Part. (AP/año)</label><input type="number" id="cfgApTotales" value="6" min="0" max="20" oninput="saveCfg()"></div>
@@ -552,7 +552,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>🌆 Tarde</span><strong>Según horario configurado arriba</strong></div>
       <div class="rule-row"><span>🌙 Noche</span><strong>Según horario configurado arriba</strong></div>
       <div class="rule-row"><span>🌅🌙 Doblete</span><strong>Mañana + noche configuradas arriba</strong></div>
-      <div class="rule-row"><span>✅ Vacaciones / AP</span><strong>7,5h (cómputo)</strong></div>
+      <div class="rule-row"><span>✅ Vacaciones / AP</span><strong>General: 7,5h · Turno fijo: horas del servicio planificado</strong></div>
       <div class="rule-row"><span>🏛️ DF</span><strong>7,5h (día libre por festivo trabajado)</strong></div>
       <div class="rule-row"><span>💼 DAS/DF remunerado / ESS</span><strong>+96,00 € cuando se marque como remunerado</strong></div>
       <div class="rule-row"><span>✝️ Permiso S.S.</span><strong>7,5h (hasta 3 días/año, Semana Santa)</strong></div>
@@ -669,7 +669,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <div class="rule-row"><span>📋 AP</span><strong>Asunto Particular · 7,5h</strong></div>
       <div class="rule-row"><span>✝️ Perm.S.S.</span><strong>Permiso Semana Santa · 3 días/año</strong></div>
       <div class="rule-row"><span>🎄 Perm.Nav.</span><strong>Permiso Navidad · 3 días/año</strong></div>
-      <div class="rule-row"><span>🏖️ Vacaciones</span><strong>No computa fines de semana ni festivos</strong></div>
+      <div class="rule-row"><span>🏖️ Vacaciones</span><strong>General: no cuentan findes/festivos · Turno fijo: solo servicios planificados</strong></div>
       <div class="rule-row"><span>✅ Libre / 🌙 Saliente</span><strong>Descanso · no computa horas</strong></div>
       <div class="rule-row"><span>🏥 Baja</span><strong>Día deducible · general 7,5/8h con tope semanal · turno fijo según cadencia</strong></div>
     </div>
@@ -755,7 +755,7 @@ input:focus,select:focus{border-color:var(--verde);}
 
 
 <footer class="app-footer" aria-label="Autoría y licencia">
-  <strong>© 2026 Ivan DM · CUADRANTE v1.5.3</strong> · Todos los derechos reservados ·
+  <strong>© 2026 Ivan DM · CUADRANTE v1.5.5.1</strong> · Todos los derechos reservados ·
   <button type="button" class="license-link" onclick="openLicenseModal()">Licencia de uso</button>
 </footer>
 
@@ -1454,20 +1454,16 @@ function syncBloquesRegimen(){
 function calcVacTurnoFijo(){
   var res = document.getElementById('vacTurnoFijoResult');
   if(!res) return;
-  var hT = parseFloat((document.getElementById('cfgHorasTurno')||{}).value||0);
-  var diasCredito = parseInt((document.getElementById('cfgDiasCredito')||{}).value||0) || cfg.diasCredito || 0;
-  if(!hT || hT <= 0 || !diasCredito){ res.style.display='none'; return; }
-  var raw = (diasCredito * 7.5) / hT;
-  var diasVac = Math.ceil(raw);
-  // Auto-actualizar el campo de vacaciones del cuadrante
-  var elVac = document.getElementById('cfgVacTotales');
-  if(elVac){ elVac.value = diasVac; saveCfg(); }
+  var hT = parseFloat((document.getElementById('cfgHorasTurno')||{}).value || cfg.horasTurno || 0) || 0;
+  var diasCredito = parseInt((document.getElementById('cfgDiasCredito')||{}).value || cfg.diasCredito || 0) || 0;
+  if(!diasCredito){ res.style.display='none'; return; }
+  var creditoHoras = Math.round(diasCredito * 7.5 * 10) / 10;
+  var equivRed = hT > 0 ? calcServiciosEquivRedondeados(creditoHoras, hT) : 0;
   res.style.display = 'block';
-  res.innerHTML = '<strong>Vacaciones en el cuadrante:</strong> '
-    + diasCredito + ' días crédito × 7,5 h ÷ ' + hT.toFixed(1) + ' h/turno'
-    + ' = <strong style="color:var(--verde);font-size:15px"> ' + diasVac + ' días</strong>'
-    + ' <span style="color:#666">('+raw.toFixed(2)+' → redondeo superior)</span>'
-    + '<br><span style="font-size:10px;color:#555">✅ Campo "Vacaciones (días/año)" actualizado automáticamente a <strong>'+diasVac+'</strong> — la app llevará la cuenta sobre ese número.</span>';
+  res.innerHTML = '<strong>Vacaciones en turno fijo/cadencia:</strong> '
+    + diasCredito + ' días de crédito × 7,5 h = <strong style="color:var(--verde);font-size:15px">'+fmtHoras(creditoHoras)+'</strong>'
+    + (hT>0 ? '<br><span style="font-size:11px;color:#555">Equivalencia orientativa: <strong>'+equivRed+' días de vacaciones</strong> en turnos de '+fmtHoras(hT)+'. Si el cálculo da decimales, se redondea al día superior.</span>' : '')
+    + '<br><span style="font-size:10px;color:#555">ℹ️ El consumo real será la suma de horas de los servicios planificados cubiertos por vacaciones. Salientes y libres incluidos en el periodo se mantienen a 0 h. La solicitud debe iniciar y finalizar en días con servicio planificado.</span>';
 }
 function actualizarRegimenInfo(){
   var el = document.getElementById('regimenInfo');
@@ -2438,6 +2434,97 @@ function fmtFechaES(str){
   return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : str;
 }
 
+function fmtHoras(h){
+  var n = Math.round((parseFloat(h)||0)*10)/10;
+  return n.toFixed(n % 1 === 0 ? 0 : 1).replace('.', ',') + ' h';
+}
+
+function calcServiciosEquivRedondeados(horasCredito, horasServicio){
+  var h = parseFloat(horasCredito) || 0;
+  var hs = parseFloat(horasServicio) || 0;
+  if(h <= 0 || hs <= 0) return 0;
+  var exacto = h / hs;
+  // Si sale cualquier decimal, equivale al siguiente servicio/día de cadencia.
+  return Math.ceil(exacto - 0.0000001);
+}
+
+function getHorasReferenciaTurnoFijo(){
+  var el = document.getElementById('cfgHorasTurno');
+  var h = parseFloat((el && el.value) || cfg.horasTurno || 0) || 0;
+  return h;
+}
+
+function getAnioVacacional(dateStr){
+  var d = dateStr ? new Date(dateStr+'T12:00:00') : new Date(year, month, 1);
+  return d.getMonth() >= 1 ? d.getFullYear() : d.getFullYear()-1;
+}
+
+function getVacCreditoHorasTurnoFijo(){
+  var diasCredito = parseInt((document.getElementById('cfgDiasCredito')||{}).value || cfg.diasCredito || cfg.vacTotales || 22) || 22;
+  return Math.round(diasCredito * 7.5 * 10) / 10;
+}
+
+function calcVacHorasConsumidas(y){
+  var inicio = new Date(y, 1, 1);       // 1 feb
+  var fin    = new Date(y+1, 0, 31);    // 31 ene siguiente
+  var horas = 0;
+  var runner = new Date(inicio);
+  while(runner <= fin){
+    var k = dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var s = shifts[k];
+    if(s && s.t === 'V') horas += getHorasComputablesRegistro(k, s);
+    runner.setDate(runner.getDate()+1);
+  }
+  return Math.round(horas*10)/10;
+}
+
+function calcVacServiciosConsumidosFijo(y){
+  var inicio = new Date(y, 1, 1);       // 1 feb
+  var fin    = new Date(y+1, 0, 31);    // 31 ene siguiente
+  var servicios = 0;
+  var runner = new Date(inicio);
+  while(runner <= fin){
+    var k = dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var s = shifts[k];
+    if(s && s.t === 'V'){
+      var tCad = getTurnoCadenciaParaFecha(k);
+      if(!tCad || esTurnoServicioCadencia(tCad)) servicios++;
+    }
+    runner.setDate(runner.getDate()+1);
+  }
+  return servicios;
+}
+
+function getVacFijoRangoResumen(inicioStr, hastaStr){
+  var inicio = new Date(inicioStr+'T12:00:00');
+  var hasta  = new Date(hastaStr+'T12:00:00');
+  var total = 0, servicio = 0, horas = 0, salientes = 0, libres = 0, otros = 0;
+  var detalle = [];
+  var runner = new Date(inicio);
+  while(runner <= hasta){
+    var k = dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var tCad = getTurnoCadenciaParaFecha(k);
+    var h = 0;
+    if(esTurnoServicioCadencia(tCad)){
+      servicio++;
+      h = getHorasCadenciaFijo(tCad, TURNO_HORAS_DEF[tCad]);
+      horas += h;
+    } else if(tCad === 'S') salientes++;
+    else if(tCad === 'L') libres++;
+    else otros++;
+    detalle.push({fecha:k, t:tCad, h:h});
+    total++;
+    runner.setDate(runner.getDate()+1);
+  }
+  var tInicio = detalle.length ? detalle[0].t : '';
+  var tFin = detalle.length ? detalle[detalle.length-1].t : '';
+  return {
+    total:total, servicio:servicio, horas:Math.round(horas*10)/10, salientes:salientes, libres:libres, otros:otros,
+    detalle:detalle, tInicio:tInicio, tFin:tFin,
+    inicioServicio:esTurnoServicioCadencia(tInicio), finServicio:esTurnoServicioCadencia(tFin)
+  };
+}
+
 function openVacRangeModal(prefillDate){
   var ov=document.getElementById('vacRangeOverlay');
   if(!ov) return;
@@ -2449,7 +2536,7 @@ function openVacRangeModal(prefillDate){
   var info=document.getElementById('vacRangeInfo');
   if(info){
     if((cfg.regimen||'general')==='fijo'){
-      info.innerHTML='Modo <strong>Turno fijo con cadencia</strong>: solo se convierten en vacaciones los días con servicio planificado (<strong>M/T/N/D</strong>). Los <strong>Salientes</strong> y <strong>Libres</strong> se mantienen visibles, no computan horas y no consumen crédito.';
+      info.innerHTML='Modo <strong>Turno fijo con cadencia</strong>: la solicitud debe <strong>empezar y terminar en días con servicio planificado</strong> (<strong>M/T/N/D</strong>). Los <strong>Salientes</strong> y <strong>Libres</strong> incluidos en medio se mantienen visibles, computan 0 h y no consumen crédito. El crédito se descuenta por <strong>horas reales del servicio</strong> que se deja de prestar.';
     } else {
       info.innerHTML='Modo <strong>régimen general</strong>: se marcará el periodo completo como vacaciones, pero el contador de crédito mantiene la regla de no descontar sábados, domingos ni festivos.';
     }
@@ -2491,7 +2578,28 @@ function previewVacRange(){
     runner.setDate(runner.getDate()+1);
   }
   if(fijo){
-    box.innerHTML='Resumen: <strong>'+total+' días</strong> de periodo · consumirán crédito <strong style="color:var(--verde)">'+consume+'</strong> · salientes mantenidos <strong>'+salientes+'</strong> · libres mantenidos <strong>'+libres+'</strong>.';
+    if(!cfg.cadenciaPatron || !cfg.cadenciaInicio){
+      box.innerHTML='<span style="color:var(--rojo);font-weight:800">⚠️ Define antes el patrón y fecha de inicio de la cadencia en Ajustes.</span>';
+      return;
+    }
+    var rF = getVacFijoRangoResumen(inicioStr, hastaStr);
+    var anioVac = getAnioVacacional(inicioStr);
+    var creditoH = getVacCreditoHorasTurnoFijo();
+    var consumidoAntes = calcVacHorasConsumidas(anioVac);
+    var dispAntes = Math.round((creditoH-consumidoAntes)*10)/10;
+    var dispDespues = Math.round((dispAntes-rF.horas)*10)/10;
+    var warn = '';
+    if(!rF.inicioServicio || !rF.finServicio){
+      warn += '<div style="margin-top:6px;color:var(--rojo);font-weight:800">⚠️ En turno fijo la solicitud debe iniciar y finalizar en días con servicio planificado. Inicio: '+(rF.tInicio||'—')+' · Fin: '+(rF.tFin||'—')+'.</div>';
+    }
+    if(rF.servicio>0 && rF.servicio<5){
+      warn += '<div style="margin-top:6px;color:#92400e;font-weight:700">ℹ️ Periodo inferior a 5 servicios planificados. Solo encajaría en la excepción de hasta 6 días anuales, en periodos de al menos 2 servicios consecutivos, o recuperación/incorporación de crédito.</div>';
+    }
+    if(dispDespues < -0.01){
+      warn += '<div style="margin-top:6px;color:var(--rojo);font-weight:800">⚠️ Supera el crédito disponible: quedarían '+fmtHoras(dispDespues)+'.</div>';
+    }
+    box.innerHTML='Resumen: <strong>'+rF.total+' días</strong> de periodo · servicios planificados <strong style="color:var(--verde)">'+rF.servicio+'</strong> · consumo <strong style="color:var(--verde)">'+fmtHoras(rF.horas)+'</strong> · salientes <strong>'+rF.salientes+'</strong> · libres <strong>'+rF.libres+'</strong>.'+
+      '<br><span style="font-size:11px;color:#64748b">Crédito disponible antes: '+fmtHoras(dispAntes)+' · después: '+fmtHoras(dispDespues)+'</span>'+warn;
   } else {
     box.innerHTML='Resumen: <strong>'+total+' días</strong> de periodo · consumirán crédito aprox. <strong style="color:var(--verde)">'+consume+'</strong> · festivos detectados <strong>'+festivos+'</strong>.';
   }
@@ -2545,42 +2653,46 @@ function aplicarVacacionesTurnoFijoRango(inicioStr, hastaStr){
     alert('Antes debes indicar el patrón y la fecha de inicio de la cadencia en Ajustes.');
     return;
   }
-  var inicio = new Date(inicioStr+'T12:00:00');
-  var hasta  = new Date(hastaStr+'T12:00:00');
-  var servicio = 0, salientes = 0, libres = 0, otros = 0;
-  var detalle = [];
-  var runner = new Date(inicio);
-  while(runner <= hasta){
-    var k = dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
-    var tCad = getTurnoCadenciaParaFecha(k);
-    if(esTurnoServicioCadencia(tCad)) servicio++;
-    else if(tCad==='S') salientes++;
-    else if(tCad==='L') libres++;
-    else otros++;
-    detalle.push({fecha:k, t:tCad});
-    runner.setDate(runner.getDate()+1);
+  var r = getVacFijoRangoResumen(inicioStr, hastaStr);
+  if(!r.inicioServicio || !r.finServicio){
+    alert('⚠️ En turno fijo/cadencia la solicitud de vacaciones debe empezar y terminar en días con servicio planificado.\n\nInicio seleccionado: '+(r.tInicio||'—')+'\nFin seleccionado: '+(r.tFin||'—')+'\n\nAjusta el inicio y el fin al primer/último día de trabajo de la cadencia. Los libres y salientes intermedios pueden quedar incluidos, pero no consumen crédito.');
+    return;
+  }
+  if(r.servicio < 5){
+    var okMin = confirm('ℹ️ Este periodo incluye solo '+r.servicio+' días con servicio planificado.\n\nLa regla general exige al menos 5 días consecutivos con servicio planificado. Existe una excepción de hasta 6 días anuales en periodos de al menos 2 servicios consecutivos, o casos de recuperación/incorporación de crédito.\n\n¿Quieres aplicarlo igualmente?');
+    if(!okMin) return;
+  }
+  var anioVac = getAnioVacacional(inicioStr);
+  var creditoH = getVacCreditoHorasTurnoFijo();
+  var consumidoAntes = calcVacHorasConsumidas(anioVac);
+  var dispAntes = Math.round((creditoH-consumidoAntes)*10)/10;
+  var dispDespues = Math.round((dispAntes-r.horas)*10)/10;
+  if(dispDespues < -0.01){
+    var okSaldo = confirm('⚠️ El periodo consume '+fmtHoras(r.horas)+' y solo quedan '+fmtHoras(dispAntes)+' de crédito.\n\nQuedarías en negativo: '+fmtHoras(dispDespues)+'.\n\n¿Quieres aplicarlo igualmente?');
+    if(!okSaldo) return;
   }
   var txt = 'Se aplicará el periodo de vacaciones del '+fmtFechaES(inicioStr)+' al '+fmtFechaES(hastaStr)+'.\n\n'
-    + 'Turno fijo: consumirán crédito '+servicio+' días con servicio planificado (M/T/N/D).\n'
-    + 'Salientes mantenidos sin consumir crédito: '+salientes+'.\n'
-    + 'Libres mantenidos sin consumir crédito: '+libres+'.\n\n'
+    + 'Turno fijo: consumirá '+fmtHoras(r.horas)+' de crédito por '+r.servicio+' servicios planificados (M/T/N/D).\n'
+    + 'Salientes mantenidos sin consumir crédito: '+r.salientes+'.\n'
+    + 'Libres mantenidos sin consumir crédito: '+r.libres+'.\n'
+    + 'Crédito disponible tras aplicar: '+fmtHoras(dispDespues)+'.\n\n'
     + 'Se sobrescribirán los turnos existentes dentro de ese rango para respetar la cadencia. ¿Continuar?';
   if(!confirm(txt)) return;
-  detalle.forEach(function(item){
+  r.detalle.forEach(function(item){
     var k = item.fecha;
     var tCad = item.t;
     var def = TURNO_HORAS_DEF[tCad];
     if(esTurnoServicioCadencia(tCad)){
-      shifts[k] = {t:'V', ini:TURNO_HORAS_DEF.V.ini, fin:TURNO_HORAS_DEF.V.fin, h:getHorasCadenciaFijo(tCad, def), companeros:[], nota:'Vacaciones sobre servicio planificado '+tCad};
-      if(tCad==='D') shifts[k].nota = 'Vacaciones sobre doblete planificado';
+      shifts[k] = {t:'V', ini:TURNO_HORAS_DEF.V.ini, fin:TURNO_HORAS_DEF.V.fin, h:item.h, companeros:[], nota:'Vacaciones sobre servicio planificado '+tCad+' · consume '+fmtHoras(item.h)};
+      if(tCad==='D') shifts[k].nota = 'Vacaciones sobre doblete planificado · consume '+fmtHoras(item.h);
     } else if(tCad==='S' || tCad==='L'){
       shifts[k] = {t:tCad, ini:def?def.ini:'', fin:def?def.fin:'', h:0, companeros:[], nota:'Incluido en periodo de vacaciones sin consumir crédito'};
     } else {
-      shifts[k] = {t:tCad || 'L', ini:def?def.ini:'', fin:def?def.fin:'', h:def?def.h:0, companeros:[], nota:'Incluido en periodo de vacaciones'};
+      shifts[k] = {t:tCad || 'L', ini:def?def.ini:'', fin:def?def.fin:'', h:0, companeros:[], nota:'Incluido en periodo de vacaciones sin consumir crédito'};
     }
   });
   save(); renderAll(); closeVacRangeModal();
-  showToast('Vacaciones aplicadas: '+servicio+' días consumen crédito · '+salientes+' salientes mantenidos');
+  showToast('Vacaciones aplicadas: '+fmtHoras(r.horas)+' consumidas · '+r.salientes+' salientes mantenidos');
 }
 
 
@@ -3149,6 +3261,13 @@ function saveModal(){
   } else {
     if(!shifts[modalDay]) shifts[modalDay]={};
     shifts[modalDay].t=tKey;
+    if(tKey==='V' && (cfg.regimen||'general')==='fijo'){
+      var tCadModal = getTurnoCadenciaParaFecha(modalDay);
+      if(!esTurnoServicioCadencia(tCadModal)){
+        alert('⚠️ Ese día cae en '+(tCadModal||'sin servicio')+' según la cadencia. En turno fijo las vacaciones deben solicitarse sobre días con servicio planificado; libres y salientes solo se incluyen dentro del periodo, pero no como inicio/fin ni consumen crédito.');
+        return;
+      }
+    }
     if(TURNOS[tKey].compHoras){
       if(tKey==='D'){
         shifts[modalDay].iniM=document.getElementById('modalIniM').value;
@@ -3163,12 +3282,19 @@ function saveModal(){
       } else {
         shifts[modalDay].ini=document.getElementById('modalInicio').value;
         shifts[modalDay].fin=document.getElementById('modalFin').value;
-        shifts[modalDay].h=calcHoras(shifts[modalDay].ini, shifts[modalDay].fin);
+        if(tKey==='V' && (cfg.regimen||'general')==='fijo'){
+          var tCadH = getTurnoCadenciaParaFecha(modalDay);
+          shifts[modalDay].h = getHorasCadenciaFijo(tCadH, TURNO_HORAS_DEF[tCadH]);
+          shifts[modalDay].nota = 'Vacaciones sobre servicio planificado '+tCadH+' · consume '+fmtHoras(shifts[modalDay].h);
+        } else {
+          shifts[modalDay].h=calcHoras(shifts[modalDay].ini, shifts[modalDay].fin);
+        }
       }
     } else {
       shifts[modalDay].ini=''; shifts[modalDay].fin=''; shifts[modalDay].h=0;
     }
-    shifts[modalDay].nota=document.getElementById('modalNota').value;
+    var notaModal = document.getElementById('modalNota').value;
+    if(!(tKey==='V' && (cfg.regimen||'general')==='fijo') || notaModal){ shifts[modalDay].nota=notaModal; }
     shifts[modalDay].hmps = document.getElementById('modalHmps').checked;
     shifts[modalDay].hmns = document.getElementById('modalHmns').checked;
     if(esTurnoRemunerable(tKey)){
@@ -3362,7 +3488,7 @@ function calcResumen(){
   var aDiff=Math.round((annH-annRefH)*10)/10;
   addAnnCard('⚖️', (aDiff>=0?'+':'')+aDiff+'h', 'Balance total', aDiff>=0?'var(--verde)':'var(--rojo)');
   addAnnCard('📋', annCounts.AP, 'Asuntos Propios', '#059669');
-  addAnnCard('🏖️', annCounts.V, 'Vacaciones disp.', '#0e7490');
+  addAnnCard('🏖️', annCounts.V, 'Vacaciones marc.', '#0e7490');
   addAnnCard('🏛️', annCounts.DF, 'Días Fest. (DF)', '#0f766e');
   var annRem=0;
   Object.keys(shifts).forEach(function(k){ var ss=shifts[k]; if(ss && ((ss.t==='DA'||ss.t==='DF') && ss.remunerado)) annRem++; });
@@ -4834,7 +4960,29 @@ function renderVacApContent(y){
   }
 
   var html = '';
-  html += fila('🏖️','Vacaciones',vacTot,vacCons,vacDisp);
+  if(isTurnoFijo()){
+    var creditoH = getVacCreditoHorasTurnoFijo();
+    var consH = calcVacHorasConsumidas(y);
+    var dispH = Math.round((creditoH-consH)*10)/10;
+    var cVacH = dispH>=0?'var(--verde)':'var(--rojo)';
+    var diasCreditoF = parseInt(cfg.diasCredito || cfg.vacTotales || 22) || 22;
+    var hRefVac = getHorasReferenciaTurnoFijo();
+    var serviciosConsumidos = calcVacServiciosConsumidosFijo(y);
+    html += '<div class="br"><span>🏖️ Crédito vacaciones:</span><strong>'+diasCreditoF+' días × 7,5 h = '+fmtHoras(creditoH)+'</strong></div>';
+    if(hRefVac > 0){
+      var equivTotal = calcServiciosEquivRedondeados(creditoH, hRefVac);
+      html += '<div class="br"><span>Tu crédito da para aprox.:</span><strong>'+equivTotal+' días de vacaciones</strong> <span style="font-size:10px;color:#64748b">(turnos de '+fmtHoras(hRefVac)+')</span></div>';
+    }
+    html += '<div class="br"><span>Días con servicio marcados de vacaciones:</span><strong style="color:var(--rojo)">'+serviciosConsumidos+' días = '+fmtHoras(consH)+'</strong></div>';
+    html += '<div class="br tot"><span>Te quedan:</span><strong style="color:'+cVacH+';font-size:15px">'+fmtHoras(dispH)+'</strong></div>';
+    if(hRefVac > 0){
+      var equivDisp = calcServiciosEquivRedondeados(Math.max(0, dispH), hRefVac);
+      html += '<div class="br"><span>Te quedan aprox.:</span><strong style="color:'+cVacH+'">'+equivDisp+' días más de vacaciones</strong> <span style="font-size:10px;color:#64748b">(turnos de '+fmtHoras(hRefVac)+')</span></div>';
+    }
+    html += '<div style="font-size:10px;color:#64748b;margin-top:4px">Ejemplo: si tienes 165 h y tus turnos son de 8,5 h, la app lo traduce a días de vacaciones redondeando hacia arriba. Si gastas 6 días con servicio de 8,5 h, consumes 51 h y quedan 114 h, que equivalen aprox. a 14 días más de vacaciones. Libres y salientes incluidos computan 0 h.</div>';
+  } else {
+    html += fila('🏖️','Vacaciones',vacTot,vacCons,vacDisp);
+  }
   html += '<div style="margin-top:10px"></div>';
   html += fila('📋','Asuntos Particulares (AP)',apTot,apCons,apDisp);
   html += '<div style="margin-top:10px"></div>';
@@ -4895,9 +5043,18 @@ function actualizarContadoresAjustes(){
       var c = disp>=0?'var(--verde)':'var(--rojo)';
       return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #dcfce7"><span>'+icon+' '+label+':</span><strong style="color:'+c+'">'+disp+' / '+tot+' días</strong></div>';
     }
+    function lineaSaldoHoras(icon, label, totalH, consH){
+      var dispH = Math.round((totalH-consH)*10)/10;
+      var c = dispH>=0?'var(--verde)':'var(--rojo)';
+      return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #dcfce7"><span>'+icon+' '+label+':</span><strong style="color:'+c+'">'+fmtHoras(dispH)+' / '+fmtHoras(totalH)+'</strong></div>';
+    }
     var html = '<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:10px 12px;font-size:12px;">';
     html += '<div style="font-weight:800;color:var(--verde);margin-bottom:6px">📊 Saldo actual de permisos</div>';
-    html += lineaSaldo('🏖️','Vacaciones disponibles',vacTot,vacCons);
+    if(isTurnoFijo()){
+      html += lineaSaldoHoras('🏖️','Vacaciones disponibles',getVacCreditoHorasTurnoFijo(),calcVacHorasConsumidas(year));
+    } else {
+      html += lineaSaldo('🏖️','Vacaciones disponibles',vacTot,vacCons);
+    }
     var apExtra = calcApExtraPorFestivosSabado(year);
     var apLabel = apExtra > 0 ? 'AP disponibles ('+cfg.apTotales+'+'+apExtra+' extra)' : 'AP disponibles';
     html += lineaSaldo('📋', apLabel, apTot, apCons);
