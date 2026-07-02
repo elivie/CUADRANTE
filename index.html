@@ -1,5 +1,5 @@
 <!--
-CUADRANTE v1.5.4.3
+CUADRANTE v1.5.4.4
 Copyright © 2026 Ivan DM. Todos los derechos reservados.
 Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
 No se autoriza la eliminación de la atribución, la redistribución, la modificación,
@@ -52,6 +52,12 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 .cal-head{text-align:center;font-size:10px;font-weight:700;color:#888;padding:3px 0;}
 .cal-cell{border:1.5px solid #ddd;border-radius:8px;padding:3px 2px;height:90px;overflow:hidden;display:flex;flex-direction:column;align-items:center;cursor:pointer;background:#fff;position:relative;transition: all 0.1s ease;}
 .cal-cell.sel {border-color:var(--azul)!important;border-width:2px;box-shadow:0 0 0 3px #b3cbe8;transform: scale(0.97);}
+.cal-cell.msel {border-color:#16a34a!important;border-width:2px;box-shadow:0 0 0 3px #bbf7d0;background:#f0fdf4!important;}
+.cal-cell .msel-badge{position:absolute;top:2px;left:4px;background:#16a34a;color:#fff;border-radius:999px;width:16px;height:16px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.22);}
+.month-nav{position:relative;}
+.msel-toggle-icon{position:absolute;right:0;top:50%;transform:translateY(-50%);background:#fff;border:1.5px solid var(--azul);color:var(--azul);border-radius:8px;width:32px;height:32px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.msel-toggle-icon.active{background:var(--azul);color:#fff;box-shadow:0 0 0 3px #b3cbe8;}
+.sel-hint .msel-cancel-link{color:#dc2626;font-weight:800;text-decoration:underline;cursor:pointer;margin-left:6px;}
 .cal-cell .dn{font-size:11px;font-weight:700;margin-bottom:1px;}
 .cal-cell .ci{font-size:15px;line-height:1;}
 .cal-cell .ck{font-size:8px;font-weight:800;margin-top:1px;}
@@ -203,6 +209,8 @@ input:focus,select:focus{border-color:var(--verde);}
   .tb .ti{font-size:14px;}
   .cal-cell{min-height:52px;}
   .cal-cell .ci{font-size:13px;}
+  .month-nav h2{min-width:140px;}
+  .msel-toggle-icon{width:26px;height:26px;font-size:13px;}
 }
 </style>
 <meta name="theme-color" content="#1e3a6e">
@@ -235,7 +243,7 @@ input:focus,select:focus{border-color:var(--verde);}
   <div class="h-top">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
-      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.4</span></div>
+      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.4.4</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
@@ -256,6 +264,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <button class="arr" onclick="changeMonth(-1)">‹</button>
       <h2 id="monthLabel"></h2>
       <button class="arr" onclick="changeMonth(1)">›</button>
+      <button class="msel-toggle-icon" id="mselToggleBtn" onclick="toggleMultiSelect()" title="Selección múltiple">☑️</button>
     </div>
     <div class="turno-bar" id="turnoBar"></div>
     <div class="sel-hint" id="selHint">Selecciona un día en el calendario para asignarle un turno</div>
@@ -315,7 +324,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <input type="text" inputmode="decimal" id="prodEstructuralInput" style="width:90px;padding:5px 8px;border:1px solid #6ee7b7;border-radius:8px;font-size:14px;font-weight:700" oninput="saveProdEstructural()">
       <span style="font-size:11px;color:#888">Guardado solo para esta nómina.</span>
     </div>
-    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (horas exceso hasta 40h/período: ≥30 min = 1h × 12 €), <strong>SERVICIOS EXTRAORDINARIOS</strong> DAS/DF remunerados/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
+    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables; también se estima en turno fijo) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (horas exceso hasta 40h/período: ≥30 min = 1h × 12 €; en turno fijo se estima por cuatrimestre), <strong>SERVICIOS EXTRAORDINARIOS</strong> DAS/DF remunerados/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
     <div id="nominaCard"></div>
     <div class="bal-card"><h3>⚡ Detalle INCENTIVOS del mes</h3><div id="nominaIncentivosDetail"></div></div>
 
@@ -1214,6 +1223,8 @@ var year=now.getFullYear();
 var month=now.getMonth();
 var shifts={};
 var selectedDay=null;
+var multiSelectMode=false;
+var selectedDays=new Set();
 var modalDay=null;
 var cfg={
   base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general',
@@ -1840,6 +1851,7 @@ function changeMonth(dir){
   if(month<0){ month=11; year--; }
   else if(month>11){ month=0; year++; }
   selectedDay=null;
+  selectedDays.clear();
   renderAll();
 }
 
@@ -1858,11 +1870,15 @@ function renderTurnoBar(){
   TURNO_BAR_ORDER.forEach(function(k){
     var t=TURNOS[k];
     if(!t) return;
+    // En modo selección múltiple, V y CS quedan ocultos: abren un modal de rango
+    // que no encaja con "aplicar a varios días sueltos".
+    if(multiSelectMode && (k==='V' || k==='CS')) return;
     var div=document.createElement('div');
     div.className='tb';
     div.style.borderColor=t.color;
     div.style.color=t.color;
     div.onclick=function(){
+      if(multiSelectMode){ assignToSelection(k); return; }
       if(k==='V'){ openVacRangeModal(selectedDay); }
       else if(k==='CS'){ openCsRangeModal(selectedDay); }
       else { assignSelected(k); }
@@ -1909,6 +1925,7 @@ function renderCalendar(){
     if(out) cell.classList.add('outside-period');
     
     if(selectedDay===key) cell.classList.add('sel');
+    if(multiSelectMode && selectedDays.has(key)) cell.classList.add('msel');
     
     var fest=isFestivo(key, s.t);
     var esp=isEspSig(key);
@@ -2041,8 +2058,22 @@ function renderCalendar(){
       cell.appendChild(cc);
     }
     
+    if(multiSelectMode && selectedDays.has(key)){
+      var mBadge=document.createElement('span');
+      mBadge.className='msel-badge';
+      mBadge.innerText='✓';
+      cell.appendChild(mBadge);
+    }
+
     cell.onclick=(function(k){
       return function(){
+        if(multiSelectMode){
+          if(selectedDays.has(k)) selectedDays.delete(k);
+          else selectedDays.add(k);
+          updateMultiSelectUI();
+          renderCalendar();
+          return;
+        }
         if(selectedDay===k){
           openModal(k);
         } else {
@@ -2068,6 +2099,115 @@ function renderCalendar(){
     
     cal.appendChild(cell);
     runner.setDate(runner.getDate()+1);
+  }
+}
+
+// ==========================================
+// SELECCIÓN MÚLTIPLE DE DÍAS
+// ==========================================
+function toggleMultiSelect(){
+  multiSelectMode=!multiSelectMode;
+  selectedDays.clear();
+  selectedDay=null;
+  updateMultiSelectUI();
+  renderAll();
+}
+
+function cancelMultiSelect(){
+  multiSelectMode=false;
+  selectedDays.clear();
+  updateMultiSelectUI();
+  renderAll();
+}
+
+function updateMultiSelectUI(){
+  var btn=document.getElementById('mselToggleBtn');
+  var hint=document.getElementById('selHint');
+  if(!btn) return;
+  if(multiSelectMode){
+    btn.classList.add('active');
+    if(selectedDays.size>0){
+      hint.innerHTML='<strong>'+selectedDays.size+'</strong> día'+(selectedDays.size===1?'':'s')+' marcado'+(selectedDays.size===1?'':'s')+'. Toca un turno arriba para aplicarlo a todos.<span class="msel-cancel-link" onclick="cancelMultiSelect()">✕ cancelar</span>';
+    } else {
+      hint.innerHTML='Modo selección múltiple: toca los días del cuadrante que quieras marcar.<span class="msel-cancel-link" onclick="cancelMultiSelect()">✕ cancelar</span>';
+    }
+  } else {
+    btn.classList.remove('active');
+    if(!selectedDay) hint.innerHTML='Selecciona un día en el calendario para asignarle un turno';
+  }
+}
+
+// Aplica un turno a todos los días marcados en selectedDays.
+// Reutiliza las mismas reglas que guardarTurnoAsignado, pero pregunta
+// "¿remunerado?" y confirmaciones de saldo (DF/vacaciones/AP/etc.) UNA sola vez para todo el lote.
+function assignToSelection(tKey){
+  if(selectedDays.size===0){ alert('Marca primero uno o varios días en el calendario'); return; }
+  var dias=Array.from(selectedDays);
+
+  if(tKey==='DF'){
+    var dfInfo=calcDFAnio(year);
+    if(dfInfo.disponibles < dias.length){
+      if(!confirm('⚠️ Vas a aplicar DF a '+dias.length+' días, pero solo te quedan '+dfInfo.disponibles+' disponibles. ¿Continuar igualmente?')) return;
+    }
+  }
+  if(tKey==='AP'){
+    var apDisp=totalApAnio(year)-calcApConsumidos(year);
+    if(apDisp < dias.length){
+      if(!confirm('⚠️ Vas a aplicar AP a '+dias.length+' días, pero solo te quedan '+apDisp+' disponibles. ¿Continuar igualmente?')) return;
+    }
+  }
+  if(tKey==='PSS'){
+    var pssDisp=(cfg.pssTotales||3)-calcPssConsumidos(year);
+    if(pssDisp < dias.length){
+      if(!confirm('⚠️ Vas a aplicar Permiso S.S. a '+dias.length+' días, pero solo te quedan '+pssDisp+' disponibles. ¿Continuar igualmente?')) return;
+    }
+  }
+  if(tKey==='PNV'){
+    var pnavDisp=(cfg.pnavTotales||3)-calcPnavConsumidos(year);
+    if(pnavDisp < dias.length){
+      if(!confirm('⚠️ Vas a aplicar Permiso Navidad a '+dias.length+' días, pero solo te quedan '+pnavDisp+' disponibles. ¿Continuar igualmente?')) return;
+    }
+  }
+
+  var aplicarLote=function(remFlag){
+    dias.forEach(function(d){
+      shifts[d]=shifts[d]||{t:''};
+      shifts[d].t=tKey;
+      var def=TURNO_HORAS_DEF[tKey];
+      shifts[d].ini=def?def.ini:'';
+      shifts[d].fin=def?def.fin:'';
+      var hDef=def?def.h:7.5;
+      if(tKey==='V' && isWeekend(d) && (cfg.regimen||'general')!=='fijo') hDef=0;
+      shifts[d].h=hDef;
+      if(tKey==='D'){
+        shifts[d].iniM=shifts[d].iniM||cfg.iniDM||'06:30';
+        shifts[d].finM=shifts[d].finM||cfg.finDM||'14:00';
+        shifts[d].iniN=shifts[d].iniN||cfg.iniDN||'22:00';
+        shifts[d].finN=shifts[d].finN||cfg.finDN||'05:30';
+      }
+      if(!shifts[d].companeros) shifts[d].companeros=[];
+      if(!shifts[d].nota) shifts[d].nota='';
+      if(esTurnoRemunerable(tKey)){
+        shifts[d].remunerado=!!remFlag;
+      } else {
+        delete shifts[d].remunerado;
+      }
+    });
+    save();
+    var n=dias.length;
+    multiSelectMode=false;
+    selectedDays.clear();
+    updateMultiSelectUI();
+    renderAll();
+    var msg=(TURNOS[tKey]?TURNOS[tKey].label:tKey)+' asignado a '+n+' día'+(n===1?'':'s');
+    if(esTurnoRemunerable(tKey) && remFlag) msg+=' · +'+(96*n).toFixed(2).replace('.',',')+' € en nómina';
+    showToast(msg);
+  };
+
+  if(esTurnoRemunerable(tKey)){
+    preguntarRemunerado(tKey, aplicarLote);
+  } else {
+    aplicarLote(false);
   }
 }
 
@@ -3315,10 +3455,12 @@ function calcResumen(){
 // ESTIMACIÓN DE NÓMINA FÓRMULAS
 // ==========================================
 function calcCrexMes(){
-  // Regla oficial:
+  // Regla estimativa:
   // - Exceso entre ref (37,5h x sem) y limite (40h x sem) -> CREX pagado a 12€/h
   // - Exceso sobre 40h x sem -> genera DSJ, NO se paga
-  var p=getPeriodForMonth(year,month);
+  // En turno fijo se usa el cómputo cuatrimestral de la cadencia, no el periodo mensual.
+  var r = cfg.regimen || 'general';
+  var p = (r === 'fijo') ? getCuatrimestreTurnos(year, month) : getPeriodForMonth(year,month);
   var totalH=0;
   var runner=new Date(p.start);
   while(runner<=p.end){
@@ -3339,7 +3481,6 @@ function calcCrexMes(){
   var diff  = totalH - ref;
   if(diff <= 0) return {horas:0, importe:0, horasDSJ:0};
   // Régimen 40h: no hay tramo CREX, DSJ desde la primera hora sobre 40h
-  var r = cfg.regimen || 'general';
   if(r !== 'general' && r !== 'fijo'){
     var horasSobreLimite40 = Math.max(0, totalH - limit);
     return {horas:0, importe:0, horasDSJ: horasSobreLimite40};
@@ -3479,7 +3620,7 @@ function calcNomina(noReloadInputs){
   year = refYear; month = refMonth;
 
   var ptsIncentivos, impIncentivos;
-  if((cfg.regimen||'general') === 'general'){
+  if(esRegimenConICRES()){
     ptsIncentivos = calcIncentivosMesPoints();
     impIncentivos = getIncentivosImporte(ptsIncentivos);
   } else {
@@ -3521,10 +3662,11 @@ function calcNomina(noReloadInputs){
     : '<div class="nom-row" style="color:#aaa"><span>+ ICREM modificaciones (HMPS/HMNS):</span><strong>0,00 €</strong></div>';
   var crexDSJnota = (crex.horasDSJ > 0) ? ' <span style="font-size:10px;color:#b45309">(+'+crex.horasDSJ.toFixed(1)+'h → DSJ)</span>' : '';
   var crexRow = '';
-  if((cfg.regimen||'general') === 'general'){
+  var regimenCrex = cfg.regimen || 'general';
+  if(regimenCrex === 'general' || regimenCrex === 'fijo'){
     crexRow = crex.horas > 0
       ? '<div class="nom-row var"><span>+ CREX ('+crex.horas+'h × 12,00 €)'+crexDSJnota+':</span><strong>'+crex.importe.toFixed(2)+' €</strong></div>'
-      : '<div class="nom-row" style="color:#aaa"><span>+ CREX (horas de exceso hasta 40h/sem):</span><strong>0,00 €</strong></div>';
+      : '<div class="nom-row" style="color:#aaa"><span>+ CREX (horas de exceso hasta 40h/'+(regimenCrex==='fijo'?'cuatrimestre':'sem')+'):</span><strong>0,00 €</strong></div>';
   } else {
     var dsjNota = crex.horasDSJ > 0 ? ' <span style="font-size:10px;color:#b45309">('+crex.horasDSJ.toFixed(1)+'h → DSJ)</span>' : '';
     crexRow = '<div class="nom-row" style="color:#aaa"><span>Régimen 40h — sin CREX'+dsjNota+':</span><strong>—</strong></div>';
@@ -3546,7 +3688,7 @@ function calcNomina(noReloadInputs){
   
   var div=document.getElementById('nominaCard');
   var refMesLabel = MESES[refMonth] + ' ' + refYear;
-  div.innerHTML='<div class="nom-card"><h3>💰 PREVISION NETO A PERCIBIR</h3><div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Conceptos variables (INCENTIVOS/CREX/Serv.Ext.) corresponden a: <strong style=\"color:#5eead4\">'+refMesLabel+'</strong></div><div class="nom-tot"><span class="ntl">Liquido estimado en cuenta:</span><strong class="ntv">'+neto.toFixed(2)+' €</strong></div><div style="margin-top:12px"><div class="nom-row"><span>Sueldo Bruto Fijo base:</span><strong>'+baseBruto.toFixed(2)+' €</strong></div>'+((cfg.regimen||'general')==='general'?'<div class="nom-row var"><span>+ Complemento INCENTIVOS variable:</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="nom-row var" style="color:#065f46"><span>+ Productividad estructural (EFA/EFM):</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>')+''+modificacionesRow+crexRow+sExtRow+pagaExtraRow+'<div class="nom-row"><span>Bruto Total del mes:</span><strong>'+brutoTotal.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Retencion IRPF ('+irpfMes+'%):</span><strong>-'+retIrpf.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Derechos Pasivos / Mutualidad'+(esMesExtra?' (×2 paga extra)':'')+' :</span><strong>-'+((cfg.pasivos+cfg.mutualidad)*factorExtra).toFixed(2)+' €</strong></div>'+(dedNF>0?'<div class="nom-row" style="color:#fca5a5"><span>- Deducciones no formalizables:</span><strong>-'+dedNF.toFixed(2)+' €</strong></div>':'')+'</div></div>';
+  div.innerHTML='<div class="nom-card"><h3>💰 PREVISION NETO A PERCIBIR</h3><div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Conceptos variables (INCENTIVOS/CREX/Serv.Ext.) corresponden a: <strong style=\"color:#5eead4\">'+refMesLabel+'</strong></div><div class="nom-tot"><span class="ntl">Liquido estimado en cuenta:</span><strong class="ntv">'+neto.toFixed(2)+' €</strong></div><div style="margin-top:12px"><div class="nom-row"><span>Sueldo Bruto Fijo base:</span><strong>'+baseBruto.toFixed(2)+' €</strong></div>'+(esRegimenConICRES()?'<div class="nom-row var"><span>+ Complemento INCENTIVOS / ICRES:</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="nom-row var" style="color:#065f46"><span>+ Productividad estructural (EFA/EFM):</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>')+''+modificacionesRow+crexRow+sExtRow+pagaExtraRow+'<div class="nom-row"><span>Bruto Total del mes:</span><strong>'+brutoTotal.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Retencion IRPF ('+irpfMes+'%):</span><strong>-'+retIrpf.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Derechos Pasivos / Mutualidad'+(esMesExtra?' (×2 paga extra)':'')+' :</span><strong>-'+((cfg.pasivos+cfg.mutualidad)*factorExtra).toFixed(2)+' €</strong></div>'+(dedNF>0?'<div class="nom-row" style="color:#fca5a5"><span>- Deducciones no formalizables:</span><strong>-'+dedNF.toFixed(2)+' €</strong></div>':'')+'</div></div>';
   
   // Detalle INCENTIVOS en nómina
   var det=document.getElementById('nominaIncentivosDetail');
@@ -3555,7 +3697,7 @@ function calcNomina(noReloadInputs){
   var sExtDetalle = sExt.importe > 0
     ? '<div class="br" style="color:#be185d"><span>Serv. Ext. DAS rem. ('+sExt.nDASR+') + DF rem. ('+sExt.nDFR+') + ESS ('+sExt.nESS+') × 96 €:</span><strong>'+sExt.importe.toFixed(2)+' €</strong></div>'
     : '';
-  det.innerHTML=(((cfg.regimen||'general')==='general')?'<div class="br" style="color:#5eead4;font-size:11px"><span>Calculado sobre: '+refMesLabel+'</span></div><div class="br"><span>Puntos INCENTIVOS:</span><strong>'+ptsIncentivos.toFixed(2)+' pts</strong></div><div class="br tot"><span>Retribución INCENTIVOS:</span><strong style="color:var(--azul)">'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="br" style="color:#065f46;font-size:11px"><span>Régimen 40h — productividad estructural fija (EFA/EFM). Introduce el importe manualmente arriba.</span></div><div class="br tot"><span>Productividad estructural:</span><strong style="color:#065f46">'+impIncentivos.toFixed(2)+' €</strong></div>')+modificacionesDetalle+crexDetalle+sExtDetalle;
+  det.innerHTML=(esRegimenConICRES()?'<div class="br" style="color:#5eead4;font-size:11px"><span>Calculado sobre: '+refMesLabel+'</span></div><div class="br"><span>Puntos INCENTIVOS / ICRES:</span><strong>'+ptsIncentivos.toFixed(2)+' pts</strong></div><div class="br tot"><span>Retribución INCENTIVOS / ICRES:</span><strong style="color:var(--azul)">'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="br" style="color:#065f46;font-size:11px"><span>Régimen 40h — productividad estructural fija (EFA/EFM). Introduce el importe manualmente arriba.</span></div><div class="br tot"><span>Productividad estructural:</span><strong style="color:#065f46">'+impIncentivos.toFixed(2)+' €</strong></div>')+modificacionesDetalle+crexDetalle+sExtDetalle;
 }
 
 // ==========================================
@@ -5139,10 +5281,22 @@ function loadProdEstructural(){
   if(input && document.activeElement !== input) input.value = formatNumeroInput(getProdEstructuralMes());
 }
 
+function esRegimenProductividadEstructural(){
+  var r = cfg.regimen || 'general';
+  return r === 'admin' || r === 'especial';
+}
+
+function esRegimenConICRES(){
+  var r = cfg.regimen || 'general';
+  // En turno fijo se siguen estimando los INCENTIVOS/ICRES por servicios computables
+  // (nocturnos, festivos, especial significación, etc.).
+  return r === 'general' || r === 'fijo';
+}
+
 function actualizarVisibilidadNomina(){
   var box = document.getElementById('prodEstructuralBox');
   if(!box) return;
-  box.style.display = ((cfg.regimen||'general') !== 'general') ? 'flex' : 'none';
+  box.style.display = esRegimenProductividadEstructural() ? 'flex' : 'none';
 }
 
 window.onload=function(){
