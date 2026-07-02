@@ -1,5 +1,5 @@
 <!--
-CUADRANTE v1.5.4.4
+CUADRANTE v1.5.4.7
 Copyright © 2026 Ivan DM. Todos los derechos reservados.
 Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
 No se autoriza la eliminación de la atribución, la redistribución, la modificación,
@@ -55,7 +55,7 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 .cal-cell.msel {border-color:#16a34a!important;border-width:2px;box-shadow:0 0 0 3px #bbf7d0;background:#f0fdf4!important;}
 .cal-cell .msel-badge{position:absolute;top:2px;left:4px;background:#16a34a;color:#fff;border-radius:999px;width:16px;height:16px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.22);}
 .month-nav{position:relative;}
-.msel-toggle-icon{position:absolute;right:0;top:50%;transform:translateY(-50%);background:#fff;border:1.5px solid var(--azul);color:var(--azul);border-radius:8px;width:32px;height:32px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.msel-toggle-icon{position:absolute;right:0;top:50%;transform:translateY(-50%);background:#fff;border:1.5px solid var(--azul);color:var(--azul);border-radius:10px;min-width:88px;height:32px;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 8px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.10);font-family:inherit;}
 .msel-toggle-icon.active{background:var(--azul);color:#fff;box-shadow:0 0 0 3px #b3cbe8;}
 .sel-hint .msel-cancel-link{color:#dc2626;font-weight:800;text-decoration:underline;cursor:pointer;margin-left:6px;}
 .cal-cell .dn{font-size:11px;font-weight:700;margin-bottom:1px;}
@@ -199,6 +199,13 @@ input:focus,select:focus{border-color:var(--verde);}
   }
 }
 
+
+@media(max-width:520px){
+  .month-nav{gap:10px;}
+  .month-nav h2{min-width:140px;font-size:17px;}
+  .msel-toggle-icon{min-width:72px;height:31px;font-size:10.5px;padding:0 6px;border-radius:9px;}
+}
+
 @media(max-width:340px){
   nav button{font-size:10px;padding:7px 3px;}
 }
@@ -209,8 +216,8 @@ input:focus,select:focus{border-color:var(--verde);}
   .tb .ti{font-size:14px;}
   .cal-cell{min-height:52px;}
   .cal-cell .ci{font-size:13px;}
-  .month-nav h2{min-width:140px;}
-  .msel-toggle-icon{width:26px;height:26px;font-size:13px;}
+  .month-nav h2{min-width:132px;font-size:16px;}
+  .msel-toggle-icon{min-width:68px;height:30px;font-size:10.5px;padding:0 6px;border-radius:9px;}
 }
 </style>
 <meta name="theme-color" content="#1e3a6e">
@@ -243,7 +250,7 @@ input:focus,select:focus{border-color:var(--verde);}
   <div class="h-top">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
-      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.4.4</span></div>
+      <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">V1.5.4.7</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
@@ -264,7 +271,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <button class="arr" onclick="changeMonth(-1)">‹</button>
       <h2 id="monthLabel"></h2>
       <button class="arr" onclick="changeMonth(1)">›</button>
-      <button class="msel-toggle-icon" id="mselToggleBtn" onclick="toggleMultiSelect()" title="Selección múltiple">☑️</button>
+      <button class="msel-toggle-icon" id="mselToggleBtn" onclick="toggleMultiSelect()" title="Seleccionar varios días" aria-label="Seleccionar varios días">☑️ Varios</button>
     </div>
     <div class="turno-bar" id="turnoBar"></div>
     <div class="sel-hint" id="selHint">Selecciona un día en el calendario para asignarle un turno</div>
@@ -324,7 +331,7 @@ input:focus,select:focus{border-color:var(--verde);}
       <input type="text" inputmode="decimal" id="prodEstructuralInput" style="width:90px;padding:5px 8px;border:1px solid #6ee7b7;border-radius:8px;font-size:14px;font-weight:700" oninput="saveProdEstructural()">
       <span style="font-size:11px;color:#888">Guardado solo para esta nómina.</span>
     </div>
-    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables; también se estima en turno fijo) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (horas exceso hasta 40h/período: ≥30 min = 1h × 12 €; en turno fijo se estima por cuatrimestre), <strong>SERVICIOS EXTRAORDINARIOS</strong> DAS/DF remunerados/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
+    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables; también se estima en turno fijo) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (régimen general: exceso hasta 40h/período, ≥30 min = 1h × 12 €; en <strong>turno fijo/cadencia</strong> no se liquida mes a mes: solo se calcula al cierre del cuatrimestre de devengo, <strong>mayo, septiembre o enero</strong>), <strong>SERVICIOS EXTRAORDINARIOS</strong> DAS/DF remunerados/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
     <div id="nominaCard"></div>
     <div class="bal-card"><h3>⚡ Detalle INCENTIVOS del mes</h3><div id="nominaIncentivosDetail"></div></div>
 
@@ -691,10 +698,11 @@ input:focus,select:focus{border-color:var(--verde);}
     <div class="sec-title" style="font-size:14px">💰 CREX y DSJ</div>
     <div style="background:#fef9c3;border-radius:8px;padding:7px 10px;font-size:11px;color:#854d0e;margin-bottom:6px">ℹ️ El cómputo varía según el régimen configurado en Ajustes.</div>
     <div class="rule-card" style="margin-bottom:10px">
-      <div class="rule-row"><span>CREX</span><strong>Horas entre 37,5h y 40h/sem → 12€/h</strong></div>
+      <div class="rule-row"><span>CREX</span><strong>Régimen general: horas entre 37,5h y 40h/sem → 12€/h</strong></div>
+      <div class="rule-row"><span>Turno fijo</span><strong>Cómputo cuatrimestral; no se mete CREX mes a mes</strong></div>
       <div class="rule-row"><span>DSJ</span><strong>Horas sobre 40h/sem → descanso compensatorio</strong></div>
-      <div class="rule-row"><span>DSJ = 1 día</span><strong>Cada 7,5h de exceso sobre 40h/período</strong></div>
-      <div class="rule-row"><span>Caducidad</span><strong>Disfrutar en el trimestre o se pierden</strong></div>
+      <div class="rule-row"><span>DSJ = 1 día</span><strong>Cada 7,5h/8h según régimen y periodo</strong></div>
+      <div class="rule-row"><span>Disfrute</span><strong>Según periodo posterior aplicable al régimen</strong></div>
     </div>
 
     <div class="sec-title" style="font-size:14px">💾 Copias de seguridad</div>
@@ -1184,6 +1192,19 @@ function getCuatrimestreTurnos(y,m){
   return {start:qStart, end:qEnd, label:qLabel, weeks:qJueves, requiredHours:qRefHours};
 }
 
+function esMesCierreCuatrimestreTurnos(m){
+  // En turno fijo/cadencia, el CREX solo se calcula cuando el mes de devengo
+  // cierra uno de los tres periodos cuatrimestrales oficiales: mayo, septiembre o enero.
+  return m === 4 || m === 8 || m === 0;
+}
+
+function getCierreCuatrimestreTurnosLabel(y,m){
+  if(m >= 1 && m <= 4) return 'Mayo ' + y;
+  if(m >= 5 && m <= 8) return 'Septiembre ' + y;
+  if(m >= 9) return 'Enero ' + (y + 1);
+  return 'Enero ' + y;
+}
+
 function isRegimenEspecial(){
   return (cfg && (cfg.regimen || 'general') === 'especial');
 }
@@ -1456,7 +1477,7 @@ function actualizarRegimenInfo(){
     'general': '37,5 h/sem · Exceso hasta 40h → CREX (12 €/h) · Exceso sobre 40h → DSJ (1 día / 7,5h) · Descansos singularizados activados',
     'admin':   '40 h/sem · Sin CREX · Exceso sobre 40h → DSJ (1 día / 8h) · Cómputo mensual',
     'especial':'40 h/sem · Cómputo <strong>trimestral</strong> · al menos 33 h/sem presenciales/combinadas cuando proceda · disponibilidad hasta 7 h/sem · Sin CREX · Exceso → DSJ (1 día / 8h)',
-    'fijo':    '37,5 h/sem · Cómputo <strong>cuatrimestral</strong> · CREX entre 37,5h y 40h/sem (12 €/h) · Sin DAS ni DF (integrados en la cadencia)'
+    'fijo':    '37,5 h/sem · Cómputo <strong>cuatrimestral</strong> · CREX solo al cierre del cuatrimestre de devengo (mayo/septiembre/enero), no mes a mes · Sin DAS ni DF (integrados en la cadencia)'
   };
   el.style.display = 'block';
   el.innerHTML = msgs[r] || '';
@@ -2120,10 +2141,20 @@ function cancelMultiSelect(){
   renderAll();
 }
 
+function getMultiSelectButtonText(active){
+  var compact = false;
+  try { compact = window.matchMedia && window.matchMedia('(max-width:520px)').matches; } catch(e) {}
+  if(active) return compact ? '✅ ON' : '✅ Selección ON';
+  return compact ? '☑️ Varios' : '☑️ Varios días';
+}
+
 function updateMultiSelectUI(){
   var btn=document.getElementById('mselToggleBtn');
   var hint=document.getElementById('selHint');
   if(!btn) return;
+  btn.innerHTML=getMultiSelectButtonText(multiSelectMode);
+  btn.title=multiSelectMode ? 'Selección múltiple activada' : 'Seleccionar varios días';
+  btn.setAttribute('aria-label', btn.title);
   if(multiSelectMode){
     btn.classList.add('active');
     if(selectedDays.size>0){
@@ -3456,10 +3487,25 @@ function calcResumen(){
 // ==========================================
 function calcCrexMes(){
   // Regla estimativa:
-  // - Exceso entre ref (37,5h x sem) y limite (40h x sem) -> CREX pagado a 12€/h
-  // - Exceso sobre 40h x sem -> genera DSJ, NO se paga
-  // En turno fijo se usa el cómputo cuatrimestral de la cadencia, no el periodo mensual.
+  // - Régimen general: exceso entre ref (37,5h x sem) y límite (40h x sem) -> CREX a 12€/h
+  // - Exceso sobre 40h x sem -> genera DSJ informativo, NO se paga como CREX
+  // - Turno fijo/cadencia: la referencia es cuatrimestral. Para no duplicar importes,
+  //   la nómina solo calcula CREX cuando el mes de devengo cierra el cuatrimestre
+  //   oficial (mayo, septiembre o enero). En los meses intermedios queda pendiente.
   var r = cfg.regimen || 'general';
+
+  if(r === 'fijo' && !esMesCierreCuatrimestreTurnos(month)){
+    var qPend = getCuatrimestreTurnos(year, month);
+    return {
+      horas:0,
+      importe:0,
+      horasDSJ:0,
+      pendiente:true,
+      periodoLabel:qPend.label,
+      cierreLabel:getCierreCuatrimestreTurnosLabel(year, month)
+    };
+  }
+
   var p = (r === 'fijo') ? getCuatrimestreTurnos(year, month) : getPeriodForMonth(year,month);
   var totalH=0;
   var runner=new Date(p.start);
@@ -3476,24 +3522,24 @@ function calcCrexMes(){
     runner.setDate(runner.getDate()+1);
   }
   totalH += calcHorasBajaEnPeriodo(p.start, p.end);
-  var ref   = p.requiredHours;        // horaRef x semanas
-  var limit = p.weeks * 40;           // 40h x semanas (limite absoluto)
+  var ref   = p.requiredHours;        // referencia del periodo
+  var limit = p.weeks * 40;           // 40h x semanas del periodo (límite absoluto estimativo)
   var diff  = totalH - ref;
-  if(diff <= 0) return {horas:0, importe:0, horasDSJ:0};
+  if(diff <= 0) return {horas:0, importe:0, horasDSJ:0, pendiente:false, periodoLabel:p.label||'', cierreLabel:''};
+
   // Régimen 40h: no hay tramo CREX, DSJ desde la primera hora sobre 40h
   if(r !== 'general' && r !== 'fijo'){
     var horasSobreLimite40 = Math.max(0, totalH - limit);
-    return {horas:0, importe:0, horasDSJ: horasSobreLimite40};
+    return {horas:0, importe:0, horasDSJ: horasSobreLimite40, pendiente:false, periodoLabel:p.label||'', cierreLabel:''};
   }
-  // Régimen general (37,5h): CREX entre ref y 40h/sem
-  // Horas pagables como CREX: solo hasta el limite de 40h/sem
+
+  // Régimen general/turno fijo al cierre: CREX entre ref y 40h/sem
   var horasCrexRaw = Math.min(diff, limit - ref);
-  if(horasCrexRaw <= 0) return {horas:0, importe:0, horasDSJ: Math.max(0, diff)};
-  // Redondeo: fraccion >= 0.5 sube, < 0.5 se trunca
+  if(horasCrexRaw <= 0) return {horas:0, importe:0, horasDSJ: Math.max(0, diff), pendiente:false, periodoLabel:p.label||'', cierreLabel:''};
+  // Redondeo: fracción >= 0.5 sube, < 0.5 se trunca
   var horasCrex = Math.floor(horasCrexRaw) + (horasCrexRaw % 1 >= 0.5 ? 1 : 0);
-  // Horas sobre el limite -> DSJ (informativo)
   var horasSobreLimite = Math.max(0, totalH - limit);
-  return {horas: horasCrex, importe: horasCrex * 12, horasDSJ: horasSobreLimite};
+  return {horas: horasCrex, importe: horasCrex * 12, horasDSJ: horasSobreLimite, pendiente:false, periodoLabel:p.label||'', cierreLabel:''};
 }
 
 function calcServiciosExtraordinariosMes(){
@@ -3663,10 +3709,18 @@ function calcNomina(noReloadInputs){
   var crexDSJnota = (crex.horasDSJ > 0) ? ' <span style="font-size:10px;color:#b45309">(+'+crex.horasDSJ.toFixed(1)+'h → DSJ)</span>' : '';
   var crexRow = '';
   var regimenCrex = cfg.regimen || 'general';
-  if(regimenCrex === 'general' || regimenCrex === 'fijo'){
+  if(regimenCrex === 'fijo'){
+    if(crex.pendiente){
+      crexRow = '<div class="nom-row" style="color:#fbbf24"><span>+ CREX turno fijo/cadencia:</span><strong>Pendiente cierre '+crex.cierreLabel+'</strong></div>';
+    } else {
+      crexRow = crex.horas > 0
+        ? '<div class="nom-row var"><span>+ CREX cierre cuatrimestral ('+crex.horas+'h × 12,00 €)'+crexDSJnota+':</span><strong>'+crex.importe.toFixed(2)+' €</strong></div>'
+        : '<div class="nom-row" style="color:#aaa"><span>+ CREX cierre cuatrimestral:</span><strong>0,00 €</strong></div>';
+    }
+  } else if(regimenCrex === 'general'){
     crexRow = crex.horas > 0
       ? '<div class="nom-row var"><span>+ CREX ('+crex.horas+'h × 12,00 €)'+crexDSJnota+':</span><strong>'+crex.importe.toFixed(2)+' €</strong></div>'
-      : '<div class="nom-row" style="color:#aaa"><span>+ CREX (horas de exceso hasta 40h/'+(regimenCrex==='fijo'?'cuatrimestre':'sem')+'):</span><strong>0,00 €</strong></div>';
+      : '<div class="nom-row" style="color:#aaa"><span>+ CREX (horas de exceso hasta 40h/sem):</span><strong>0,00 €</strong></div>';
   } else {
     var dsjNota = crex.horasDSJ > 0 ? ' <span style="font-size:10px;color:#b45309">('+crex.horasDSJ.toFixed(1)+'h → DSJ)</span>' : '';
     crexRow = '<div class="nom-row" style="color:#aaa"><span>Régimen 40h — sin CREX'+dsjNota+':</span><strong>—</strong></div>';
@@ -3693,7 +3747,14 @@ function calcNomina(noReloadInputs){
   // Detalle INCENTIVOS en nómina
   var det=document.getElementById('nominaIncentivosDetail');
   var modificacionesDetalle = ptsModificaciones > 0 ? '<div class="br" style="color:#7c3aed"><span>Modificaciones — Puntos modificaciones ('+ptsModificaciones.toFixed(2)+' pts):</span><strong>'+impModificaciones.toFixed(2)+' €</strong></div>' : '';
-  var crexDetalle = '<div class="br"><span>CREX — Horas de exceso del periodo:</span><strong>'+crex.horas+' h</strong></div><div class="br"><span>Importe CREX ('+crex.horas+' × 12,00 €):</span><strong style="color:var(--verde)">'+crex.importe.toFixed(2)+' €</strong></div>';
+  var crexDetalle = '';
+  if((cfg.regimen || 'general') === 'fijo' && crex.pendiente){
+    crexDetalle = '<div class="br" style="color:#b45309"><span>CREX turno fijo/cadencia:</span><strong>Pendiente al cierre '+crex.cierreLabel+'</strong></div><div class="br"><span>Periodo cuatrimestral oficial:</span><strong>'+crex.periodoLabel+'</strong></div><div class="br"><span>Importe aplicado en esta nómina:</span><strong>0,00 €</strong></div>';
+  } else if((cfg.regimen || 'general') === 'fijo'){
+    crexDetalle = '<div class="br"><span>CREX — Cierre cuatrimestral:</span><strong>'+crex.horas+' h</strong></div><div class="br"><span>Periodo cuatrimestral oficial:</span><strong>'+(crex.periodoLabel || '—')+'</strong></div><div class="br"><span>Importe CREX ('+crex.horas+' × 12,00 €):</span><strong style="color:var(--verde)">'+crex.importe.toFixed(2)+' €</strong></div>';
+  } else {
+    crexDetalle = '<div class="br"><span>CREX — Horas de exceso del periodo:</span><strong>'+crex.horas+' h</strong></div><div class="br"><span>Importe CREX ('+crex.horas+' × 12,00 €):</span><strong style="color:var(--verde)">'+crex.importe.toFixed(2)+' €</strong></div>';
+  }
   var sExtDetalle = sExt.importe > 0
     ? '<div class="br" style="color:#be185d"><span>Serv. Ext. DAS rem. ('+sExt.nDASR+') + DF rem. ('+sExt.nDFR+') + ESS ('+sExt.nESS+') × 96 €:</span><strong>'+sExt.importe.toFixed(2)+' €</strong></div>'
     : '';
@@ -5317,6 +5378,13 @@ window.onload=function(){
   // Sincronización automática cifrada al arrancar
   autoSyncGistOnLoad();
 };
+
+try {
+  window.addEventListener('resize', function(){
+    if(document.getElementById('mselToggleBtn')) updateMultiSelectUI();
+  });
+} catch(e) {}
+
 </script>
 </body>
 </html>
