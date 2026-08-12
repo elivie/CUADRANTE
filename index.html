@@ -275,6 +275,19 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 }
 </style>
 
+
+<style id="das-df-origin-style">
+.origen-servicio-block{display:none;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:9px 10px;margin-bottom:8px}
+.origen-servicio-block .origen-title{font-size:12px;font-weight:800;margin-bottom:6px;color:#334155}
+.origen-servicio-wrap{position:relative;width:100%}
+.origen-servicio-wrap::after{content:'▾';position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:900;color:#475569;pointer-events:none}
+.origen-servicio-select{width:100%;border:1px solid #94a3b8;border-radius:8px;padding:8px 34px 8px 9px;background:#fff;font-weight:700;color:#334155;appearance:none;-webkit-appearance:none}
+.origen-servicio-select:focus{border-color:var(--verde);box-shadow:0 0 0 2px rgba(22,163,74,.12)}
+.origen-servicio-help{font-size:10px;color:#64748b;margin-top:5px;line-height:1.35}
+.origen-badge{display:inline-flex;align-items:center;justify-content:center;gap:2px;margin-left:3px;padding:1px 4px;border-radius:5px;font-size:8px;font-weight:900;line-height:1.15;background:#fce7f3;color:#be185d;border:1px solid #f9a8d4}
+.origen-badge.df{background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe}
+</style>
+
 </head>
 <body>
 
@@ -699,7 +712,7 @@ button[aria-label*="EDITAR CUADRANTE" i] {
       <div class="rule-row"><span>🌅🌙 Doblete (D)</span><strong>Mañana + noche según Ajustes</strong></div>
       <div class="rule-row"><span>📄 DAS</span><strong>Descanso Adicional Singularizado</strong></div>
       <div class="rule-row"><span>🏛️ DF</span><strong>Día Festivo libre · 7,5h</strong></div>
-      <div class="rule-row"><span>💼 DAS/DF remunerado</span><strong>DAS o DF con marca R · 96€</strong></div>
+      <div class="rule-row"><span>💼 DAS/DF remunerado</span><strong>El servicio trabajado conserva el origen DAS/DF · 96€</strong></div>
       <div class="rule-row"><span>🌟 Esp.Sing.</span><strong>Especial Singularización · 96€</strong></div>
       <div class="rule-row"><span>⏳ DSJ</span><strong>Descanso por superación de jornada</strong></div>
       <div class="rule-row"><span>📋 AP</span><strong>Asunto Particular · 7,5h</strong></div>
@@ -810,6 +823,17 @@ button[aria-label*="EDITAR CUADRANTE" i] {
         <input type="checkbox" id="modalRemunerado" style="width:17px;height:17px;accent-color:#16a34a">
         <span><strong>Servicio remunerado</strong> — añadir 96 € en nómina y mostrar marca <strong>R</strong> en el cuadrante.</span>
       </label>
+    </div>
+    <div id="modalOrigenBlock" class="origen-servicio-block">
+      <div class="origen-title">💼 Procedencia del servicio</div>
+      <div class="origen-servicio-wrap">
+        <select id="modalOrigenServicio" class="origen-servicio-select" aria-label="Procedencia del servicio">
+          <option value="">Normal — servicio ordinario</option>
+          <option value="DAS">📄 DAS R — procede de un DAS planificado</option>
+          <option value="DF">🏛️ DF R — procede de un DF planificado</option>
+        </select>
+      </div>
+      <div class="origen-servicio-help">▼ Es un desplegable. <strong>No cambia el horario.</strong> Si el día es nuevo, Mañana/Tarde/Noche toma su horario de Ajustes; DAS R/DF R solo indica la procedencia y la remuneración.</div>
     </div>
     <div id="modalHoras">
       <div class="ig2">
@@ -932,7 +956,7 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 
 <div class="modal-overlay license-overlay" id="licenseModalOverlay" onclick="closeLicenseModalOutside(event)" role="dialog" aria-modal="true" aria-labelledby="licenseModalTitle">
   <div class="modal license-modal">
-    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.5.3</h3>
+    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.6</h3>
     <div class="license-subtitle">Copyright © 2026 Ivan DM. Todos los derechos reservados.</div>
     <div class="license-content">
       <h4>1. Titularidad</h4>
@@ -1059,7 +1083,16 @@ var TURNO_BAR_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSS','PN
 var MODAL_TURNOS_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSS','PNV','V','L','B','S'];
 
 function esTurnoRemunerable(tKey){ return tKey==='DA' || tKey==='DF'; }
-function esServicioExtraordinarioRegistro(s){ return !!(s && (s.t==='ESS' || s.t==='DASR' || s.t==='DFR' || ((s.t==='DA' || s.t==='DF') && s.remunerado))); }
+function esServicioConOrigenRemunerado(s){
+  return !!(s && (s.origenServicio==='DAS' || s.origenServicio==='DF'));
+}
+function esServicioExtraordinarioRegistro(s){
+  return !!(s && (
+    s.t==='ESS' || s.t==='DASR' || s.t==='DFR' ||
+    ((s.t==='DA' || s.t==='DF') && s.remunerado) ||
+    esServicioConOrigenRemunerado(s)
+  ));
+}
 function normalizarServiciosRemuneradosLegacy(){
   if(!shifts) return;
   Object.keys(shifts).forEach(function(k){
@@ -2043,11 +2076,11 @@ function renderCalendar(){
       cell.appendChild(badge);
     }
 
-    if(esServicioExtraordinarioRegistro(s) && (s.t==='DA' || s.t==='DF')){
+    if(esServicioConOrigenRemunerado(s) || ((s.t==='DA'||s.t==='DF') && s.remunerado)){
       var rb = document.createElement('span');
-      rb.className = 'rem-badge';
-      rb.innerText = 'R';
-      rb.title = 'Servicio remunerado';
+      rb.className = 'origen-badge' + (s.origenServicio==='DF' || (s.t==='DF' && s.remunerado) ? ' df' : '');
+      rb.innerText = (s.origenServicio==='DF' || (s.t==='DF' && s.remunerado)) ? 'DF R' : 'DAS R';
+      rb.title = ((s.origenServicio==='DF' || (s.t==='DF' && s.remunerado)) ? 'Servicio de mañana/tarde/noche procedente de un DF remunerado' : 'Servicio de mañana/tarde/noche procedente de un DAS remunerado');
       cell.appendChild(rb);
     }
     
@@ -2087,7 +2120,7 @@ function renderCalendar(){
         ch.innerText=iniM+'-'+finM+'\n'+iniN+'-'+finN;
         ch.style.whiteSpace='pre';
       } else {
-        var hVal = getHorasComputablesRegistro(key, s);
+        var hVal = getHorasServicioRegistro(key, s);
         ch.innerText=hVal+'h';
       }
       cell.appendChild(ch);
@@ -2379,11 +2412,7 @@ function assignToSelection(tKey){
     showToast(msg);
   };
 
-  if(esTurnoRemunerable(tKey)){
-    preguntarRemunerado(tKey, aplicarLote);
-  } else {
-    aplicarLote(false);
-  }
+  aplicarLote(false);
 }
 
 function assignSelected(tKey){
@@ -2433,12 +2462,8 @@ function assignSelected(tKey){
   }
 
   var dayToAssign = selectedDay;
-  if(esTurnoRemunerable(tKey)){
-    preguntarRemunerado(tKey, function(rem){
-      guardarTurnoAsignado(dayToAssign, tKey, rem);
-    });
-    return;
-  }
+  // DAS/DF son ahora únicamente el nombre del descanso planificado.
+  // La remuneración se define al editar el servicio que finalmente se trabaja.
   guardarTurnoAsignado(dayToAssign, tKey, false);
 }
 
@@ -2484,9 +2509,12 @@ function guardarTurnoAsignado(day, tKey, remuneradoFlag){
   if(!shifts[day].companeros) shifts[day].companeros=[];
   if(!shifts[day].nota) shifts[day].nota='';
   if(esTurnoRemunerable(tKey)){
-    shifts[day].remunerado = !!remuneradoFlag;
+    // DAS/DF directos son descansos planificados, no servicios remunerados.
+    delete shifts[day].remunerado;
+    delete shifts[day].origenServicio;
   } else {
     delete shifts[day].remunerado;
+    delete shifts[day].origenServicio;
   }
   
   save(); renderAll();
@@ -2547,15 +2575,17 @@ function esTurnoServicioCadencia(tKey){
 // Horas computables de un registro del cuadrante.
 // En turno fijo, una V computa las horas del servicio de cadencia que sustituye,
 // aunque caiga en sábado/domingo/festivo. El saliente y los libres no computan.
-function getHorasComputablesRegistro(dateStr, registro){
+// Horas reales del servicio del registro (sin aplicar la deducción del DAS/DF de origen).
+// Un DAS/DF que sigue siendo descanso no suma horas realizadas.
+function getHorasServicioRegistro(dateStr, registro){
   if(!registro || !registro.t) return 0;
   var tKey = registro.t;
   var tObj = TURNOS[tKey];
   if(!tObj || !tObj.compHoras) return 0;
 
-  // Baja médica: es día deducible. En turno fijo computa las horas del servicio
-  // planificado por cadencia que deja de prestarse; en el resto, la referencia diaria.
   if(tKey === 'B') return getHorasBajaDia(dateStr);
+
+  if(tKey === 'DA' || tKey === 'DF' || tKey === 'DASR' || tKey === 'DFR') return 0;
 
   if(tKey === 'V' && (cfg.regimen||'general') === 'fijo'){
     var tCad = getTurnoCadenciaParaFecha(dateStr);
@@ -2573,6 +2603,23 @@ function getHorasComputablesRegistro(dateStr, registro){
   }
 
   return registro.h !== undefined ? registro.h : (TURNO_HORAS_DEF[tKey] ? TURNO_HORAS_DEF[tKey].h : 0);
+}
+
+// El DAS/DF es un descanso que descuenta jornada. Si se trabaja ese día,
+// el servicio suma sus horas y el origen DAS/DF resta 7,5 h: el trabajo
+// conserva su condición de servicio extraordinario remunerado, pero no
+// duplica el cómputo ordinario de jornada.
+function getDeduccionDASDFRegistro(registro){
+  if(!registro) return 0;
+  if(registro.origenServicio==='DAS' || registro.origenServicio==='DF') return 7.5;
+  if(registro.t==='DA' || registro.t==='DF' || registro.t==='DASR' || registro.t==='DFR') return 7.5;
+  return 0;
+}
+
+function getHorasComputablesRegistro(dateStr, registro){
+  var reales = getHorasServicioRegistro(dateStr, registro);
+  var deduccion = getDeduccionDASDFRegistro(registro);
+  return Math.round((reales - deduccion)*10)/10;
 }
 
 
@@ -3187,7 +3234,7 @@ function calcQuickStats(){
     if(s && s.t){
       var tObj=TURNOS[s.t];
       if(tObj && tObj.compHoras && s.t!=='B'){
-        var horas = getHorasComputablesRegistro(k, s);
+        var horas = getHorasServicioRegistro(k, s);
         totalH += horas;
       }
       if(s.t==='N'||s.t==='D') nN++;
@@ -3279,6 +3326,29 @@ function openModal(key){
   document.getElementById('modalHmns').checked = !!(s.hmns);
   var remChk=document.getElementById('modalRemunerado');
   if(remChk) remChk.checked = !!(s.remunerado || s.t==='DASR' || s.t==='DFR');
+  var origenSel=document.getElementById('modalOrigenServicio');
+  if(origenSel){
+    origenSel.value = (s.origenServicio==='DAS'||s.origenServicio==='DF') ? s.origenServicio : '';
+    // La procedencia es independiente del horario: cambiarla nunca toca hora inicio/fin.
+    origenSel.onchange = function(){
+      // DAS R / DF R es solo la procedencia del servicio.
+      // No debe crear un horario de 8,5 h ni usar los antiguos 06:00–14:30.
+      // Si el día conserva ese horario heredado, lo normalizamos al configurado
+      // en Ajustes para el tipo de turno actual.
+      var iniEl=document.getElementById('modalInicio');
+      var finEl=document.getElementById('modalFin');
+      if(iniEl && finEl && (tKey==='M'||tKey==='T'||tKey==='N')){
+        var iniCfg = tKey==='M' ? (cfg.iniM||'06:30') : tKey==='T' ? (cfg.iniT||'14:00') : (cfg.iniN||'22:00');
+        var finCfg = tKey==='M' ? (cfg.finM||'14:00') : tKey==='T' ? (cfg.finT||'21:30') : (cfg.finN||'05:30');
+        // 06:00–14:30 era el horario heredado que estaba provocando las 8,5 h.
+        if(iniEl.value==='06:00' && finEl.value==='14:30'){
+          iniEl.value=iniCfg;
+          finEl.value=finCfg;
+        }
+      }
+      actualizarModBlock();
+    };
+  }
   actualizarModBlock();
   
   onModalTurnoChange();
@@ -3306,8 +3376,11 @@ function onModalTurnoChange(){
   var compD=document.getElementById('modalCompBlockD');
   var salHint=document.getElementById('modalSalienteHint');
   var remBlock=document.getElementById('modalRemBlock');
+  var origenBlock=document.getElementById('modalOrigenBlock');
   if(salHint) salHint.style.display=(tKey==='S')?'block':'none';
-  if(remBlock) remBlock.style.display=esTurnoRemunerable(tKey)?'block':'none';
+  // El antiguo selector de remuneración queda solo como compatibilidad interna.
+  if(remBlock) remBlock.style.display='none';
+  if(origenBlock) origenBlock.style.display=(tKey==='M'||tKey==='T'||tKey==='N'||tKey==='D')?'block':'none';
   if(tKey==='D'){
     box.style.display='none';
     boxD.style.display='block';
@@ -3317,9 +3390,17 @@ function onModalTurnoChange(){
   } else if(tKey && TURNOS[tKey] && TURNOS[tKey].compHoras){
     box.style.display='block';
     boxD.style.display='none';
-    if(!document.getElementById('modalInicio').value){
-      document.getElementById('modalInicio').value=TURNO_HORAS_DEF[tKey].ini;
-      document.getElementById('modalFin').value=TURNO_HORAS_DEF[tKey].fin;
+    // Solo propone el horario por defecto si el servicio aún no tiene horario.
+    // Cambiar Normal ↔ DAS R ↔ DF R no modifica nunca las horas ya introducidas.
+    var iniActual=document.getElementById('modalInicio').value;
+    var finActual=document.getElementById('modalFin').value;
+    if(!iniActual && !finActual){
+      // Para un servicio nuevo, el horario sale SIEMPRE de Ajustes.
+      // No usar valores antiguos de TURNO_HORAS_DEF si la configuración cambió.
+      var iniCfg = tKey==='M' ? (cfg.iniM||'06:30') : tKey==='T' ? (cfg.iniT||'14:00') : (cfg.iniN||'22:00');
+      var finCfg = tKey==='M' ? (cfg.finM||'14:00') : tKey==='T' ? (cfg.finT||'21:30') : (cfg.finN||'05:30');
+      document.getElementById('modalInicio').value=iniCfg;
+      document.getElementById('modalFin').value=finCfg;
     }
     if(compNormal) compNormal.style.display='block';
     if(compD) compD.style.display='none';
@@ -3445,9 +3526,25 @@ function saveModal(){
     if(!(tKey==='V' && (cfg.regimen||'general')==='fijo') || notaModal){ shifts[modalDay].nota=notaModal; }
     shifts[modalDay].hmps = document.getElementById('modalHmps').checked;
     shifts[modalDay].hmns = document.getElementById('modalHmns').checked;
-    if(esTurnoRemunerable(tKey)){
-      shifts[modalDay].remunerado = !!(document.getElementById('modalRemunerado') && document.getElementById('modalRemunerado').checked);
+    var origenSel = document.getElementById('modalOrigenServicio');
+    var origen = (origenSel && (tKey==='M'||tKey==='T'||tKey==='N'||tKey==='D')) ? origenSel.value : '';
+    if(origen==='DAS' || origen==='DF'){
+      shifts[modalDay].origenServicio = origen;
+      shifts[modalDay].remunerado = true;
+      // DAS R / DF R NO sustituyen el horario del servicio.
+      // El cómputo usa las horas reales de Hora inicio / Hora fin.
+      if(tKey==='M'||tKey==='T'||tKey==='N'){
+        shifts[modalDay].ini = document.getElementById('modalInicio').value || shifts[modalDay].ini || '';
+        shifts[modalDay].fin = document.getElementById('modalFin').value || shifts[modalDay].fin || '';
+        shifts[modalDay].h = calcHoras(shifts[modalDay].ini, shifts[modalDay].fin);
+      }
     } else {
+      delete shifts[modalDay].origenServicio;
+      delete shifts[modalDay].remunerado;
+    }
+    // DAS/DF directos son descansos, no llevan remuneración desde este selector.
+    if(tKey==='DA' || tKey==='DF'){
+      delete shifts[modalDay].origenServicio;
       delete shifts[modalDay].remunerado;
     }
     sincronizarModDia(modalDay, shifts[modalDay]);
@@ -3536,7 +3633,7 @@ function calcResumen(){
     if(s && s.t && counts[s.t]!==undefined){
       counts[s.t]++;
       if(TURNOS[s.t].compHoras && s.t!=='B'){
-        var hRes = getHorasComputablesRegistro(k, s);
+        var hRes = getHorasServicioRegistro(k, s);
         totalH += hRes;
       }
       if(s.t==='N'||s.t==='D') noches++;
@@ -3615,7 +3712,7 @@ function calcResumen(){
       var s=shifts[k];
       if(s && s.t && annCounts[s.t]!==undefined){
         annCounts[s.t]++;
-        if(TURNOS[s.t].compHoras) annH += getHorasComputablesRegistro(k, s);
+        if(TURNOS[s.t].compHoras) annH += getHorasServicioRegistro(k, s);
         if(s.t==='N'||s.t==='D') annN++;
         if(s.t==='ES'||isFestivo(k,s.t)){
           if(s.t!=='L'&&s.t!=='B'&&s.t!=='AP'&&s.t!=='V'&&s.t!=='S') annF++;
@@ -3826,8 +3923,8 @@ function calcServiciosExtraordinariosMes(){
     var k=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
     var s=shifts[k];
     if(s){
-      if((s.t==='DA' && s.remunerado) || s.t==='DASR') nDASR++;
-      if((s.t==='DF' && s.remunerado) || s.t==='DFR') nDFR++;
+      if((s.t==='DA' && s.remunerado) || s.t==='DASR' || s.origenServicio==='DAS') nDASR++;
+      if((s.t==='DF' && s.remunerado) || s.t==='DFR' || s.origenServicio==='DF') nDFR++;
       if(s.t==='ESS') nESS++;
     }
     runner.setDate(runner.getDate()+1);
@@ -4342,27 +4439,37 @@ function calcDASAcumulado(){
   }
   var totalFest = 0;
   var totalNoc  = 0;
-  // Scan all shifts
+  // Scan all shifts. Un festivo trabajado que procede de un DAS/DF remunerado
+  // NO cuenta para generar otro DAS por festivos: el descanso que correspondía
+  // a ese día ya fue sustituido por el servicio remunerado.
   var keys = Object.keys(shifts);
   keys.forEach(function(k){
     var s = shifts[k];
     if(!s || !s.t) return;
     var t = s.t;
     if(!TURNOS[t] || !TURNOS[t].compHoras) return;
-    // DAS consumed days don't count. 'S' (Saliente, incl. cadencia fija) tampoco genera DAS.
+    // DAS consumidos, libres, bajas, permisos y saliente no son servicios que generen DAS.
     if(t==='DA'||t==='L'||t==='B'||t==='AP'||t==='V'||t==='DF'||t==='DSJ'||t==='PSS'||t==='PNV'||t==='S') return;
-    if(esServicioFestivo(k,t))  totalFest++;
-    else if(esServicioNocturno(k,t)) totalNoc++;
+
+    if(esServicioFestivo(k,t)){
+      // Si este servicio sustituyó un DAS/DF remunerado, el festivo ya está
+      // compensado por ese DAS/DF y no debe generar un segundo DAS.
+      var festivoCompensado = (s.origenServicio==='DAS' || s.origenServicio==='DF' ||
+                               ((t==='DA'||t==='DF') && s.remunerado));
+      if(!festivoCompensado) totalFest++;
+    } else if(esServicioNocturno(k,t)) {
+      totalNoc++;
+    }
   });
   var dasFest = Math.floor(totalFest / 3);
-  var dasNoc  = Math.floor(totalNoc  / 6);
+  var dasNoc  = Math.floor(totalNoc / 6);
   return {
     festivos:  totalFest,
     nocturnos: totalNoc,
     dasFest:   dasFest,
     dasNoc:    dasNoc,
     festPend:  totalFest % 3,
-    nocPend:   totalNoc  % 6,
+    nocPend:   totalNoc % 6,
     totalDAS:  dasFest + dasNoc
   };
 }
@@ -5415,7 +5522,7 @@ function exportarCuadrantePDF(){
         html += '<div class="turno" style="color:#0e7490">Vacaciones</div>';
       } else {
         html += '<div class="turno">' + tObj.label + '</div>';
-        var h = getHorasComputablesRegistro(k, s);
+        var h = getHorasServicioRegistro(k, s);
         if(h > 0) html += '<div class="horas">' + h + 'h</div>';
         if(s.ini && s.fin) html += '<div class="horas">' + s.ini + '-' + s.fin + '</div>';
       }
