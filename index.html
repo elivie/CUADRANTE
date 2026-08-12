@@ -38,7 +38,7 @@ nav button.active{background:var(--gris);color:var(--verde);}
 
 main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 
-.month-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;}
+.month-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;position:relative;min-height:34px;}
 .month-nav h2{font-size:18px;font-weight:800;color:var(--verde);min-width:170px;text-align:center;}
 .arr{background:var(--verde);color:#fff;border:none;border-radius:8px;width:34px;height:34px;font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
@@ -53,10 +53,21 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 .cal-cell{border:1.5px solid #ddd;border-radius:8px;padding:3px 2px;height:90px;overflow:hidden;display:flex;flex-direction:column;align-items:center;cursor:pointer;background:#fff;position:relative;transition: all 0.1s ease;}
 .cal-cell.sel {border-color:var(--azul)!important;border-width:2px;box-shadow:0 0 0 3px #b3cbe8;transform: scale(0.97);}
 .cal-cell.msel {border-color:#16a34a!important;border-width:2px;box-shadow:0 0 0 3px #bbf7d0;background:#f0fdf4!important;}
+.cal-cell.delete-selected {border-color:#dc2626!important;border-width:2px;box-shadow:0 0 0 3px #fecaca;background:#fff1f2!important;}
+.cal-cell .delete-badge{position:absolute;top:2px;right:4px;background:#dc2626;color:#fff;border-radius:999px;width:18px;height:18px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.22);}
 .cal-cell .msel-badge{position:absolute;top:2px;left:4px;background:#16a34a;color:#fff;border-radius:999px;width:16px;height:16px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.22);}
 .month-nav{position:relative;}
-.msel-toggle-icon{position:absolute;right:0;top:50%;transform:translateY(-50%);background:#fff;border:1.5px solid var(--azul);color:var(--azul);border-radius:10px;min-width:88px;height:32px;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 8px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.10);font-family:inherit;}
+.msel-toggle-icon{box-sizing:border-box;position:absolute;right:0;top:50%;transform:translateY(-50%);background:#fff;border:1.5px solid var(--azul);color:var(--azul);border-radius:10px;min-width:88px;height:32px;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 8px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.10);font-family:inherit;}
 .msel-toggle-icon.active{background:var(--azul);color:#fff;box-shadow:0 0 0 3px #b3cbe8;}
+.month-action-btn{box-sizing:border-box;position:absolute;left:0;top:50%;transform:translateY(-50%);background:#fff;border:1.5px solid #dc2626;color:#b91c1c;border-radius:10px;min-width:88px;height:32px;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 8px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.10);font-family:inherit;}
+.month-action-btn.active{background:#dc2626;color:#fff;box-shadow:0 0 0 3px #fecaca;}
+.edit-toggle{width:100%;height:34px;border:1.5px solid var(--verde);background:#fff;color:var(--verde);border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;margin-bottom:6px;font-family:inherit;}
+.edit-toggle.active{background:var(--verde);color:#fff;}
+.edit-mode-actions{display:flex;gap:8px;align-items:center;justify-content:center;background:#f0fdf4;border-radius:10px;padding:7px 9px;margin-bottom:6px;font-size:11px;font-weight:700;color:#166534;}
+.delete-actions{display:flex;gap:8px;align-items:center;justify-content:center;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:7px 9px;margin-bottom:6px;font-size:11px;font-weight:700;color:#9f1239;}
+.delete-actions button{border:none;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;}
+.delete-actions .delete-confirm{background:#dc2626;color:#fff;}
+.delete-actions .delete-cancel{background:#fff;color:#b91c1c;border:1px solid #fca5a5;}
 .sel-hint .msel-cancel-link{color:#dc2626;font-weight:800;text-decoration:underline;cursor:pointer;margin-left:6px;}
 .cal-cell .dn{font-size:11px;font-weight:700;margin-bottom:1px;}
 .cal-cell .ci{font-size:15px;line-height:1;}
@@ -201,9 +212,11 @@ input:focus,select:focus{border-color:var(--verde);}
 
 
 @media(max-width:520px){
-  .month-nav{gap:10px;}
-  .month-nav h2{min-width:140px;font-size:17px;}
-  .msel-toggle-icon{min-width:72px;height:31px;font-size:10.5px;padding:0 6px;border-radius:9px;}
+  /* Cabecera mensual compacta: evita que VARIOS/ELIMINAR invadan las flechas en móviles. */
+  .month-nav{gap:5px;padding:0 68px;min-height:34px;box-sizing:border-box;}
+  .month-nav h2{min-width:110px;font-size:16px;white-space:nowrap;}
+  .arr{width:29px;height:31px;font-size:19px;flex:0 0 29px;}
+  .msel-toggle-icon,.month-action-btn{box-sizing:border-box;min-width:72px;width:72px;height:31px;font-size:9.5px;padding:0 4px;border-radius:8px;gap:2px;}
 }
 
 @media(max-width:340px){
@@ -216,8 +229,10 @@ input:focus,select:focus{border-color:var(--verde);}
   .tb .ti{font-size:14px;}
   .cal-cell{min-height:52px;}
   .cal-cell .ci{font-size:13px;}
-  .month-nav h2{min-width:132px;font-size:16px;}
-  .msel-toggle-icon{min-width:68px;height:30px;font-size:10.5px;padding:0 6px;border-radius:9px;}
+  .month-nav{gap:4px;padding:0 62px;}
+  .month-nav h2{min-width:95px;font-size:15px;}
+  .arr{width:27px;height:30px;font-size:18px;flex-basis:27px;}
+  .msel-toggle-icon,.month-action-btn{box-sizing:border-box;min-width:62px;width:62px;height:30px;font-size:9px;padding:0 3px;border-radius:8px;gap:1px;}
 }
 </style>
 <meta name="theme-color" content="#1e3a6e">
@@ -243,6 +258,23 @@ input:focus,select:focus{border-color:var(--verde);}
   manifestLink.href = manifestURL;
   document.head.appendChild(manifestLink);
 </script>
+
+<style id="compact-edit-toggle">
+/* Botón de edición más fino para ganar espacio vertical al mostrar el cuadrante */
+#btnEditarCuadrante,
+#btnEditar,
+#editarCuadrante,
+.btn-editar-cuadrante,
+.edit-quadrant-btn,
+button[aria-label*="EDITAR CUADRANTE" i] {
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 3px 10px !important;
+  line-height: 20px !important;
+  font-size: 12px !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -268,12 +300,16 @@ input:focus,select:focus{border-color:var(--verde);}
 <main>
   <div id="vCuadrante">
     <div class="month-nav">
+      <button class="month-action-btn" id="deleteModeBtn" onclick="toggleDeleteMode()" title="Eliminar turnos de varios días" aria-label="Eliminar turnos de varios días">🗑️ Eliminar</button>
       <button class="arr" onclick="changeMonth(-1)">‹</button>
       <h2 id="monthLabel"></h2>
       <button class="arr" onclick="changeMonth(1)">›</button>
       <button class="msel-toggle-icon" id="mselToggleBtn" onclick="toggleMultiSelect()" title="Seleccionar varios días" aria-label="Seleccionar varios días">☑️ Varios</button>
     </div>
+    <button class="edit-toggle" id="editToggleBtn" onclick="toggleEditMode()">✏️ EDITAR CUADRANTE</button>
     <div class="turno-bar" id="turnoBar"></div>
+    <div class="edit-mode-actions" id="editModeActions" style="display:none">✏️ Modo edición activo · <button type="button" onclick="toggleEditMode()" style="border:0;background:none;color:#166534;font:inherit;font-weight:900;cursor:pointer;text-decoration:underline">ocultar botones</button></div>
+    <div class="delete-actions" id="deleteActions" style="display:none">🗑️ <span id="deleteCount">0 días seleccionados</span><button class="delete-cancel" onclick="cancelDeleteMode()">Cancelar</button><button class="delete-confirm" onclick="confirmDeleteSelected()">Eliminar</button></div>
     <div class="sel-hint" id="selHint">Selecciona un día en el calendario para asignarle un turno</div>
     <div class="period-banner" id="periodBanner"></div>
     <div class="cal" id="calendar"></div>
@@ -1246,6 +1282,9 @@ var shifts={};
 var selectedDay=null;
 var multiSelectMode=false;
 var selectedDays=new Set();
+var deleteMode=false;
+var deleteSelectedDays=new Set();
+var editMode=false;
 var modalDay=null;
 var cfg={
   base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general',
@@ -1869,11 +1908,16 @@ function changeMonth(dir){
   else if(month>11){ month=0; year++; }
   selectedDay=null;
   selectedDays.clear();
+  deleteSelectedDays.clear();
+  deleteMode=false;
+  updateDeleteUI();
   renderAll();
 }
 
 function renderAll(){
   renderTurnoBar();
+  updateEditUI();
+  updateDeleteUI();
   renderCalendar();
   calcQuickStats();
 }
@@ -1884,6 +1928,8 @@ function renderAll(){
 function renderTurnoBar(){
   var bar=document.getElementById('turnoBar');
   bar.innerHTML='';
+  bar.style.display = editMode && !deleteMode ? 'grid' : 'none';
+  if(!editMode || deleteMode) return;
   TURNO_BAR_ORDER.forEach(function(k){
     var t=TURNOS[k];
     if(!t) return;
@@ -1943,6 +1989,7 @@ function renderCalendar(){
     
     if(selectedDay===key) cell.classList.add('sel');
     if(multiSelectMode && selectedDays.has(key)) cell.classList.add('msel');
+    if(deleteMode && deleteSelectedDays.has(key)) cell.classList.add('delete-selected');
     
     var fest=isFestivo(key, s.t);
     var esp=isEspSig(key);
@@ -2081,9 +2128,22 @@ function renderCalendar(){
       mBadge.innerText='✓';
       cell.appendChild(mBadge);
     }
+    if(deleteMode && deleteSelectedDays.has(key)){
+      var dBadge=document.createElement('span');
+      dBadge.className='delete-badge';
+      dBadge.innerText='✓';
+      cell.appendChild(dBadge);
+    }
 
     cell.onclick=(function(k){
       return function(){
+        if(deleteMode){
+          if(deleteSelectedDays.has(k)) deleteSelectedDays.delete(k);
+          else deleteSelectedDays.add(k);
+          updateDeleteUI();
+          renderCalendar();
+          return;
+        }
         if(multiSelectMode){
           if(selectedDays.has(k)) selectedDays.delete(k);
           else selectedDays.add(k);
@@ -2120,9 +2180,97 @@ function renderCalendar(){
 }
 
 // ==========================================
+// EDICIÓN Y ELIMINACIÓN MÚLTIPLE
+// ==========================================
+function toggleEditMode(){
+  if(deleteMode) return;
+  editMode=!editMode;
+  updateEditUI();
+  renderTurnoBar();
+}
+
+function updateEditUI(){
+  var btn=document.getElementById('editToggleBtn');
+  var actions=document.getElementById('editModeActions');
+  if(!btn) return;
+  btn.style.display = deleteMode ? 'none' : 'block';
+  btn.classList.toggle('active', editMode);
+  btn.innerHTML = editMode ? '✖️ OCULTAR EDICIÓN' : '✏️ EDITAR CUADRANTE';
+  if(actions) actions.style.display = editMode && !deleteMode ? 'flex' : 'none';
+  var hint=document.getElementById('selHint');
+  if(hint && !multiSelectMode && !deleteMode){
+    hint.style.display = editMode ? 'block' : 'none';
+    if(!editMode && !selectedDay) hint.innerHTML='';
+  }
+}
+
+function toggleDeleteMode(){
+  if(multiSelectMode) cancelMultiSelect();
+  deleteMode=!deleteMode;
+  deleteSelectedDays.clear();
+  selectedDay=null;
+  if(deleteMode) editMode=false;
+  updateDeleteUI();
+  updateEditUI();
+  renderAll();
+}
+
+function cancelDeleteMode(){
+  deleteMode=false;
+  deleteSelectedDays.clear();
+  updateDeleteUI();
+  renderAll();
+}
+
+function updateDeleteUI(){
+  var btn=document.getElementById('deleteModeBtn');
+  var actions=document.getElementById('deleteActions');
+  var count=document.getElementById('deleteCount');
+  var varios=document.getElementById('mselToggleBtn');
+  var hint=document.getElementById('selHint');
+  var n=deleteSelectedDays.size;
+  if(btn){
+    btn.classList.toggle('active', deleteMode);
+    btn.innerHTML=deleteMode ? '✖️ Cancelar' : '🗑️ Eliminar';
+  }
+  if(varios) varios.style.display=deleteMode ? 'none' : 'flex';
+  if(actions) actions.style.display=deleteMode ? 'flex' : 'none';
+  if(count) count.innerText=n+' día'+(n===1?' seleccionado':'s seleccionados');
+  if(hint){
+    if(deleteMode){
+      hint.style.display='block';
+      hint.innerHTML=n ? 'Marca o desmarca días. Cuando termines, pulsa <strong>Eliminar</strong>.' : '🗑️ <strong>Modo eliminar:</strong> toca los días cuyos turnos quieras eliminar.';
+    } else if(!multiSelectMode){
+      hint.style.display=editMode ? 'block' : 'none';
+    }
+  }
+}
+
+function confirmDeleteSelected(){
+  var dias=Array.from(deleteSelectedDays);
+  if(dias.length===0){ alert('Marca primero uno o varios días en el calendario'); return; }
+  var listado=dias.map(function(k){ return k.split('-').reverse().join('/'); }).sort().join(', ');
+  if(!confirm('⚠️ Vas a eliminar los turnos de '+dias.length+' días seleccionados.\n\n'+listado+'\n\nSolo se eliminarán los datos diarios de esos turnos. No se modificarán los ajustes, festivos ni la configuración de la aplicación.\n\n¿Continuar?')) return;
+  dias.forEach(function(k){
+    if(shifts[k]){
+      sincronizarModDia(k, {hmps:false, hmns:false, h:0});
+      delete shifts[k];
+    }
+  });
+  save();
+  deleteMode=false;
+  deleteSelectedDays.clear();
+  selectedDay=null;
+  updateDeleteUI();
+  renderAll();
+  showToast(dias.length+' turno'+(dias.length===1?'':'s')+' eliminado'+(dias.length===1?'':'s'));
+}
+
+// ==========================================
 // SELECCIÓN MÚLTIPLE DE DÍAS
 // ==========================================
 function toggleMultiSelect(){
+  if(deleteMode) return;
   multiSelectMode=!multiSelectMode;
   selectedDays.clear();
   selectedDay=null;
