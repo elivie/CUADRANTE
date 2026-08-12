@@ -63,7 +63,6 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 .month-action-btn.active{background:#dc2626;color:#fff;box-shadow:0 0 0 3px #fecaca;}
 .edit-toggle{width:100%;height:34px;border:1.5px solid var(--verde);background:#fff;color:var(--verde);border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;margin-bottom:6px;font-family:inherit;}
 .edit-toggle.active{background:var(--verde);color:#fff;}
-.edit-mode-actions{display:flex;gap:8px;align-items:center;justify-content:center;background:#f0fdf4;border-radius:10px;padding:7px 9px;margin-bottom:6px;font-size:11px;font-weight:700;color:#166534;}
 .delete-actions{display:flex;gap:8px;align-items:center;justify-content:center;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:7px 9px;margin-bottom:6px;font-size:11px;font-weight:700;color:#9f1239;}
 .delete-actions button{border:none;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer;}
 .delete-actions .delete-confirm{background:#dc2626;color:#fff;}
@@ -321,7 +320,6 @@ button[aria-label*="EDITAR CUADRANTE" i] {
     </div>
     <button class="edit-toggle" id="editToggleBtn" onclick="toggleEditMode()">✏️ EDITAR CUADRANTE</button>
     <div class="turno-bar" id="turnoBar"></div>
-    <div class="edit-mode-actions" id="editModeActions" style="display:none">✏️ Modo edición activo · <button type="button" onclick="toggleEditMode()" style="border:0;background:none;color:#166534;font:inherit;font-weight:900;cursor:pointer;text-decoration:underline">ocultar botones</button></div>
     <div class="delete-actions" id="deleteActions" style="display:none">🗑️ <span id="deleteCount">0 días seleccionados</span><button class="delete-cancel" onclick="cancelDeleteMode()">Cancelar</button><button class="delete-confirm" onclick="confirmDeleteSelected()">Eliminar</button></div>
     <div class="sel-hint" id="selHint">Selecciona un día en el calendario para asignarle un turno</div>
     <div class="period-banner" id="periodBanner"></div>
@@ -1996,7 +1994,12 @@ function renderCalendar(){
     var tInfoBanner = getTrimestreEspecial(year, month);
     banner.innerHTML='⭐ Mando / especial: el cómputo oficial es <strong>trimestral</strong> · '+tInfoBanner.label+' · Ref: <strong>'+tInfoBanner.requiredHours+'h</strong>';
   } else {
-    banner.innerHTML='⏱️ Periodo: <strong>'+pad2(p.start.getDate())+'/'+pad2(p.start.getMonth()+1)+'</strong> al <strong>'+pad2(p.end.getDate())+'/'+pad2(p.end.getMonth()+1)+'</strong> ('+p.weeks+' sem) · Ref: <strong>'+p.requiredHours+'h</strong>';
+    var creditoDASDF = getCreditoDASDFPeriodo(p.start,p.end);
+    var refEfectiva = Math.round((p.requiredHours - creditoDASDF)*10)/10;
+    var refTexto = creditoDASDF > 0
+      ? 'Ref: <strong>'+refEfectiva+'h</strong> <span style="font-weight:600;font-size:10px;opacity:.9">(−'+creditoDASDF+'h DAS/DF)</span>'
+      : 'Ref: <strong>'+p.requiredHours+'h</strong>';
+    banner.innerHTML='⏱️ <strong>'+pad2(p.start.getDate())+'/'+pad2(p.start.getMonth()+1)+'–'+pad2(p.end.getDate())+'/'+pad2(p.end.getMonth()+1)+'</strong> · '+p.weeks+' sem · '+refTexto;
   }
   
   var cal=document.getElementById('calendar');
@@ -2224,12 +2227,12 @@ function toggleEditMode(){
 
 function updateEditUI(){
   var btn=document.getElementById('editToggleBtn');
-  var actions=document.getElementById('editModeActions');
   if(!btn) return;
   btn.style.display = deleteMode ? 'none' : 'block';
   btn.classList.toggle('active', editMode);
-  btn.innerHTML = editMode ? '✖️ OCULTAR EDICIÓN' : '✏️ EDITAR CUADRANTE';
-  if(actions) actions.style.display = editMode && !deleteMode ? 'flex' : 'none';
+  btn.innerHTML = editMode ? '✖️ CERRAR EDICIÓN' : '✏️ EDITAR CUADRANTE';
+  btn.setAttribute('aria-label', editMode ? 'Cerrar edición del cuadrante' : 'Editar cuadrante');
+  btn.setAttribute('title', editMode ? 'Cerrar edición' : 'Editar cuadrante');
   var hint=document.getElementById('selHint');
   if(hint && !multiSelectMode && !deleteMode){
     hint.style.display = editMode ? 'block' : 'none';
