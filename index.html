@@ -2605,21 +2605,42 @@ function getHorasServicioRegistro(dateStr, registro){
   return registro.h !== undefined ? registro.h : (TURNO_HORAS_DEF[tKey] ? TURNO_HORAS_DEF[tKey].h : 0);
 }
 
-// El DAS/DF es un descanso que descuenta jornada. Si se trabaja ese día,
-// el servicio suma sus horas y el origen DAS/DF resta 7,5 h: el trabajo
-// conserva su condición de servicio extraordinario remunerado, pero no
-// duplica el cómputo ordinario de jornada.
-function getDeduccionDASDFRegistro(registro){
-  if(!registro) return 0;
-  if(registro.origenServicio==='DAS' || registro.origenServicio==='DF') return 7.5;
-  if(registro.t==='DA' || registro.t==='DF' || registro.t==='DASR' || registro.t==='DFR') return 7.5;
-  return 0;
+// DAS/DF normal: es un descanso planificado que reduce en 7,5 h la jornada
+// exigible del periodo, pero NO son horas realizadas.
+// DAS R / DF R: el día se trabaja y, por tanto, computan las horas REALES del
+// servicio (M/T/N/D). El origen DAS/DF solo sirve para consumir el descanso y
+// para la remuneración; no resta las horas trabajadas.
+function esDASDFDescanso(registro){
+  if(!registro || !registro.t) return false;
+  return (registro.t==='DA' || registro.t==='DF') && !registro.remunerado && !registro.origenServicio;
+}
+
+function getCreditoDASDFRegistro(registro){
+  return esDASDFDescanso(registro) ? 7.5 : 0;
 }
 
 function getHorasComputablesRegistro(dateStr, registro){
+  // Los DAS/DF de descanso no son horas realizadas.
+  if(esDASDFDescanso(registro)) return 0;
+  // Un DAS R/DF R cuenta las horas reales del servicio que se ha trabajado.
   var reales = getHorasServicioRegistro(dateStr, registro);
-  var deduccion = getDeduccionDASDFRegistro(registro);
-  return Math.round((reales - deduccion)*10)/10;
+  return Math.round(reales*10)/10;
+}
+
+function getCreditoDASDFPeriodo(inicio, fin){
+  var credito=0;
+  var runner=new Date(inicio);
+  while(runner<=fin){
+    var k=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
+    var s=shifts[k];
+    if(s) credito += getCreditoDASDFRegistro(s);
+    runner.setDate(runner.getDate()+1);
+  }
+  return Math.round(credito*10)/10;
+}
+
+function getReferenciaEfectivaPeriodo(p){
+  return Math.round((p.requiredHours - getCreditoDASDFPeriodo(p.start,p.end))*10)/10;
 }
 
 
@@ -3248,7 +3269,8 @@ function calcQuickStats(){
   }
   totalH += calcHorasBajaEnPeriodo(p.start, p.end);
   
-  var diff=Math.round((totalH-p.requiredHours)*10)/10;
+  var refEfectiva=getReferenciaEfectivaPeriodo(p);
+  var diff=Math.round((totalH-refEfectiva)*10)/10;
   var sStrip=document.getElementById('quickStats');
   sStrip.innerHTML='';
   
@@ -3316,6 +3338,15 @@ function openModal(key){
   
   document.getElementById('modalInicio').value=s.ini||'';
   document.getElementById('modalFin').value=s.fin||'';
+  // Si el servicio ya es DAS R/DF R y conserva el horario antiguo 06:00–14:30,
+  // corregirlo al abrir el editor según los horarios actuales de Ajustes.
+  var origenGuardado=(s.origenServicio==='DAS'||s.origenServicio==='DF');
+  if(origenGuardado && (s.t==='M'||s.t==='T'||s.t==='N') && s.ini==='06:00' && s.fin==='14:30'){
+    var iniCfg0=s.t==='M'?(cfg.iniM||'06:30'):s.t==='T'?(cfg.iniT||'14:00'):(cfg.iniN||'22:00');
+    var finCfg0=s.t==='M'?(cfg.finM||'14:00'):s.t==='T'?(cfg.finT||'21:30'):(cfg.finN||'05:30');
+    document.getElementById('modalInicio').value=iniCfg0;
+    document.getElementById('modalFin').value=finCfg0;
+  }
   // Campos doblete
   document.getElementById('modalIniM').value=s.iniM||'07:00';
   document.getElementById('modalFinM').value=s.finM||'14:30';
@@ -3332,15 +3363,15 @@ function openModal(key){
     // La procedencia es independiente del horario: cambiarla nunca toca hora inicio/fin.
     origenSel.onchange = function(){
       // DAS R / DF R es solo la procedencia del servicio.
-      // No debe crear un horario de 8,5 h ni usar los antiguos 06:00–14:30.
-      // Si el día conserva ese horario heredado, lo normalizamos al configurado
-      // en Ajustes para el tipo de turno actual.
+      // El tipo de turno manda sobre el horario: Mañana/Tarde/Noche usan Ajustes.
+      var tActual=document.getElementById('modalTurno').value;
       var iniEl=document.getElementById('modalInicio');
       var finEl=document.getElementById('modalFin');
-      if(iniEl && finEl && (tKey==='M'||tKey==='T'||tKey==='N')){
-        var iniCfg = tKey==='M' ? (cfg.iniM||'06:30') : tKey==='T' ? (cfg.iniT||'14:00') : (cfg.iniN||'22:00');
-        var finCfg = tKey==='M' ? (cfg.finM||'14:00') : tKey==='T' ? (cfg.finT||'21:30') : (cfg.finN||'05:30');
-        // 06:00–14:30 era el horario heredado que estaba provocando las 8,5 h.
+      if(iniEl && finEl && (tActual==='M'||tActual==='T'||tActual==='N')){
+        var iniCfg = tActual==='M' ? (cfg.iniM||'06:30') : tActual==='T' ? (cfg.iniT||'14:00') : (cfg.iniN||'22:00');
+        var finCfg = tActual==='M' ? (cfg.finM||'14:00') : tActual==='T' ? (cfg.finT||'21:30') : (cfg.finN||'05:30');
+        // El horario antiguo 06:00–14:30 era el que estaba generando las 8,5 h.
+        // Si aparece, se sustituye por el horario definido en Ajustes.
         if(iniEl.value==='06:00' && finEl.value==='14:30'){
           iniEl.value=iniCfg;
           finEl.value=finCfg;
@@ -3664,7 +3695,7 @@ function calcResumen(){
     addResCard('⚖️', '—', 'Balance mensual no aplicable', '#777');
   } else {
     addResCard('🎯', p.requiredHours+'h', 'Referencia mes', 'var(--azul)');
-    diff=Math.round((totalH-p.requiredHours)*10)/10;
+    diff=Math.round((totalH-getReferenciaEfectivaPeriodo(p))*10)/10;
     addResCard('⚖️', (diff>=0?'+':'')+diff+'h', 'Balance horas', diff>=0?'var(--verde)':'var(--rojo)');
   }
   addResCard('🌙', noches, 'Noches totales', '#4c1d95');
@@ -3730,7 +3761,14 @@ function calcResumen(){
   }
   addAnnCard('⏱️', annH+'h', 'Horas Año', 'var(--verde)');
   addAnnCard('🎯', annRefH+'h', 'Referencia Año', 'var(--azul)');
-  var aDiff=Math.round((annH-annRefH)*10)/10;
+  var annCreditoDASDF=0;
+  Object.keys(shifts).forEach(function(k){
+    var ss=shifts[k];
+    if(ss) annCreditoDASDF += getCreditoDASDFRegistro(ss);
+  });
+  annCreditoDASDF=Math.round(annCreditoDASDF*10)/10;
+  var annRefEfectiva=Math.round((annRefH-annCreditoDASDF)*10)/10;
+  var aDiff=Math.round((annH-annRefEfectiva)*10)/10;
   addAnnCard('⚖️', (aDiff>=0?'+':'')+aDiff+'h', 'Balance total', aDiff>=0?'var(--verde)':'var(--rojo)');
   addAnnCard('📋', annCounts.AP, 'Asuntos Propios', '#059669');
   addAnnCard('🏖️', annCounts.V, 'Vacaciones marc.', '#0e7490');
@@ -3893,7 +3931,7 @@ function calcCrexMes(){
     runner.setDate(runner.getDate()+1);
   }
   totalH += calcHorasBajaEnPeriodo(p.start, p.end);
-  var ref   = p.requiredHours;        // referencia del periodo
+  var ref   = getReferenciaEfectivaPeriodo(p); // referencia efectiva: DAS/DF normales reducen 7,5 h cada uno
   var limit = p.weeks * 40;           // 40h x semanas del periodo (límite absoluto estimativo)
   var diff  = totalH - ref;
   if(diff <= 0) return {horas:0, importe:0, horasDSJ:0, pendiente:false, periodoLabel:p.label||'', cierreLabel:''};
@@ -5575,7 +5613,7 @@ function exportarCuadrantePDF(){
     }
     runner.setDate(runner.getDate()+1);
   }
-  var diff = totalH - p.requiredHours;
+  var diff = totalH - getReferenciaEfectivaPeriodo(p);
   html += '<div class="stats">';
   html += '<div class="stat"><strong>' + totalH + 'h</strong>Horas realizadas</div>';
   if(isTurnoFijo()){
