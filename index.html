@@ -87,6 +87,14 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 .chip .cv{font-weight:800;font-size:12px;}
 
 .sec-title{font-size:17px;font-weight:800;color:var(--verde);margin-bottom:10px;margin-top:6px;}
+.ajustes-acc{border:1px solid #dcfce7;border-radius:10px;margin:10px 0;background:#fff;overflow:hidden;}
+.ajustes-acc>summary{list-style:none;cursor:pointer;font-size:14px;font-weight:800;color:var(--verde);padding:12px 14px;display:flex;align-items:center;background:#f0fdf4;}
+.ajustes-acc>summary::-webkit-details-marker{display:none;}
+.ajustes-acc>summary::after{content:'▾';margin-left:auto;font-size:13px;color:#16a34a;transition:transform .15s;}
+.ajustes-acc[open]>summary::after{transform:rotate(180deg);}
+.ajustes-acc>*:not(summary){padding:0 14px;}
+.ajustes-acc>*:last-child{padding-bottom:14px;}
+.ajustes-acc>div#horariosDefectoBlock{padding:0 14px 14px;}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px;}
 .info-card{background:#fff;border-radius:12px;padding:11px 9px;box-shadow:var(--sombra);text-align:center;}
 .info-card .ic-i{font-size:24px;}
@@ -451,7 +459,7 @@ button[aria-label*="EDITAR CUADRANTE" i] {
       <input type="text" id="cfgCompaneros" placeholder="Pérez, Gómez, Rodríguez, Martínez" oninput="saveCompaneros()">
     </div>
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">&#x23F1; Régimen de jornada</div>
+    <details class="ajustes-acc"><summary>⏱️ Régimen de jornada y cadencia de turno fijo</summary>
     <div class="ig">
       <label class="il">Modalidad de servicio<br><span style="font-size:10px;color:#888">Determina la jornada de referencia, el CREX y el cómputo de DSJ</span></label>
       <select id="cfgRegimen" style="display:none" onchange="renderRegimenCards(); syncBloquesRegimen(); renderAll(); actualizarVisibilidadNomina(); loadProdEstructural(); if(document.getElementById('vNomina').style.display!=='none') calcNomina();">
@@ -493,8 +501,9 @@ button[aria-label*="EDITAR CUADRANTE" i] {
     <div class="info-box" style="margin-top:4px">✅ <strong>Saliente (S) y Libres (L):</strong> pueden quedar incluidos dentro del periodo vacacional, pero no consumen crédito. En turno fijo la solicitud debe empezar y terminar en días con servicio planificado, y el crédito se consume por las horas de esos servicios.</div>
     <div id="vacTurnoFijoResult" style="display:none;background:#eafaf1;border-left:4px solid var(--verde);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;color:#1a3a2a;margin-top:4px"></div>
     </div>
+    </details>
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">Conceptos fijos nómina (de tu nómina real)</div>
+    <details class="ajustes-acc"><summary>💶 Conceptos fijos de nómina y pagas extra</summary>
     <div class="ig2">
       <div class="ig"><label class="il">Sueldo Grupo C1</label><input type="number" id="cfgBase" value="900.63" step="0.01" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">Comp. Destino</label><input type="number" id="cfgDestino" value="465.75" step="0.01" oninput="saveCfg()"></div>
@@ -529,8 +538,9 @@ button[aria-label*="EDITAR CUADRANTE" i] {
     <div class="ig"><label class="il">Complemento Destino Extra (€)</label><input type="number" id="cfgExtraDestino" value="463.32" step="0.01" oninput="saveCfg()"></div>
     <div class="ig"><label class="il">Compl. Esp. General Adicional Extra (€)</label><input type="number" id="cfgExtraEspG" value="562.338" step="0.001" oninput="saveCfg()"></div>
 
+    </details>
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">📅 Días libres y permisos del año</div>
+    <details class="ajustes-acc" open><summary>📅 Días libres, permisos y saldo actual</summary>
     <div class="info-box" style="margin-bottom:10px">Introduce los días totales que te corresponden. El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. En régimen general no consumen crédito los fines de semana y festivos; en turno fijo/cadencia las vacaciones se llevan por horas y solo consumen los servicios planificados que se dejan de prestar.</div>
     <div class="ig2">
       <div class="ig"><label class="il">🏖️ Vacaciones (días/año)</label><input type="number" id="cfgVacTotales" value="22" min="0" max="60" oninput="saveCfg()"></div>
@@ -540,14 +550,17 @@ button[aria-label*="EDITAR CUADRANTE" i] {
       <div class="ig"><label class="il">✝️ Permiso S.S. (días/año)</label><input type="number" id="cfgPssTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">🎄 Permiso Nav. (días/año)</label><input type="number" id="cfgPnavTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
     </div>
+    </details>
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">🧭 Turnos de preferencia — vacaciones y fechas señaladas</div>
+    <details class="ajustes-acc"><summary>🧭 Turnos de preferencia — vacaciones y fechas señaladas</summary>
     <div class="info-box">La app detecta automáticamente el turno disfrutado según las vacaciones/permisos grabados. Los turnos de verano vienen por defecto según la OG; Semana Santa y Navidad pueden variar cada año, por eso quedan editables.</div>
     <div class="ig"><label class="il">Año de referencia</label><input type="number" id="cfgPrefYear" min="2020" max="2099" oninput="loadPreferenciasEditor()"></div>
     <div id="preferenciasPeriodosEditor"></div>
     <div id="contadorLibres" style="margin-bottom:8px"></div>
     <div id="contadorDF" style="margin-bottom:8px"></div>
 
+    </details>
+    <details class="ajustes-acc"><summary>🕐 Horarios por defecto de tus turnos</summary>
     <div id="horariosDefectoBlock">
     <div class="divider"></div>
     <div class="sec-title" style="font-size:14px">Horarios por defecto de tus turnos</div>
@@ -607,9 +620,10 @@ button[aria-label*="EDITAR CUADRANTE" i] {
       <div class="rule-row"><span>⏳ DSJ</span><strong>7,5h (descanso por superación de jornada)</strong></div>
     </div>
     </div><!-- /horariosDefectoBlock -->
+    </details>
 
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">📅 Gestión de Festivos por Año</div>
+    <details class="ajustes-acc"><summary>📅 Gestión de Festivos por Año (+ copia HTML)</summary>
     <div class="info-box" style="margin-bottom:10px">Aquí puedes ver, añadir o eliminar festivos para cualquier año. Los festivos afectan al contador de DF y al marcado del calendario. Para años nuevos, añade los festivos cuando se publique el calendario oficial.</div>
     <div id="festPanel" style="margin-bottom:6px"></div>
 
@@ -620,8 +634,9 @@ button[aria-label*="EDITAR CUADRANTE" i] {
       <div style="font-size:10px;color:#888;margin-top:5px;text-align:center">Genera un fichero HTML con todos tus datos ya incluidos. Ábrelo en cualquier dispositivo sin necesidad de cuenta.</div>
     </div>
 
+    </details>
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">☁️ Sincronización GitHub Gist cifrada</div>
+    <details class="ajustes-acc"><summary>☁️ Sincronización GitHub Gist cifrada</summary>
     <div class="rule-card" style="margin-bottom:8px">
       <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:6px;border:none">
         <span style="font-size:11px;color:#555">Antes de subirlos, la app cifra tus turnos y ajustes en el propio dispositivo mediante <strong>AES-256-GCM</strong>. En el Gist solo se guarda contenido cifrado.</span>
@@ -656,8 +671,9 @@ button[aria-label*="EDITAR CUADRANTE" i] {
     <div id="gistStatus" style="display:none;margin-top:8px;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700;text-align:center"></div>
     <p style="font-size:10px;color:#aaa;margin-top:6px;text-align:center">El Gist secreto no aparece en búsquedas, pero el cifrado es lo que impide leer los datos sin tu contraseña.</p>
 
+    </details>
     <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">📦 Copia de seguridad local</div>
+    <details class="ajustes-acc"><summary>📦 Copia de seguridad local (JSON) y borrado</summary>
     <div class="rule-card" style="margin-bottom:8px">
       <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:4px">
         <span style="font-size:11px;color:#555">Exporta todos tus turnos y configuración a un fichero <strong>.json</strong> que puedes guardar o compartir con otro dispositivo.</span>
@@ -676,6 +692,7 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 
     <div class="divider"></div>
     <button class="danger-btn" onclick="borrarAnio()">🗑️ Borrar datos del año actual</button>
+    </details>
   </div>
   <div id="vAyuda" style="display:none">
     <div class="sec-title">❓ Ayuda y Guía de uso</div>
@@ -4915,10 +4932,14 @@ function updateAntiguedadInfo(){
   var ap   = calcApTotalesPorTrienios();
   var apExtra = calcApExtraPorFestivosSabado(year);
   div.style.display = 'block';
+  var apAntig = ap - 6;
+  var apDetalle = [];
+  if(apAntig>0) apDetalle.push(apAntig+' por antigüedad');
+  if(apExtra>0) apDetalle.push(apExtra+' por festivo en sábado');
   div.innerHTML = '📅 <strong>'+anos+' años de servicio</strong><br>'+
     '🏖️ Vacaciones: <strong>'+vac+' días</strong> · '+
     '📋 AP: <strong>'+(ap+apExtra)+' días</strong>'+
-    (apExtra>0?' ('+ap+' base + '+apExtra+' por festivos en sábado)':'');
+    (apDetalle.length?' (6 base + '+apDetalle.join(' + ')+')':'');
 }
 
 function calcVacConsumidas(y){
@@ -5401,7 +5422,12 @@ function actualizarContadoresAjustes(){
       html += lineaSaldo('🏖️','Vacaciones disponibles',vacTot,vacCons);
     }
     var apExtra = calcApExtraPorFestivosSabado(year);
-    var apLabel = apExtra > 0 ? 'AP disponibles ('+cfg.apTotales+'+'+apExtra+' extra)' : 'AP disponibles';
+    var apBaseInicial = cfg.fechaIngreso ? 6 : (cfg.apTotales || 6);
+    var apPorAntiguedad = cfg.fechaIngreso ? (calcApTotalesPorTrienios() - 6) : 0;
+    var apPartes = [];
+    if(apPorAntiguedad>0) apPartes.push('+'+apPorAntiguedad+' antigüedad');
+    if(apExtra>0) apPartes.push('+'+apExtra+' festivo en sábado');
+    var apLabel = apPartes.length ? 'AP disponibles ('+apBaseInicial+' '+apPartes.join(' ')+')' : 'AP disponibles';
     html += lineaSaldo('📋', apLabel, apTot, apCons);
     html += lineaSaldo('✝️','Permiso S.S. disponibles',pssTot,pssCons);
     html += lineaSaldo('🎄','Permiso Nav. disponibles',pnavTot,pnavCons);
