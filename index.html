@@ -141,7 +141,7 @@ input:focus,select:focus{border-color:var(--verde);}
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center;}
 .modal-overlay.open{display:flex;}
-.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 34px;width:100%;max-width:500px;animation:slideUp .25s ease;}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 34px;width:100%;max-width:500px;max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:slideUp .25s ease;}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal h3{font-size:16px;font-weight:800;color:var(--verde);margin-bottom:14px;text-align:center;}
 .modal-btns{display:flex;gap:8px;margin-top:14px;}
@@ -3646,6 +3646,15 @@ function openCompModal(key, dText){
       d.innerText='👤 '+c; b.appendChild(d);
     });
   }
+  // Reconectar el botón Editar a ESTE día (evita editar el día anterior seleccionado)
+  var btnEditComp = document.getElementById('quickPopupEdit');
+  if(btnEditComp){
+    btnEditComp.onclick = function(){
+      document.getElementById('compModalOverlay').style.display='none';
+      selectedDay = key;
+      openModal(key);
+    };
+  }
   document.getElementById('compModalOverlay').style.display='flex';
 }
 function closeCompModal(e){ if(e.target.id==='compModalOverlay') document.getElementById('compModalOverlay').style.display='none'; }
@@ -5732,6 +5741,7 @@ function openQuickPopup(key){
   if(btnEdit){
     btnEdit.onclick = function(){ 
       document.getElementById('compModalOverlay').style.display='none';
+      selectedDay = key;
       openModal(key);
     };
   }
