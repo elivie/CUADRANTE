@@ -55,6 +55,7 @@ main{max-width:700px;margin:0 auto;padding:14px 10px 60px;}
 .cal-cell.msel {border-color:#16a34a!important;border-width:2px;box-shadow:0 0 0 3px #bbf7d0;background:#f0fdf4!important;}
 .cal-cell.delete-selected {border-color:#dc2626!important;border-width:2px;box-shadow:0 0 0 3px #fecaca;background:#fff1f2!important;}
 .cal-cell .delete-badge{position:absolute;top:2px;right:4px;background:#dc2626;color:#fff;border-radius:999px;width:18px;height:18px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.22);}
+.cal-cell .festivo-badge{position:absolute;bottom:2px;right:3px;background:#dc2626;color:#fff;border-radius:5px;width:15px;height:15px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2;}
 .cal-cell .msel-badge{position:absolute;top:2px;left:4px;background:#16a34a;color:#fff;border-radius:999px;width:16px;height:16px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.22);}
 .month-nav{position:relative;}
 .msel-toggle-icon{box-sizing:border-box;position:absolute;right:0;top:50%;transform:translateY(-50%);background:#fff;border:1.5px solid var(--azul);color:var(--azul);border-radius:10px;min-width:88px;height:32px;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 8px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.10);font-family:inherit;}
@@ -295,12 +296,36 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 .origen-badge.df{background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe}
 </style>
 
+<style id="read-only-style">
+body.ro-mode .cal-cell,
+body.ro-mode #vAjustes input,
+body.ro-mode #vAjustes select,
+body.ro-mode #vAjustes textarea,
+body.ro-mode #vAjustes button:not(.ro-allow),
+body.ro-mode #vCuadrante button:not(.ro-allow) {
+  pointer-events: none !important;
+  opacity: .55 !important;
+  filter: grayscale(25%);
+}
+#roBanner{display:none;position:sticky;top:0;z-index:50;background:#fef3c7;border-bottom:2px solid #f59e0b;color:#92400e;font-weight:800;font-size:12px;text-align:center;padding:7px 10px}
+body.ro-mode #roBanner{display:block}
+</style>
+
+<style id="dark-mode-style">
+body.dark-mode{filter:invert(1) hue-rotate(180deg);background:#fff;}
+body.dark-mode img,
+body.dark-mode .no-invert{filter:hue-rotate(180deg) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.4)) !important;}
+.theme-btn.active{border-color:var(--verde) !important;background:#e8f4f0 !important;color:var(--verde) !important;box-shadow:0 0 0 2px rgba(26,92,56,.15)}
+</style>
+
 </head>
 <body>
 
+<div id="roBanner">👁️ Modo solo lectura — no se pueden editar datos en este dispositivo</div>
+
 <header>
   <div class="h-top">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
+    <img class="no-invert" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23f5f5f5'/%3E%3Crect x='24' y='42' width='132' height='96' rx='14' fill='%23c60b1e'/%3E%3Crect x='24' y='66' width='132' height='48' fill='%23ffc400'/%3E%3Cpath d='M90 43 L123 55 L118 112 Q90 136 62 112 L57 55 Z' fill='%23ffffff' stroke='%23c60b1e' stroke-width='5'/%3E%3Cpath d='M68 62 H112 V88 H68 Z' fill='%23ffc400'/%3E%3Cpath d='M72 94 H108 V111 Q90 126 72 111 Z' fill='%23c60b1e'/%3E%3C/svg%3E" style="height:48px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4))" alt="">
     <div style="flex:1">
       <div class="h-title">CUADRANTE <span style="font-size:11px;font-weight:400;opacity:0.6">v1.6</span></div>
       <div class="h-sub" id="hName">Configuración local</div>
@@ -450,6 +475,15 @@ button[aria-label*="EDITAR CUADRANTE" i] {
   </div>
 
   <div id="vAjustes" style="display:none">
+    <div class="ro-allow" style="border:2px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin:10px 0;background:#fff">
+      <div style="font-size:14px;font-weight:800;color:var(--verde);margin-bottom:6px">👁️ Modo solo lectura (consultar sin poder editar)</div>
+      <div style="font-size:11px;color:#555;line-height:1.4;margin-bottom:10px">Pensado para compartir el cuadrante con alguien que solo necesita <strong>consultarlo</strong> (ej: tu pareja) sin riesgo de que edite algo sin querer. Actívalo en el dispositivo de esa persona (tras unirse con tu PIN de sincronización) — ella verá el cuadrante siempre actualizado, pero todos los turnos y ajustes quedarán bloqueados solo en ese móvil. Este dispositivo tuyo sigue pudiendo editar con normalidad; el bloqueo es independiente por dispositivo, no se sincroniza con los demás.</div>
+      <label class="ro-allow" style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:9px 10px;cursor:pointer">
+        <input type="checkbox" id="cfgReadOnly" class="ro-allow" onchange="toggleReadOnly()" style="width:18px;height:18px;accent-color:var(--verde)">
+        <span style="font-size:12px;font-weight:700;color:#333">Activar modo solo lectura en este dispositivo</span>
+      </label>
+    </div>
+    <div class="divider"></div>
     <div class="sec-title">⚙️ Ajustes</div>
     <div class="ig"><label class="il">Tu nombre / Unidad</label><input type="text" id="cfgNombre" placeholder="Nombre · Unidad" oninput="saveName()"></div>
     <div class="ig"><label class="il">Fecha de incorporación<br><span style="font-size:10px;color:#888">Calcula vacaciones y AP por antigüedad automáticamente</span></label><input type="date" id="cfgFechaIngreso" oninput="saveCfg()"></div>
@@ -547,6 +581,14 @@ button[aria-label*="EDITAR CUADRANTE" i] {
     </div>
     <button class="btn-ok" type="button" style="width:100%;margin-bottom:8px;background:#7c3aed" onclick="guardarTramoTabla()">📌 Guardar tabla desde este mes</button>
     <div id="tablaHistorialList" style="margin-bottom:4px"></div>
+    </details>
+    <div class="divider"></div>
+    <details class="ajustes-acc"><summary>🎨 Apariencia</summary>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <button type="button" id="cfgThemeLight" class="theme-btn" onclick="setTheme('light')" style="border:2px solid #ddd;border-radius:9px;padding:10px 4px;background:#fff;cursor:pointer;font-size:12px;font-weight:700">☀️<br>Claro</button>
+      <button type="button" id="cfgThemeDark" class="theme-btn" onclick="setTheme('dark')" style="border:2px solid #ddd;border-radius:9px;padding:10px 4px;background:#fff;cursor:pointer;font-size:12px;font-weight:700">🌙<br>Oscuro</button>
+      <button type="button" id="cfgThemeAuto" class="theme-btn" onclick="setTheme('auto')" style="border:2px solid #ddd;border-radius:9px;padding:10px 4px;background:#fff;cursor:pointer;font-size:12px;font-weight:700">⚙️<br>Auto</button>
+    </div>
     </details>
     <div class="divider"></div>
     <details class="ajustes-acc"><summary>📅 Días libres, permisos y saldo actual</summary>
@@ -1467,6 +1509,7 @@ function save(){
 }
 
 function saveCfg(){
+  if(isReadOnly()) return;
   cfg.base= parseFloat(document.getElementById('cfgBase').value)||900.63;
   cfg.destino=parseFloat(document.getElementById('cfgDestino').value)||465.75;
   cfg.espG=parseFloat(document.getElementById('cfgEspG').value)||565.29;
@@ -2227,6 +2270,56 @@ function olvidarPin(){
   showPinMsg('Sincronización por PIN desactivada en este dispositivo.', false);
 }
 
+// ===========================================================================
+// MODO SOLO LECTURA — bloqueo local por dispositivo (no se sincroniza, cada
+// móvil decide el suyo). Pensado para compartir el cuadrante con alguien que
+// solo debe poder consultarlo, nunca editarlo.
+// ===========================================================================
+function isReadOnly(){ return localStorage.getItem('cuadrante_readonly')==='1'; }
+
+function toggleReadOnly(){
+  var chk = document.getElementById('cfgReadOnly');
+  var on = chk ? chk.checked : false;
+  if(on && !confirm('Este dispositivo pasará a modo solo lectura: no se podrán editar turnos ni ajustes desde aquí. ¿Continuar?')){
+    if(chk) chk.checked=false;
+    return;
+  }
+  try{ localStorage.setItem('cuadrante_readonly', on?'1':'0'); }catch(e){}
+  document.body.classList.toggle('ro-mode', on);
+}
+
+function loadReadOnlyMode(){
+  var on = isReadOnly();
+  document.body.classList.toggle('ro-mode', on);
+  var chk = document.getElementById('cfgReadOnly');
+  if(chk) chk.checked = on;
+}
+
+// ===========================================================================
+// TEMA: claro / oscuro / automático (según el sistema)
+// ===========================================================================
+function applyTheme(){
+  var mode = localStorage.getItem('cuadrante_theme') || 'auto';
+  var dark = mode === 'dark' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.body.classList.toggle('dark-mode', dark);
+  ['cfgThemeLight','cfgThemeDark','cfgThemeAuto'].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.classList.toggle('active', id === 'cfgTheme'+mode.charAt(0).toUpperCase()+mode.slice(1));
+  });
+}
+function setTheme(mode){
+  try{ localStorage.setItem('cuadrante_theme', mode); }catch(e){}
+  applyTheme();
+}
+function loadTheme(){
+  applyTheme();
+  if(window.matchMedia){
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){
+      if((localStorage.getItem('cuadrante_theme')||'auto') === 'auto') applyTheme();
+    });
+  }
+}
+
 
 
 // ==========================================
@@ -2372,6 +2465,16 @@ function renderCalendar(){
     dn.style.color=(fest||esp)?'var(--rojo)':(esFestLab&&!s.t?'#0f766e':'var(--texto)');
     dn.innerText=cur.getDate()+(esp?' 🎄':'')+(esFestLab&&!s.t?' 🏛️':'');
     cell.appendChild(dn);
+
+    // Marca fija de "festivo" (nacional/autonómico/local, dado de alta en Ajustes),
+    // visible SIEMPRE, tenga o no turno asignado ese día.
+    if(isFestNac(key)){
+      var fBadge=document.createElement('span');
+      fBadge.className='festivo-badge';
+      fBadge.innerText='F';
+      fBadge.title='Día festivo';
+      cell.appendChild(fBadge);
+    }
     
     // Si hay nota manual, se avisa visualmente.
     // Las notas automáticas del periodo vacacional en turno fijo NO se pintan en rojo
@@ -2492,6 +2595,7 @@ function renderCalendar(){
 
     cell.onclick=(function(k){
       return function(){
+        if(isReadOnly()){ alert('👁️ Modo solo lectura: este dispositivo no puede editar el cuadrante.'); return; }
         if(deleteMode){
           if(deleteSelectedDays.has(k)) deleteSelectedDays.delete(k);
           else deleteSelectedDays.add(k);
@@ -2738,6 +2842,7 @@ function assignToSelection(tKey){
 }
 
 function assignSelected(tKey){
+  if(isReadOnly()){ alert('👁️ Modo solo lectura: no se puede editar.'); return; }
   if(tKey==='V'){ openVacRangeModal(selectedDay); return; }
   if(tKey==='CS'){ openCsRangeModal(selectedDay); return; }
   if(!selectedDay){ alert('Selecciona primero un día en el calendario'); return; }
@@ -2790,6 +2895,7 @@ function assignSelected(tKey){
 }
 
 function guardarTurnoAsignado(day, tKey, remuneradoFlag){
+  if(isReadOnly()) return;
   if(!day) return;
   if(!shifts[day]) shifts[day]={t:''};
   shifts[day].t=tKey;
@@ -6366,6 +6472,8 @@ window.onload=function(){
   loadFestivosExtra();
   loadGistCfg();
   loadPinCfg();
+  loadReadOnlyMode();
+  loadTheme();
   buildLegend();
   renderAll();
   renderRegimenCards();
