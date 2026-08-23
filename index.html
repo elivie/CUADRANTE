@@ -540,7 +540,7 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 
     </details>
     <div class="divider"></div>
-    <details class="ajustes-acc" open><summary>📅 Días libres, permisos y saldo actual</summary>
+    <details class="ajustes-acc"><summary>📅 Días libres, permisos y saldo actual</summary>
     <div class="info-box" style="margin-bottom:10px">Introduce los días totales que te corresponden. El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. En régimen general no consumen crédito los fines de semana y festivos; en turno fijo/cadencia las vacaciones se llevan por horas y solo consumen los servicios planificados que se dejan de prestar.</div>
     <div class="ig2">
       <div class="ig"><label class="il">🏖️ Vacaciones (días/año)</label><input type="number" id="cfgVacTotales" value="22" min="0" max="60" oninput="saveCfg()"></div>
@@ -617,6 +617,7 @@ button[aria-label*="EDITAR CUADRANTE" i] {
       <div class="rule-row"><span>💼 DAS/DF remunerado / ESS</span><strong>+96,00 € cuando se marque como remunerado</strong></div>
       <div class="rule-row"><span>✝️ Permiso S.S.</span><strong>7,5h (hasta 3 días/año, Semana Santa)</strong></div>
       <div class="rule-row"><span>🎄 Permiso Nav.</span><strong>7,5h (hasta 3 días/año, Navidad)</strong></div>
+      <div class="rule-row"><span>🚨 Permiso Urgente</span><strong>7,5h/día laborable (fin de semana intermedio no cuenta)</strong></div>
       <div class="rule-row"><span>⏳ DSJ</span><strong>7,5h (descanso por superación de jornada)</strong></div>
     </div>
     </div><!-- /horariosDefectoBlock -->
@@ -957,7 +958,34 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 </div>
 
 
-<div class="modal-overlay" id="remuneradoOverlay" onclick="closeRemuneradoOutside(event)">
+<div class="modal-overlay" id="permSubOverlay" onclick="closePermSubOutside(event)">
+  <div class="modal" style="border-radius:20px;max-width:420px;padding:20px 16px 24px">
+    <h3>✝️🎄 ¿Qué permiso es?</h3>
+    <div class="modal-btns" style="margin-top:4px;gap:8px;flex-direction:column">
+      <button class="btn-ok" style="background:#6d28d9;width:100%" onclick="elegirPermSub('PSS')">✝️ Permiso Semana Santa</button>
+      <button class="btn-ok" style="background:#dc2626;width:100%" onclick="elegirPermSub('PNV')">🎄 Permiso Navidad</button>
+      <button class="btn-cancel" style="width:100%" onclick="closePermSubModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="permUrgOverlay" onclick="closePermUrgRangeOutside(event)">
+  <div class="modal" style="border-radius:20px;max-width:500px;padding:20px 16px 24px">
+    <h3>🚨 Aplicar Permiso Urgente por periodo</h3>
+    <div class="info-box" style="margin-bottom:10px">Indica inicio y fin del permiso. Los <strong>días laborables</strong> (L-V, no festivo) quedan marcados como Permiso Urgente y no computan como horas trabajadas. Si el periodo incluye un <strong>fin de semana intermedio</strong>, esos días se marcan también pero <strong>no cuentan</strong> como días de permiso.</div>
+    <div class="ig2">
+      <div class="ig"><label class="il">Fecha inicio</label><input type="date" id="permUrgInicio" oninput="previewPermUrgRange()"></div>
+      <div class="ig"><label class="il">Fecha fin</label><input type="date" id="permUrgFin" oninput="previewPermUrgRange()"></div>
+    </div>
+    <div id="permUrgPreview" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:9px 11px;font-size:12px;color:#334155;margin-top:4px"></div>
+    <div class="modal-btns" style="margin-top:14px;gap:8px">
+      <button class="btn-cancel" onclick="closePermUrgRangeModal()">Cancelar</button>
+      <button class="btn-ok" style="background:#b91c1c" onclick="aplicarPermUrgenteRangoDesdeModal()">Aplicar permiso</button>
+    </div>
+  </div>
+</div>
+
   <div class="modal" style="border-radius:20px;max-width:430px;padding:20px 16px 24px">
     <h3 id="remuneradoTitle">¿Servicio remunerado?</h3>
     <div id="remuneradoInfo" class="info-box" style="margin-bottom:10px">Marca si este DAS/DF debe añadir 96 € en nómina y mostrar la R en el cuadrante.</div>
@@ -1066,6 +1094,7 @@ var TURNO_HORAS_DEF = {
   DSJ: {ini:'',      fin:'',      h:7.5},   // Descanso Superación Jornada
   PSS: {ini:'',      fin:'',      h:7.5},   // Permiso Semana Santa (3 días/año)
   PNV: {ini:'',      fin:'',      h:7.5},   // Permiso Navidad (3 días/año)
+  PU:  {ini:'',      fin:'',      h:7.5},   // Permiso Urgente (asuntos familiares graves, etc.)
   L:   {ini:'',      fin:'',      h:0},
   B:   {ini:'',      fin:'',      h:7.5},
   S:   {ini:'',      fin:'',      h:0},     // Saliente manual (no consume crédito, no computa horas)
@@ -1086,6 +1115,11 @@ var TURNOS = {
   DSJ: {label:'DSJ',        icon:'⏳',   color:'#b45309', bg:'#fef3c7', pts_n:0, pts_f:0, compHoras:true},
   PSS: {label:'Perm.S.S.',  icon:'✝️',   color:'#6d28d9', bg:'#ede9fe', pts_n:0, pts_f:0, compHoras:true},
   PNV: {label:'Perm.Nav.',  icon:'🎄',   color:'#dc2626', bg:'#fee2e2', pts_n:0, pts_f:0, compHoras:true},
+  PU:  {label:'Perm.Urg.',  icon:'🚨',   color:'#b91c1c', bg:'#fee2e2', pts_n:0, pts_f:0, compHoras:true},
+  // Botón compuesto de la barra rápida: agrupa Perm.S.S. y Perm.Nav. en un
+  // único hueco (al pulsarlo se elige el tipo). No es un turno real por sí
+  // mismo — nunca se guarda como s.t.
+  PSSNAV: {label:'P.S.S./Nav.', icon:'✝️🎄', color:'#6d28d9', bg:'#ede9fe', pts_n:0, pts_f:0, compHoras:false},
   V:   {label:'Vacaciones', icon:'🏖️',  color:'#0e7490', bg:'#a5f3fc', pts_n:0, pts_f:0, compHoras:true},
   L:   {label:'Libre',      icon:'✅',  color:'#15803d', bg:'#dcfce7', pts_n:0, pts_f:0, compHoras:false},
   B:   {label:'Baja',       icon:'🏥',  color:'#9f1239', bg:'#ffe4e6', pts_n:0, pts_f:0, compHoras:true},
@@ -1094,8 +1128,8 @@ var TURNOS = {
 
 // Orden de botones: 15 botones en 3 filas de 5. DAS/DF rem. quedan como compatibilidad interna,
 // pero ahora se gestionan como DAS/DF + marca de remunerado.
-var TURNO_BAR_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSS','PNV','V','L','B'];
-var MODAL_TURNOS_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSS','PNV','V','L','B','S'];
+var TURNO_BAR_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSSNAV','V','L','B','PU'];
+var MODAL_TURNOS_ORDER = ['M','T','N','D','ESS','AP','DA','DF','DSJ','CS','PSS','PNV','PU','V','L','B','S'];
 
 function esTurnoRemunerable(tKey){ return tKey==='DA' || tKey==='DF'; }
 function esServicioConOrigenRemunerado(s){
@@ -1982,8 +2016,8 @@ function renderTurnoBar(){
     var t=TURNOS[k];
     if(!t) return;
     // En modo selección múltiple, V y CS quedan ocultos: abren un modal de rango
-    // que no encaja con "aplicar a varios días sueltos".
-    if(multiSelectMode && (k==='V' || k==='CS')) return;
+    // que no encaja con "aplicar a varios días sueltos". PSSNAV/PU tampoco encajan.
+    if(multiSelectMode && (k==='V' || k==='CS' || k==='PSSNAV' || k==='PU')) return;
     var div=document.createElement('div');
     div.className='tb';
     div.style.borderColor=t.color;
@@ -1992,6 +2026,8 @@ function renderTurnoBar(){
       if(multiSelectMode){ assignToSelection(k); return; }
       if(k==='V'){ openVacRangeModal(selectedDay); }
       else if(k==='CS'){ openCsRangeModal(selectedDay); }
+      else if(k==='PSSNAV'){ openPermSubPicker(selectedDay); }
+      else if(k==='PU'){ openPermUrgRangeModal(selectedDay); }
       else { assignSelected(k); }
     };
     div.innerHTML='<span class="ti">'+t.icon+'</span><span class="tk">'+t.label+'</span>';
@@ -2635,14 +2671,40 @@ function esDASDFDescanso(registro){
   return (registro.t==='DA' || registro.t==='DF') && !registro.remunerado && !registro.origenServicio;
 }
 
-function getCreditoDASDFRegistro(registro){
-  return esDASDFDescanso(registro) ? 7.5 : 0;
+// AP, Vacaciones, Bajas, Permiso S.S. y Permiso Navidad: son ausencias con
+// 7,5 h (o el equivalente de la cadencia en turno fijo) que NO son horas
+// realizadas — igual que un DAS/DF de descanso, restan de la referencia
+// exigible del periodo en vez de sumar a las horas trabajadas.
+function esAusenciaNoComputable(registro){
+  if(!registro || !registro.t) return false;
+  if(esDASDFDescanso(registro)) return true;
+  return registro.t==='AP' || registro.t==='V' || registro.t==='B' || registro.t==='PSS' || registro.t==='PNV' || registro.t==='PU';
+}
+
+function getCreditoDASDFRegistro(dateStr, registro){
+  if(!registro || !registro.t) return 0;
+  if(esDASDFDescanso(registro)) return 7.5;
+  if(registro.t==='B') return getHorasBajaDia(dateStr);
+  if(registro.t==='V'){
+    if((cfg.regimen||'general') === 'fijo'){
+      var tCadV = getTurnoCadenciaParaFecha(dateStr);
+      if(esTurnoServicioCadencia(tCadV)) return getHorasCadenciaFijo(tCadV, TURNO_HORAS_DEF[tCadV]);
+      return 0;
+    }
+    if(isWeekend(dateStr)) return 0;
+    return registro.h !== undefined ? registro.h : (TURNO_HORAS_DEF.V ? TURNO_HORAS_DEF.V.h : 7.5);
+  }
+  if(registro.t==='AP' || registro.t==='PSS' || registro.t==='PNV' || registro.t==='PU'){
+    return registro.h !== undefined ? registro.h : (TURNO_HORAS_DEF[registro.t] ? TURNO_HORAS_DEF[registro.t].h : 7.5);
+  }
+  return 0;
 }
 
 function getHorasComputablesRegistro(dateStr, registro){
-  // Los DAS/DF de descanso no son horas realizadas.
-  if(esDASDFDescanso(registro)) return 0;
-  // Un DAS R/DF R cuenta las horas reales del servicio que se ha trabajado.
+  // Las ausencias no computables (DAS/DF de descanso, AP, V, B, PSS, PNV)
+  // no son horas realizadas.
+  if(esAusenciaNoComputable(registro)) return 0;
+  // Un DAS R/DF R (o cualquier turno trabajado) cuenta las horas reales.
   var reales = getHorasServicioRegistro(dateStr, registro);
   return Math.round(reales*10)/10;
 }
@@ -2653,7 +2715,7 @@ function getCreditoDASDFPeriodo(inicio, fin){
   while(runner<=fin){
     var k=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
     var s=shifts[k];
-    if(s) credito += getCreditoDASDFRegistro(s);
+    if(s) credito += getCreditoDASDFRegistro(k, s);
     runner.setDate(runner.getDate()+1);
   }
   return Math.round(credito*10)/10;
@@ -2946,6 +3008,98 @@ function openCsRangeModal(prefillDate){
 }
 function closeCsRangeModal(){ var ov=document.getElementById('csRangeOverlay'); if(ov) ov.classList.remove('open'); }
 function closeCsRangeOutside(e){ if(e.target.id==='csRangeOverlay') closeCsRangeModal(); }
+
+// --- Selector de subtipo para el botón compuesto "P.S.S./Navidad" ---
+function openPermSubPicker(prefillDate){
+  selectedDay = prefillDate || selectedDay;
+  var ov=document.getElementById('permSubOverlay');
+  if(ov) ov.classList.add('open');
+}
+function closePermSubModal(){
+  var ov=document.getElementById('permSubOverlay');
+  if(ov) ov.classList.remove('open');
+}
+function closePermSubOutside(e){ if(e.target.id==='permSubOverlay') closePermSubModal(); }
+function elegirPermSub(tKey){
+  closePermSubModal();
+  assignSelected(tKey);
+}
+
+// --- Permiso Urgente por periodo ---
+// Marca todos los días del rango como PU. Los días laborables (no sábado,
+// domingo ni festivo) computan 7,5 h no computables (restan de la referencia).
+// Los fines de semana/festivos intermedios quedan marcados visualmente pero
+// con 0 h: no cuentan como día de permiso.
+function openPermUrgRangeModal(prefillDate){
+  var ov=document.getElementById('permUrgOverlay');
+  if(!ov) return;
+  var ini=document.getElementById('permUrgInicio');
+  var fin=document.getElementById('permUrgFin');
+  var base = prefillDate || dStr(year, month, 1);
+  if(ini) ini.value = base;
+  if(fin) fin.value = base;
+  previewPermUrgRange();
+  ov.classList.add('open');
+}
+function closePermUrgRangeModal(){
+  var ov=document.getElementById('permUrgOverlay');
+  if(ov) ov.classList.remove('open');
+}
+function closePermUrgRangeOutside(e){ if(e.target.id==='permUrgOverlay') closePermUrgRangeModal(); }
+
+function _permUrgDiasLaborables(inicioStr, hastaStr){
+  var inicio=new Date(inicioStr+'T12:00:00');
+  var hasta=new Date(hastaStr+'T12:00:00');
+  var total=0, laborables=0, finde=0;
+  var runner=new Date(inicio);
+  while(runner<=hasta){
+    total++;
+    var k=dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var dow=runner.getDay();
+    if(dow===0 || dow===6) finde++;
+    else laborables++;
+    runner.setDate(runner.getDate()+1);
+  }
+  return {total:total, laborables:laborables, finde:finde};
+}
+
+function previewPermUrgRange(){
+  var box=document.getElementById('permUrgPreview');
+  if(!box) return;
+  var inicioStr=(document.getElementById('permUrgInicio')||{}).value||'';
+  var hastaStr=(document.getElementById('permUrgFin')||{}).value||'';
+  if(!inicioStr || !hastaStr){ box.innerHTML='Indica inicio y fin para ver el resumen.'; return; }
+  if(hastaStr < inicioStr){ box.innerHTML='<span style="color:var(--rojo);font-weight:700">La fecha fin no puede ser anterior a la fecha inicio.</span>'; return; }
+  var r=_permUrgDiasLaborables(inicioStr, hastaStr);
+  box.innerHTML='Resumen: <strong>'+r.total+' días</strong> de periodo · <strong style="color:#b91c1c">'+r.laborables+' días de permiso</strong> (7,5 h no computables c/u)'+
+    (r.finde>0 ? ' · <strong>'+r.finde+' día(s) de fin de semana</strong> incluidos en el rango pero sin contar' : '')+'.';
+}
+
+function aplicarPermUrgenteRangoDesdeModal(){
+  var inicioStr=(document.getElementById('permUrgInicio')||{}).value||'';
+  var hastaStr=(document.getElementById('permUrgFin')||{}).value||'';
+  if(!inicioStr || !hastaStr){ alert('Indica fecha de inicio y fin del permiso.'); return; }
+  if(hastaStr < inicioStr){ alert('La fecha fin no puede ser anterior a la fecha de inicio.'); return; }
+  var r=_permUrgDiasLaborables(inicioStr, hastaStr);
+  var txt='Se aplicará Permiso Urgente del '+fmtFechaES(inicioStr)+' al '+fmtFechaES(hastaStr)+'.\n\n'
+    +r.laborables+' día(s) laborable(s) consumirán el permiso (7,5 h no computables cada uno).'
+    +(r.finde>0 ? '\n'+r.finde+' día(s) de fin de semana quedarán marcados pero no cuentan.' : '')
+    +'\n\nSe sobrescribirán los turnos existentes dentro de ese rango. ¿Continuar?';
+  if(!confirm(txt)) return;
+  var def=TURNO_HORAS_DEF.PU;
+  var inicio=new Date(inicioStr+'T12:00:00');
+  var hasta=new Date(hastaStr+'T12:00:00');
+  var runner=new Date(inicio);
+  while(runner<=hasta){
+    var k=dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
+    var dow=runner.getDay();
+    var esFinde=(dow===0 || dow===6);
+    shifts[k]={t:'PU', ini:def?def.ini:'', fin:def?def.fin:'', h:esFinde?0:(def?def.h:7.5), companeros:[], nota: esFinde ? 'Fin de semana dentro de Permiso Urgente · no cuenta' : 'Permiso Urgente'};
+    runner.setDate(runner.getDate()+1);
+  }
+  save(); renderAll(); closePermUrgRangeModal();
+  showToast('Permiso Urgente aplicado: '+r.laborables+' día(s) de permiso'+(r.finde>0?' · '+r.finde+' fin de semana sin contar':''));
+}
 function onCsTipoChange(){
   var tipo=(document.getElementById('csRangeTipo')||{}).value||'deducible';
   var hb=document.getElementById('csHorasBlock');
@@ -3274,9 +3428,8 @@ function calcQuickStats(){
     var s=shifts[k];
     if(s && s.t){
       var tObj=TURNOS[s.t];
-      if(tObj && tObj.compHoras && s.t!=='B'){
-        var horas = getHorasServicioRegistro(k, s);
-        totalH += horas;
+      if(tObj && tObj.compHoras){
+        totalH += getHorasComputablesRegistro(k, s);
       }
       if(s.t==='N'||s.t==='D') nN++;
       if(s.t==='ES'||isFestivo(k,s.t)) {
@@ -3287,7 +3440,6 @@ function calcQuickStats(){
     }
     runner.setDate(runner.getDate()+1);
   }
-  totalH += calcHorasBajaEnPeriodo(p.start, p.end);
   
   var refEfectiva=getReferenciaEfectivaPeriodo(p);
   var diff=Math.round((totalH-refEfectiva)*10)/10;
@@ -3692,9 +3844,8 @@ function calcResumen(){
     var s=shifts[k];
     if(s && s.t && counts[s.t]!==undefined){
       counts[s.t]++;
-      if(TURNOS[s.t].compHoras && s.t!=='B'){
-        var hRes = getHorasServicioRegistro(k, s);
-        totalH += hRes;
+      if(TURNOS[s.t].compHoras){
+        totalH += getHorasComputablesRegistro(k, s);
       }
       if(s.t==='N'||s.t==='D') noches++;
       if(s.t==='ES'||isFestivo(k,s.t)){
@@ -3711,7 +3862,6 @@ function calcResumen(){
     rGrid.appendChild(c);
   }
   
-  totalH += calcHorasBajaEnPeriodo(p.start, p.end);
   addResCard('⏱️', totalH+'h', 'Horas Totales', 'var(--verde)');
   var diff=0;
   if(isTurnoFijo()){
@@ -3772,7 +3922,7 @@ function calcResumen(){
       var s=shifts[k];
       if(s && s.t && annCounts[s.t]!==undefined){
         annCounts[s.t]++;
-        if(TURNOS[s.t].compHoras) annH += getHorasServicioRegistro(k, s);
+        if(TURNOS[s.t].compHoras) annH += getHorasComputablesRegistro(k, s);
         if(s.t==='N'||s.t==='D') annN++;
         if(s.t==='ES'||isFestivo(k,s.t)){
           if(s.t!=='L'&&s.t!=='B'&&s.t!=='AP'&&s.t!=='V'&&s.t!=='S') annF++;
@@ -3793,7 +3943,7 @@ function calcResumen(){
   var annCreditoDASDF=0;
   Object.keys(shifts).forEach(function(k){
     var ss=shifts[k];
-    if(ss) annCreditoDASDF += getCreditoDASDFRegistro(ss);
+    if(ss && k.slice(0,4)===String(year)) annCreditoDASDF += getCreditoDASDFRegistro(k, ss);
   });
   annCreditoDASDF=Math.round(annCreditoDASDF*10)/10;
   var annRefEfectiva=Math.round((annRefH-annCreditoDASDF)*10)/10;
@@ -3952,15 +4102,13 @@ function calcCrexMes(){
     var s=shifts[k];
     if(s && s.t){
       var tObj=TURNOS[s.t];
-      if(tObj && tObj.compHoras && s.t!=='B'){
-        var hCrex = getHorasComputablesRegistro(k, s);
-        totalH += hCrex;
+      if(tObj && tObj.compHoras){
+        totalH += getHorasComputablesRegistro(k, s);
       }
     }
     runner.setDate(runner.getDate()+1);
   }
-  totalH += calcHorasBajaEnPeriodo(p.start, p.end);
-  var ref   = getReferenciaEfectivaPeriodo(p); // referencia efectiva: DAS/DF normales reducen 7,5 h cada uno
+  var ref   = getReferenciaEfectivaPeriodo(p); // referencia efectiva: DAS/DF, AP, Vacaciones, Bajas y PSS/PNV reducen la jornada exigible
   var limit = p.weeks * 40;           // 40h x semanas del periodo (límite absoluto estimativo)
   var diff  = totalH - ref;
   if(diff <= 0) return {horas:0, importe:0, horasDSJ:0, pendiente:false, periodoLabel:p.label||'', cierreLabel:''};
