@@ -540,6 +540,15 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 
     </details>
     <div class="divider"></div>
+    <details class="ajustes-acc"><summary>📅 Histórico de subidas (tramos por fecha)</summary>
+    <div class="info-box" style="margin-bottom:10px">Cuando te suban algún concepto (sueldo, destino, específicos, <strong>residencia</strong>, vestuario, trienio, ERG3, O3 o pagas extra), <strong>no edites directamente</strong> los campos de arriba sin más. Hazlo así: 1) cambia arriba, en "Conceptos fijos", los importes a los nuevos valores; 2) elige aquí el mes desde el que aplica; 3) guarda. Las nóminas anteriores a ese mes conservan los importes antiguos automáticamente.</div>
+    <div class="ig2">
+      <div class="ig"><label class="il">Aplicar desde (mes)</label><input type="month" id="tablaTramoDesde"></div>
+    </div>
+    <button class="btn-ok" type="button" style="width:100%;margin-bottom:8px;background:#7c3aed" onclick="guardarTramoTabla()">📌 Guardar tabla desde este mes</button>
+    <div id="tablaHistorialList" style="margin-bottom:4px"></div>
+    </details>
+    <div class="divider"></div>
     <details class="ajustes-acc"><summary>📅 Días libres, permisos y saldo actual</summary>
     <div class="info-box" style="margin-bottom:10px">Introduce los días totales que te corresponden. El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. En régimen general no consumen crédito los fines de semana y festivos; en turno fijo/cadencia las vacaciones se llevan por horas y solo consumen los servicios planificados que se dejan de prestar.</div>
     <div class="ig2">
@@ -1357,6 +1366,7 @@ var deleteMode=false;
 var deleteSelectedDays=new Set();
 var editMode=false;
 var modalDay=null;
+var TABLA_CAMPOS = ['base','destino','espG','espS','res','vest','importeTrienio','erg3','o3','extraSalario','extraTrienio','extraDestino','extraEspG'];
 var cfg={
   base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general',
   vacTotales:22, apTotales:6, pssTotales:3, pnavTotales:3, huerfanosOrd:9.01, huerfanosExtra:16.79, dedNoForm:0,
@@ -1364,7 +1374,9 @@ var cfg={
   horasTurno:0, horasFijoM:0, horasFijoT:0, horasFijoN:0,
   iniDM:'06:30', finDM:'14:00', iniDN:'22:00', finDN:'05:30',
   extraSalario:774.342, extraTrienio:28.2984, extraDestino:463.32, extraEspG:562.338,
-  prefYear: new Date().getFullYear(), prefPeriodos:{}
+  prefYear: new Date().getFullYear(), prefPeriodos:{},
+  resHistorial: null, // legacy: histórico antiguo de residencia (versión anterior), se fusiona en tablaHistorial al cargar
+  tablaHistorial: null // [{desde:'YYYY-MM', valores:{base,destino,espG,espS,vest,importeTrienio,erg3,o3,extraSalario,extraTrienio,extraDestino,extraEspG}}, ...]
 };
 
 function load(){
@@ -1376,6 +1388,28 @@ function load(){
     normalizarServiciosRemuneradosLegacy();
     if(cfg.huerfanosOrd===undefined) cfg.huerfanosOrd=9.01;
     if(cfg.huerfanosExtra===undefined) cfg.huerfanosExtra=16.79;
+    if(!Array.isArray(cfg.tablaHistorial) || !cfg.tablaHistorial.length){
+      var valoresIniciales={};
+      TABLA_CAMPOS.forEach(function(k){ valoresIniciales[k]=cfg[k]; });
+      cfg.tablaHistorial = [{desde:'2000-01', valores:valoresIniciales}];
+    }
+    // Migración: si existía el antiguo histórico independiente de residencia (versión anterior),
+    // se fusiona dentro de la tabla salarial única para no tener dos sistemas de tramos.
+    if(Array.isArray(cfg.resHistorial) && cfg.resHistorial.length){
+      cfg.resHistorial.forEach(function(rt){
+        var match = cfg.tablaHistorial.find(function(tt){ return tt.desde===rt.desde; });
+        if(match){
+          match.valores.res = rt.importe;
+        } else {
+          var valoresNuevo={};
+          TABLA_CAMPOS.forEach(function(k){ valoresNuevo[k]=cfg[k]; });
+          valoresNuevo.res = rt.importe;
+          cfg.tablaHistorial.push({desde:rt.desde, valores:valoresNuevo});
+        }
+      });
+      cfg.tablaHistorial.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+      delete cfg.resHistorial;
+    }
     applyConfig();
   } catch(e){}
 }
@@ -1466,6 +1500,7 @@ function applyConfig(){
   document.getElementById('cfgEspG').value=cfg.espG;
   document.getElementById('cfgEspS').value=cfg.espS;
   document.getElementById('cfgRes').value=cfg.res;
+  renderTablaHistorial();
   document.getElementById('cfgVest').value=cfg.vest;
   document.getElementById('cfgTrienios').value=cfg.trienios;
   document.getElementById('cfgImporteTrienio').value=cfg.importeTrienio||32.96;
@@ -4198,17 +4233,81 @@ function nominaCambiarMes(delta){
   renderModificaciones();
 }
 
+function ymFrom(year, monthIdx0){ return year + '-' + pad2(monthIdx0+1); }
+
+// Devuelve la tabla salarial (conjunto de conceptos fijos) vigente para un mes dado.
+// Igual mecánica que residencia, pero guardando un "paquete" completo de campos por tramo.
+function getTablaVigente(historial, ym, fallbackCfg){
+  var result = {};
+  TABLA_CAMPOS.forEach(function(k){ result[k] = fallbackCfg[k]; });
+  if(Array.isArray(historial) && historial.length){
+    var sorted = historial.slice().sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+    var vigente = sorted[0];
+    for(var i=0;i<sorted.length;i++){
+      if((sorted[i].desde||'') <= ym) vigente = sorted[i]; else break;
+    }
+    if(vigente && vigente.valores){
+      TABLA_CAMPOS.forEach(function(k){
+        if(typeof vigente.valores[k]==='number' && isFinite(vigente.valores[k])) result[k]=vigente.valores[k];
+      });
+    }
+  }
+  return result;
+}
+function guardarTramoTabla(){
+  var desdeEl = document.getElementById('tablaTramoDesde');
+  var desde = desdeEl ? desdeEl.value : '';
+  if(!desde){ alert('Indica el mes desde el que aplica esta tabla salarial.'); return; }
+  if(!Array.isArray(cfg.tablaHistorial)) cfg.tablaHistorial = [];
+  var valores = {};
+  TABLA_CAMPOS.forEach(function(k){ valores[k]=cfg[k]; });
+  var existente = cfg.tablaHistorial.find(function(t){ return t.desde===desde; });
+  if(existente){ existente.valores = valores; } else { cfg.tablaHistorial.push({desde:desde, valores:valores}); }
+  cfg.tablaHistorial.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+  try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
+  scheduleGistPush();
+  if(desdeEl) desdeEl.value='';
+  renderTablaHistorial();
+  calcNomina();
+}
+function borrarTramoTabla(desde){
+  if(!Array.isArray(cfg.tablaHistorial) || cfg.tablaHistorial.length<=1) return;
+  cfg.tablaHistorial = cfg.tablaHistorial.filter(function(t){ return t.desde!==desde; });
+  try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
+  scheduleGistPush();
+  renderTablaHistorial();
+  calcNomina();
+}
+function renderTablaHistorial(){
+  var el = document.getElementById('tablaHistorialList');
+  if(!el) return;
+  var hist = (Array.isArray(cfg.tablaHistorial) ? cfg.tablaHistorial.slice() : []).sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+  if(!hist.length){ el.innerHTML=''; return; }
+  el.innerHTML = hist.map(function(t){
+    var puedeBorrar = hist.length>1;
+    var v = t.valores||{};
+    var resumen = 'Base '+Number(v.base||0).toFixed(2)+'€ · Destino '+Number(v.destino||0).toFixed(2)+'€ · Esp.Gral '+Number(v.espG||0).toFixed(2)+'€ · Esp.Sing '+Number(v.espS||0).toFixed(2)+'€ · Residencia '+Number(v.res||0).toFixed(2)+'€ · Trienio '+Number(v.importeTrienio||0).toFixed(2)+'€ · ERG3 '+Number(v.erg3||0).toFixed(2)+'€';
+    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:4px;font-size:11px;background:#f8fafc">'
+      + '<span>Desde <strong>'+t.desde+'</strong><br><span style="color:#64748b">'+resumen+'</span></span>'
+      + (puedeBorrar ? '<button type="button" onclick="borrarTramoTabla(\''+t.desde+'\')" style="background:none;border:none;color:#b91c1c;font-size:13px;cursor:pointer;flex-shrink:0">🗑️</button>' : '')
+      + '</div>';
+  }).join('');
+}
+
 function calcNomina(noReloadInputs){
   if(!noReloadInputs){
     loadIrpfMes();
     loadSocorrosMes();
   }
-  var baseBruto = cfg.base + cfg.destino + cfg.espG + cfg.espS + cfg.res + cfg.vest + (cfg.trienios * (cfg.importeTrienio||32.96)) + cfg.erg3 + (cfg.o3||0);
-
   // La pestaña muestra el mismo mes de nómina que el Cuadrante.
   // Los conceptos variables se calculan sobre el periodo de devengo de dos meses antes.
   var pago = actualizarPeriodoNominaPago();
   var pagoYear = pago.year, pagoMonth = pago.month;
+  // Todos los conceptos fijos (sueldo, destino, específicos, residencia, vestuario,
+  // trienio, ERG3, O3 y pagas extra) usan la "tabla salarial" vigente en el mes de PAGO
+  // de esta nómina, no el valor "actual" de Ajustes, para que las subidas no reescriban meses anteriores.
+  var tabla = getTablaVigente(cfg.tablaHistorial, ymFrom(pagoYear, pagoMonth), cfg);
+  var baseBruto = tabla.base + tabla.destino + tabla.espG + tabla.espS + tabla.res + tabla.vest + (cfg.trienios * (tabla.importeTrienio||32.96)) + tabla.erg3 + (tabla.o3||0);
   var devengo = getPeriodoDevengoNomina();
   var refYear = devengo.year, refMonth = devengo.month;
   var lblEl = document.getElementById('nominaMesLabel');
@@ -4239,10 +4338,10 @@ function calcNomina(noReloadInputs){
   var pagaExtra = 0;
   var pagaExtraDetalle = null;
   if(esMesExtra){
-    var exSal  = cfg.extraSalario  || 0;
-    var exTri  = (cfg.extraTrienio || 0) * (cfg.trienios || 0);
-    var exDest = cfg.extraDestino  || 0;
-    var exEspG = cfg.extraEspG     || 0;
+    var exSal  = tabla.extraSalario  || 0;
+    var exTri  = (tabla.extraTrienio || 0) * (cfg.trienios || 0);
+    var exDest = tabla.extraDestino  || 0;
+    var exEspG = tabla.extraEspG     || 0;
     pagaExtra = exSal + exTri + exDest + exEspG;
     pagaExtraDetalle = {sal:exSal, tri:exTri, dest:exDest, espG:exEspG, total:pagaExtra};
   }
@@ -4285,7 +4384,7 @@ function calcNomina(noReloadInputs){
     var mesExtraLabel = pagoMonth === 5 ? 'Junio' : 'Diciembre';
     pagaExtraRow = '<div class="nom-row" style="color:#059669;margin-top:6px;border-top:1px solid #e2e8f0;padding-top:6px"><span>🎁 <strong>Paga Extra '+mesExtraLabel+':</strong></span><strong>'+pagaExtraDetalle.total.toFixed(2)+' €</strong></div>';
     pagaExtraRow += '<div class="nom-row" style="color:#6b7280;font-size:11px"><span>&nbsp;&nbsp;Salario Extra C1:</span><strong>'+pagaExtraDetalle.sal.toFixed(3)+' €</strong></div>';
-    pagaExtraRow += '<div class="nom-row" style="color:#6b7280;font-size:11px"><span>&nbsp;&nbsp;Trienios Extra ('+cfg.trienios+'×'+cfg.extraTrienio.toFixed(4)+'€):</span><strong>'+pagaExtraDetalle.tri.toFixed(3)+' €</strong></div>';
+    pagaExtraRow += '<div class="nom-row" style="color:#6b7280;font-size:11px"><span>&nbsp;&nbsp;Trienios Extra ('+cfg.trienios+'×'+(tabla.extraTrienio||0).toFixed(4)+'€):</span><strong>'+pagaExtraDetalle.tri.toFixed(3)+' €</strong></div>';
     pagaExtraRow += '<div class="nom-row" style="color:#6b7280;font-size:11px"><span>&nbsp;&nbsp;Compl. Destino Extra:</span><strong>'+pagaExtraDetalle.dest.toFixed(2)+' €</strong></div>';
     pagaExtraRow += '<div class="nom-row" style="color:#6b7280;font-size:11px"><span>&nbsp;&nbsp;Compl. Esp. Gral. Adicional Extra:</span><strong>'+pagaExtraDetalle.espG.toFixed(3)+' €</strong></div>';
   }
