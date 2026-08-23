@@ -986,17 +986,6 @@ button[aria-label*="EDITAR CUADRANTE" i] {
   </div>
 </div>
 
-  <div class="modal" style="border-radius:20px;max-width:430px;padding:20px 16px 24px">
-    <h3 id="remuneradoTitle">¿Servicio remunerado?</h3>
-    <div id="remuneradoInfo" class="info-box" style="margin-bottom:10px">Marca si este DAS/DF debe añadir 96 € en nómina y mostrar la R en el cuadrante.</div>
-    <div class="modal-btns" style="margin-top:14px;gap:8px">
-      <button class="btn-cancel" onclick="responderRemunerado(false)" style="font-weight:800">NO</button>
-      <button class="btn-ok" onclick="responderRemunerado(true)" style="background:#16a34a;font-weight:900">SÍ · +96 €</button>
-    </div>
-  </div>
-</div>
-
-
 <div class="modal-overlay license-overlay" id="licenseModalOverlay" onclick="closeLicenseModalOutside(event)" role="dialog" aria-modal="true" aria-labelledby="licenseModalTitle">
   <div class="modal license-modal">
     <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v1.6</h3>
@@ -2521,28 +2510,6 @@ function assignSelected(tKey){
   // DAS/DF son ahora únicamente el nombre del descanso planificado.
   // La remuneración se define al editar el servicio que finalmente se trabaja.
   guardarTurnoAsignado(dayToAssign, tKey, false);
-}
-
-var remuneradoCallback = null;
-function preguntarRemunerado(tKey, cb){
-  remuneradoCallback = cb;
-  var ov=document.getElementById('remuneradoOverlay');
-  var title=document.getElementById('remuneradoTitle');
-  var info=document.getElementById('remuneradoInfo');
-  var label=(TURNOS[tKey] && TURNOS[tKey].label) ? TURNOS[tKey].label : 'servicio';
-  if(title) title.innerText = '¿'+label+' remunerado?';
-  if(info) info.innerHTML = 'Marca <strong>SÍ</strong> si este '+label+' debe añadir <strong>96 €</strong> en nómina y mostrar la marca <strong>R</strong> en el cuadrante. Marca <strong>NO</strong> si solo quieres registrarlo como '+label+' normal.';
-  if(ov) ov.classList.add('open');
-}
-function responderRemunerado(si){
-  var ov=document.getElementById('remuneradoOverlay');
-  if(ov) ov.classList.remove('open');
-  var cb=remuneradoCallback;
-  remuneradoCallback=null;
-  if(cb) cb(!!si);
-}
-function closeRemuneradoOutside(e){
-  if(e.target && e.target.id==='remuneradoOverlay') responderRemunerado(false);
 }
 
 function guardarTurnoAsignado(day, tKey, remuneradoFlag){
