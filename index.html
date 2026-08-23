@@ -550,10 +550,15 @@ button[aria-label*="EDITAR CUADRANTE" i] {
     </details>
     <div class="divider"></div>
     <details class="ajustes-acc"><summary>📅 Días libres, permisos y saldo actual</summary>
-    <div class="info-box" style="margin-bottom:10px">Introduce los días totales que te corresponden. El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. En régimen general no consumen crédito los fines de semana y festivos; en turno fijo/cadencia las vacaciones se llevan por horas y solo consumen los servicios planificados que se dejan de prestar.</div>
+    <div class="info-box" style="margin-bottom:10px">El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. En régimen general no consumen crédito los fines de semana y festivos; en turno fijo/cadencia las vacaciones se llevan por horas.<br><br>
+    <span id="vacApAutoNote"></span></div>
     <div class="ig2">
-      <div class="ig"><label class="il">🏖️ Vacaciones (días/año)</label><input type="number" id="cfgVacTotales" value="22" min="0" max="60" oninput="saveCfg()"></div>
-      <div class="ig"><label class="il">📋 Asuntos Part. (AP/año)</label><input type="number" id="cfgApTotales" value="6" min="0" max="20" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il">🏖️ Vacaciones — base manual (sin fecha ingreso)</label><input type="number" id="cfgVacTotales" value="22" min="0" max="60" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il">📋 AP — base manual (sin fecha ingreso)</label><input type="number" id="cfgApTotales" value="6" min="0" max="20" oninput="saveCfg()"></div>
+    </div>
+    <div class="ig2">
+      <div class="ig"><label class="il">➕ Vacaciones extra (bajas, etc.)</label><input type="number" id="cfgVacExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il">➕ AP extra (bajas, etc.)</label><input type="number" id="cfgApExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
     </div>
     <div class="ig2">
       <div class="ig"><label class="il">✝️ Permiso S.S. (días/año)</label><input type="number" id="cfgPssTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
@@ -1442,6 +1447,8 @@ function saveCfg(){
   cfg.mutualidad=parseFloat(document.getElementById('cfgMutualidad').value)||31.24;
   cfg.vacTotales=parseInt(document.getElementById('cfgVacTotales').value)||22;
   cfg.apTotales=parseInt(document.getElementById('cfgApTotales').value)||6;
+  cfg.vacExtra=parseInt((document.getElementById('cfgVacExtra')||{}).value)||0;
+  cfg.apExtra=parseInt((document.getElementById('cfgApExtra')||{}).value)||0;
   cfg.horasTurno=parseFloat(document.getElementById('cfgHorasTurno') ? document.getElementById('cfgHorasTurno').value : 0)||0;
   cfg.horasFijoM=parseFloat(document.getElementById('cfgHorasFijoM') ? document.getElementById('cfgHorasFijoM').value : 0)||0;
   cfg.horasFijoT=parseFloat(document.getElementById('cfgHorasFijoT') ? document.getElementById('cfgHorasFijoT').value : 0)||0;
@@ -1514,6 +1521,8 @@ function applyConfig(){
   document.getElementById('cfgMutualidad').value=cfg.mutualidad;
   document.getElementById('cfgVacTotales').value=cfg.vacTotales||22;
   document.getElementById('cfgApTotales').value=cfg.apTotales||6;
+  if(document.getElementById('cfgVacExtra')) document.getElementById('cfgVacExtra').value=cfg.vacExtra||0;
+  if(document.getElementById('cfgApExtra')) document.getElementById('cfgApExtra').value=cfg.apExtra||0;
   if(document.getElementById('cfgHorasTurno')) document.getElementById('cfgHorasTurno').value=cfg.horasTurno||'';
   if(document.getElementById('cfgHorasFijoM')) document.getElementById('cfgHorasFijoM').value=cfg.horasFijoM||'';
   if(document.getElementById('cfgHorasFijoT')) document.getElementById('cfgHorasFijoT').value=cfg.horasFijoT||'';
@@ -2511,7 +2520,7 @@ function assignSelected(tKey){
   
   // Aviso si se intenta gastar vacaciones sin tener disponibles
   if(tKey==='V'){
-    var vacDisp = (cfg.vacTotales||22) - calcVacConsumidas(year);
+    var vacDisp = totalVacAnio() - calcVacConsumidas(year);
     if(vacDisp <= 0){
       if(!confirm('⚠️ No te quedan días de vacaciones disponibles. ¿Quieres grabarlo igualmente?')) return;
     }
@@ -5139,20 +5148,29 @@ function calcApTotalesPorTrienios(){
 
 function updateAntiguedadInfo(){
   var div = document.getElementById('antiguedadInfo');
-  if(!div) return;
-  if(!cfg.fechaIngreso){ div.style.display='none'; return; }
+  var note = document.getElementById('vacApAutoNote');
+  if(!cfg.fechaIngreso){
+    if(div) div.style.display='none';
+    if(note) note.innerHTML = '⚠️ No has indicado fecha de incorporación (arriba, Datos personales). Vacaciones y AP usarán la <strong>base manual</strong> de abajo.';
+    return;
+  }
   var anos = calcAnosServicio();
   var vac  = calcVacTotalesPorAntiguedad();
   var ap   = calcApTotalesPorTrienios();
   var apExtra = calcApExtraPorFestivosSabado(year);
+  var vacExtra = cfg.vacExtra||0, apExtraManual = cfg.apExtra||0;
+  if(note) note.innerHTML = '✅ Tienes fecha de incorporación: Vacaciones y AP se calculan <strong>automáticamente</strong> por antigüedad ('+anos+' años). Los campos "base manual" de abajo se ignoran; usa los de "extra" solo para añadir días excepcionales (bajas, causas ajenas...).';
+  if(!div) return;
   div.style.display = 'block';
   var apAntig = ap - 6;
   var apDetalle = [];
   if(apAntig>0) apDetalle.push(apAntig+' por antigüedad');
   if(apExtra>0) apDetalle.push(apExtra+' por festivo en sábado');
+  if(apExtraManual) apDetalle.push(apExtraManual+' extra manual');
+  if(vacExtra) var vacDetalle = ' ('+vac+' + '+vacExtra+' extra manual)';
   div.innerHTML = '📅 <strong>'+anos+' años de servicio</strong><br>'+
-    '🏖️ Vacaciones: <strong>'+vac+' días</strong> · '+
-    '📋 AP: <strong>'+(ap+apExtra)+' días</strong>'+
+    '🏖️ Vacaciones: <strong>'+(vac+vacExtra)+' días</strong>'+(vacExtra?' <span style="font-size:10px">(auto '+vac+' + '+vacExtra+' extra)</span>':'')+' · '+
+    '📋 AP: <strong>'+(ap+apExtra+apExtraManual)+' días</strong>'+
     (apDetalle.length?' (6 base + '+apDetalle.join(' + ')+')':'');
 }
 
@@ -5225,7 +5243,13 @@ function calcApExtraPorFestivosSabado(y){
 // Total AP disponibles = base + extras por festivos en sabado
 function totalApAnio(y){
   var base = cfg.fechaIngreso ? calcApTotalesPorTrienios() : (cfg.apTotales || 6);
-  return base + calcApExtraPorFestivosSabado(y || year);
+  return base + calcApExtraPorFestivosSabado(y || year) + (cfg.apExtra||0);
+}
+// Total de vacaciones: automático por antigüedad si hay fecha de incorporación,
+// si no, el valor manual introducido. Siempre se suma el ajuste manual (bajas, etc.)
+function totalVacAnio(){
+  var base = cfg.fechaIngreso ? calcVacTotalesPorAntiguedad() : (cfg.vacTotales || 22);
+  return base + (cfg.vacExtra||0);
 }
 function calcApConsumidos(y){
   // Periodo: 1-feb(y) al 31-ene(y+1), igual que vacaciones
@@ -5518,7 +5542,7 @@ function savePreferenciasEditorToCfg(){
 function renderVacApContent(y){
   var box = document.getElementById('vacApContent');
   if(!box) return;
-  var vacTot  = cfg.vacTotales||22;
+  var vacTot  = totalVacAnio();
   var apTot   = totalApAnio(y);
   var pssTot  = cfg.pssTotales||3;
   var pnavTot = cfg.pnavTotales||3;
@@ -5531,11 +5555,15 @@ function renderVacApContent(y){
   var pssDisp  = pssTot  - pssCons;
   var pnavDisp = pnavTot - pnavCons;
 
-  function fila(icon, label, tot, cons, disp){
+  function fila(icon, label, tot, cons, disp, tema){
     var c = disp>=0?'var(--verde)':'var(--rojo)';
-    var html = '<div class="br"><span>'+icon+' '+label+' totales:</span><strong>'+tot+' días</strong></div>';
-    html += '<div class="br"><span>Consumidos:</span><strong style="color:var(--rojo)">'+cons+' días</strong></div>';
-    html += '<div class="br tot"><span>Disponibles:</span><strong style="color:'+c+';font-size:15px">'+disp+' días</strong></div>';
+    var bgDisp = disp>=0?'#dcfce7':'#fee2e2';
+    var html = '<div style="border-left:4px solid '+tema+';background:#fafafa;border-radius:8px;padding:8px 10px;margin-bottom:8px">';
+    html += '<div style="font-weight:800;font-size:13px;color:'+tema+';margin-bottom:5px">'+icon+' '+label+'</div>';
+    html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0"><span>Totales:</span><strong>'+tot+' días</strong></div>';
+    html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0"><span>Consumidos:</span><strong style="color:var(--rojo)">'+cons+' días</strong></div>';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;background:'+bgDisp+';border-radius:6px;padding:6px 8px;margin-top:5px"><span style="font-weight:700;font-size:13px">Disponibles:</span><strong style="color:'+c+';font-size:17px">'+disp+' días</strong></div>';
+    html += '</div>';
     return html;
   }
 
@@ -5561,15 +5589,11 @@ function renderVacApContent(y){
     }
     html += '<div style="font-size:10px;color:#64748b;margin-top:4px">Ejemplo: si tienes 165 h y tus turnos son de 8,5 h, la app lo traduce a días de vacaciones redondeando hacia arriba. Si gastas 6 días con servicio de 8,5 h, consumes 51 h y quedan 114 h, que equivalen aprox. a 14 días más de vacaciones. Libres y salientes incluidos computan 0 h.</div>';
   } else {
-    html += fila('🏖️','Vacaciones',vacTot,vacCons,vacDisp);
+    html += fila('🏖️','Vacaciones',vacTot,vacCons,vacDisp,'#0369a1');
   }
-  html += '<div style="margin-top:10px"></div>';
-  html += fila('📋','Asuntos Particulares (AP)',apTot,apCons,apDisp);
-  html += '<div style="margin-top:10px"></div>';
-  html += fila('✝️','Permiso Semana Santa',pssTot,pssCons,pssDisp);
-  html += '<div style="margin-top:10px"></div>';
-  html += fila('🎄','Permiso Navidad',pnavTot,pnavCons,pnavDisp);
-  html += '<div style="margin-top:10px"></div>';
+  html += fila('📋','Asuntos Particulares (AP)',apTot,apCons,apDisp,'#7c3aed');
+  html += fila('✝️','Permiso Semana Santa',pssTot,pssCons,pssDisp,'#9333ea');
+  html += fila('🎄','Permiso Navidad',pnavTot,pnavCons,pnavDisp,'#16a34a');
   // DSJ
   var dsjGen  = calcDSJGenerados(y);
   var dsjCons = calcDSJConsumidos(y);
@@ -5607,7 +5631,7 @@ function renderVacApContent(y){
 // Actualiza los contadores en Ajustes
 function actualizarContadoresAjustes(){
   var df       = calcDFAnio(year);
-  var vacTot   = cfg.vacTotales||22;
+  var vacTot   = totalVacAnio();
   var apTot    = totalApAnio(year);
   var pssTot   = cfg.pssTotales||3;
   var pnavTot  = cfg.pnavTotales||3;
@@ -5641,6 +5665,7 @@ function actualizarContadoresAjustes(){
     var apPartes = [];
     if(apPorAntiguedad>0) apPartes.push('+'+apPorAntiguedad+' antigüedad');
     if(apExtra>0) apPartes.push('+'+apExtra+' festivo en sábado');
+    if(cfg.apExtra) apPartes.push((cfg.apExtra>0?'+':'')+cfg.apExtra+' extra manual');
     var apLabel = apPartes.length ? 'AP disponibles ('+apBaseInicial+' '+apPartes.join(' ')+')' : 'AP disponibles';
     html += lineaSaldo('📋', apLabel, apTot, apCons);
     html += lineaSaldo('✝️','Permiso S.S. disponibles',pssTot,pssCons);
