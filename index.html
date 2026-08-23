@@ -553,12 +553,12 @@ button[aria-label*="EDITAR CUADRANTE" i] {
     <div class="info-box" style="margin-bottom:10px">El periodo de disfrute va del <strong>1 de febrero al 31 de enero</strong> del año siguiente. En régimen general no consumen crédito los fines de semana y festivos; en turno fijo/cadencia las vacaciones se llevan por horas.<br><br>
     <span id="vacApAutoNote"></span></div>
     <div class="ig2">
-      <div class="ig"><label class="il">🏖️ Vacaciones — base manual (sin fecha ingreso)</label><input type="number" id="cfgVacTotales" value="22" min="0" max="60" oninput="saveCfg()"></div>
-      <div class="ig"><label class="il">📋 AP — base manual (sin fecha ingreso)</label><input type="number" id="cfgApTotales" value="6" min="0" max="20" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il" style="min-height:28px">🏖️ Vacaciones — base manual (sin fecha ingreso)</label><input type="number" id="cfgVacTotales" value="22" min="0" max="60" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il" style="min-height:28px">📋 AP — base manual (sin fecha ingreso)</label><input type="number" id="cfgApTotales" value="6" min="0" max="20" oninput="saveCfg()"></div>
     </div>
     <div class="ig2">
-      <div class="ig"><label class="il">➕ Vacaciones extra (bajas, etc.)</label><input type="number" id="cfgVacExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
-      <div class="ig"><label class="il">➕ AP extra (bajas, etc.)</label><input type="number" id="cfgApExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il" style="min-height:28px">➕ Vacaciones extra (bajas, etc.)</label><input type="number" id="cfgVacExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
+      <div class="ig"><label class="il" style="min-height:28px">➕ AP extra (bajas, etc.)</label><input type="number" id="cfgApExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
     </div>
     <div class="ig2">
       <div class="ig"><label class="il">✝️ Permiso S.S. (días/año)</label><input type="number" id="cfgPssTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
@@ -651,7 +651,46 @@ button[aria-label*="EDITAR CUADRANTE" i] {
 
     </details>
     <div class="divider"></div>
-    <details class="ajustes-acc"><summary>☁️ Sincronización GitHub Gist cifrada</summary>
+    <details class="ajustes-acc"><summary>📱 Sincronizar con mis otros dispositivos (PIN)</summary>
+    <div class="info-box" style="margin-bottom:10px">Es totalmente <strong>opcional</strong>. Si no lo activas, tus datos se quedan solo en este dispositivo. Tus datos van siempre <strong>cifrados</strong> antes de subirse — sin tu contraseña, nadie puede leerlos.</div>
+    <label style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:9px 10px;margin-bottom:10px;cursor:pointer">
+      <input type="checkbox" id="cfgPinEnabled" onchange="togglePinSync()" style="width:18px;height:18px;accent-color:var(--verde)">
+      <span style="font-size:12px;font-weight:700;color:#333">Activar sincronización por PIN</span>
+    </label>
+    <div id="pinSetupBlock" style="display:none">
+      <div class="ig">
+        <label class="il">🔐 Contraseña de cifrado (elige una, mín. 8 caracteres)</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="password" id="cfgPinPassword" placeholder="Mínimo 8 caracteres" oninput="savePinPassword()" autocomplete="new-password" style="flex:1">
+          <button type="button" id="btnTogglePinPassword" onclick="togglePinPasswordVis()" aria-label="Mostrar u ocultar contraseña" style="width:46px;height:40px;border:2px solid #ddd;border-radius:9px;background:#fff;font-size:18px;cursor:pointer">👁️</button>
+        </div>
+        <div style="font-size:10px;color:#666;margin-top:5px;line-height:1.35">Úsala también en tus otros dispositivos. Si la olvidas, NADIE puede recuperar los datos.</div>
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:9px 10px;margin-bottom:10px;cursor:pointer">
+        <input type="checkbox" id="cfgRememberPinPassword" onchange="savePinPassword()" style="width:18px;height:18px;margin-top:1px;accent-color:var(--verde)">
+        <span style="font-size:11px;color:#555;line-height:1.35">Recordar la contraseña en este dispositivo.</span>
+      </label>
+      <button type="button" class="btn-export" style="width:100%;margin-bottom:10px" onclick="generarPinNuevo()">✨ Generar mi PIN (primer dispositivo)</button>
+      <div class="divider" style="margin:6px 0"></div>
+      <div class="ig">
+        <label class="il">📲 O escribe un PIN que ya tengas (otro dispositivo)</label>
+        <input type="text" id="cfgPinJoin" placeholder="Ej: 483920" maxlength="6" inputmode="numeric">
+      </div>
+      <button type="button" class="btn-import" style="width:100%" onclick="unirsePinExistente()">🔗 Unirme con ese PIN</button>
+    </div>
+    <div id="pinActiveBlock" style="display:none">
+      <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:12px;text-align:center;margin-bottom:10px">
+        <div style="font-size:11px;color:#555;margin-bottom:4px">Tu PIN de sincronización</div>
+        <div id="pinShown" style="font-size:26px;font-weight:800;letter-spacing:3px;color:var(--verde)">------</div>
+        <div style="font-size:10px;color:#666;margin-top:4px">Apunta este PIN y tu contraseña. Úsalos en tus otros dispositivos para unirte al mismo cuadrante.</div>
+      </div>
+      <button type="button" class="btn-export" style="width:100%;margin-bottom:8px" onclick="pinPush()">🔒 Sincronizar ahora</button>
+      <button type="button" onclick="olvidarPin()" style="background:none;border:none;color:#64748b;text-decoration:underline;font-size:11px;cursor:pointer;padding:2px 0 8px;width:100%">Desactivar en este dispositivo</button>
+    </div>
+    <div id="pinStatus" style="display:none;margin-top:4px;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:700;text-align:center"></div>
+    </details>
+    <div class="divider"></div>
+    <details class="ajustes-acc"><summary>☁️ Sincronización GitHub Gist cifrada (avanzado)</summary>
     <div class="rule-card" style="margin-bottom:8px">
       <div class="rule-row" style="flex-direction:column;align-items:flex-start;gap:6px;border:none">
         <span style="font-size:11px;color:#555">Antes de subirlos, la app cifra tus turnos y ajustes en el propio dispositivo mediante <strong>AES-256-GCM</strong>. En el Gist solo se guarda contenido cifrado.</span>
@@ -1424,7 +1463,7 @@ function save(){
     localStorage.setItem('cuadrante_shifts',JSON.stringify(shifts));
     localStorage.setItem('cuadrante_lastSave', Date.now().toString());
   }catch(e){}
-  scheduleGistPush();
+  scheduleGistPush(); schedulePinPush();
 }
 
 function saveCfg(){
@@ -1478,7 +1517,7 @@ function saveCfg(){
   TURNO_HORAS_DEF.N.ini=cfg.iniN; TURNO_HORAS_DEF.N.fin=cfg.finN;
   TURNO_HORAS_DEF.D.ini=cfg.iniM; TURNO_HORAS_DEF.D.fin=cfg.finN;
   try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
-  scheduleGistPush();
+  scheduleGistPush(); schedulePinPush();
   calcNomina();
 }
 
@@ -1486,13 +1525,13 @@ function saveName(){
   cfg.nombre = document.getElementById('cfgNombre').value;
   document.getElementById('hName').innerText = cfg.nombre || '';
   try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
-  scheduleGistPush();
+  scheduleGistPush(); schedulePinPush();
 }
 
 function saveCompaneros(){
   cfg.companeros = document.getElementById('cfgCompaneros').value;
   try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
-  scheduleGistPush();
+  scheduleGistPush(); schedulePinPush();
 }
 
 function applyConfig(){
@@ -1995,6 +2034,200 @@ async function autoSyncGistOnLoad(){
     }
   }
 }
+
+// ===========================================================================
+// SINCRONIZACIÓN POR PIN (Firebase Realtime Database) — opcional, "para tontos"
+// Reutiliza el mismo cifrado AES-256-GCM que la sincronización con Gist.
+// ===========================================================================
+var FIREBASE_URL = 'https://cuadrante-a79d2-default-rtdb.europe-west1.firebasedatabase.app';
+var pinCfg = { pin:'', enabled:false, remember:false };
+var pinPassword = '';
+var pinAutoTimer = null;
+
+function loadPinCfg(){
+  try{
+    var p = localStorage.getItem('cuadrante_pin_cfg');
+    if(p) pinCfg = Object.assign(pinCfg, JSON.parse(p));
+    pinPassword = localStorage.getItem('cuadrante_pin_password') || sessionStorage.getItem('cuadrante_pin_password') || '';
+    pinCfg.remember = !!localStorage.getItem('cuadrante_pin_password');
+    var enEl = document.getElementById('cfgPinEnabled');
+    var passEl = document.getElementById('cfgPinPassword');
+    var remEl = document.getElementById('cfgRememberPinPassword');
+    if(enEl) enEl.checked = !!pinCfg.enabled;
+    if(passEl) passEl.value = pinPassword;
+    if(remEl) remEl.checked = !!pinCfg.remember;
+  }catch(e){}
+  updatePinUI();
+}
+
+function persistPinCfg(){
+  var safe = { pin: pinCfg.pin||'', enabled: !!pinCfg.enabled, remember: !!pinCfg.remember };
+  try{ localStorage.setItem('cuadrante_pin_cfg', JSON.stringify(safe)); }catch(e){}
+}
+
+function savePinPassword(){
+  var passEl = document.getElementById('cfgPinPassword');
+  var remEl = document.getElementById('cfgRememberPinPassword');
+  pinPassword = passEl ? passEl.value : '';
+  pinCfg.remember = remEl ? remEl.checked : false;
+  persistPinCfg();
+  try{
+    if(pinCfg.remember && pinPassword){
+      localStorage.setItem('cuadrante_pin_password', pinPassword);
+      sessionStorage.removeItem('cuadrante_pin_password');
+    }else{
+      localStorage.removeItem('cuadrante_pin_password');
+      if(pinPassword) sessionStorage.setItem('cuadrante_pin_password', pinPassword);
+      else sessionStorage.removeItem('cuadrante_pin_password');
+    }
+  }catch(e){}
+}
+
+function togglePinPasswordVis(){
+  var p = document.getElementById('cfgPinPassword');
+  var b = document.getElementById('btnTogglePinPassword');
+  if(!p) return;
+  p.type = p.type === 'password' ? 'text' : 'password';
+  if(b) b.textContent = p.type === 'password' ? '👁️' : '🙈';
+}
+
+function togglePinSync(){
+  var enEl = document.getElementById('cfgPinEnabled');
+  pinCfg.enabled = enEl ? enEl.checked : false;
+  persistPinCfg();
+  updatePinUI();
+}
+
+function updatePinUI(){
+  var setup = document.getElementById('pinSetupBlock');
+  var block = document.getElementById('pinActiveBlock');
+  if(!setup || !block) return;
+  if(!pinCfg.enabled){ setup.style.display='none'; block.style.display='none'; return; }
+  if(pinCfg.pin){
+    setup.style.display='none';
+    block.style.display='block';
+    var shown = document.getElementById('pinShown');
+    if(shown) shown.innerText = pinCfg.pin;
+  }else{
+    setup.style.display='block';
+    block.style.display='none';
+  }
+}
+
+function showPinMsg(m, isErr){
+  var d = document.getElementById('pinStatus');
+  if(!d) return;
+  d.innerText = m; d.style.display='block';
+  d.style.background = isErr ? '#fee2e2' : '#e8f4f0';
+  d.style.color = isErr ? 'var(--rojo)' : 'var(--verde)';
+}
+
+async function generarPinNuevo(){
+  savePinPassword();
+  if(!pinPassword || pinPassword.length<8){ showPinMsg('Escribe antes una contraseña de al menos 8 caracteres.', true); return; }
+  if(!cryptoDisponible()){ showPinMsg('Este navegador no soporta cifrado seguro.', true); return; }
+  showPinMsg('Generando PIN disponible...', false);
+  try{
+    var pin, libre=false, intentos=0;
+    while(!libre && intentos<8){
+      pin = String(Math.floor(100000+Math.random()*900000));
+      var res = await fetch(FIREBASE_URL+'/sync/'+pin+'.json');
+      var data = await res.json();
+      libre = !data;
+      intentos++;
+    }
+    if(!libre) throw new Error('No se pudo generar un PIN libre, inténtalo de nuevo.');
+    pinCfg.pin = pin; pinCfg.enabled = true;
+    persistPinCfg();
+    await pinPush();
+    updatePinUI();
+    showPinMsg('✅ PIN creado y datos subidos. Apunta el PIN y la contraseña en un lugar seguro.', false);
+  }catch(e){
+    showPinMsg('Error generando PIN: '+e.message, true);
+  }
+}
+
+async function unirsePinExistente(){
+  savePinPassword();
+  var pinEl = document.getElementById('cfgPinJoin');
+  var pin = pinEl ? pinEl.value.trim() : '';
+  if(!/^\d{6}$/.test(pin)){ showPinMsg('Escribe un PIN de 6 dígitos.', true); return; }
+  if(!pinPassword || pinPassword.length<8){ showPinMsg('Escribe la contraseña de ese PIN.', true); return; }
+  if(!confirm('¿Descargar los datos de ese PIN? Se sobrescribirán los datos de este dispositivo.')) return;
+  try{
+    showPinMsg('Descargando y descifrando...', false);
+    var res = await fetch(FIREBASE_URL+'/sync/'+pin+'.json');
+    if(!res.ok) throw new Error('Error de red');
+    var stored = await res.json();
+    if(!stored) throw new Error('No existe ningún cuadrante con ese PIN.');
+    var parsed = await decryptGistPayload(stored, pinPassword);
+    applyGistPayload(parsed);
+    pinCfg.pin = pin; pinCfg.enabled = true;
+    persistPinCfg();
+    updatePinUI();
+    showPinMsg('🔓 Datos descargados y aplicados con éxito.', false);
+    alert('¡Listo! Este dispositivo ya está sincronizado con ese PIN.');
+  }catch(e){
+    showPinMsg('Error: '+e.message, true);
+  }
+}
+
+async function pinPush(){
+  if(!pinCfg.enabled || !pinCfg.pin || !pinPassword || pinPassword.length<8 || !cryptoDisponible()) return;
+  try{
+    var payload = buildGistPayload();
+    var encrypted = await encryptGistPayload(payload, pinPassword);
+    var res = await fetch(FIREBASE_URL+'/sync/'+pinCfg.pin+'.json', {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(encrypted)
+    });
+    if(!res.ok) throw new Error('Error HTTP '+res.status);
+    showPinMsg('🔒 Sincronizado a las '+new Date().toLocaleTimeString(), false);
+  }catch(e){
+    showPinMsg('⚠️ Error al sincronizar: '+e.message, true);
+  }
+}
+
+function schedulePinPush(){
+  if(!pinCfg.enabled || !pinCfg.pin || !pinPassword || pinPassword.length<8 || !cryptoDisponible()) return;
+  clearTimeout(pinAutoTimer);
+  pinAutoTimer = setTimeout(function(){ pinPush(); }, 3000);
+}
+
+async function autoSyncPinOnLoad(){
+  if(!pinCfg.enabled || !pinCfg.pin || !pinPassword || pinPassword.length<8 || !cryptoDisponible()) return;
+  try{
+    var res = await fetch(FIREBASE_URL+'/sync/'+pinCfg.pin+'.json');
+    if(!res.ok) return;
+    var stored = await res.json();
+    if(!stored) return;
+    var remoteTs = new Date(stored.ts||0).getTime();
+    var localTs = parseInt(localStorage.getItem('cuadrante_lastSave')||'0',10);
+    if(!remoteTs || remoteTs > localTs){
+      var parsed = await decryptGistPayload(stored, pinPassword);
+      applyGistPayload(parsed, remoteTs || undefined);
+      showPinMsg('🔓 Datos actualizados desde otro dispositivo.', false);
+    }
+  }catch(e){
+    showPinMsg('⚠️ No se pudo comprobar la sincronización: contraseña incorrecta o dato dañado.', true);
+  }
+}
+
+function olvidarPin(){
+  if(!confirm('¿Desactivar la sincronización por PIN en este dispositivo? Los datos ya subidos con ese PIN no se borran de la nube.')) return;
+  pinCfg = {pin:'', enabled:false, remember:false};
+  pinPassword = '';
+  try{
+    localStorage.removeItem('cuadrante_pin_cfg');
+    localStorage.removeItem('cuadrante_pin_password');
+    sessionStorage.removeItem('cuadrante_pin_password');
+  }catch(e){}
+  var enEl=document.getElementById('cfgPinEnabled'); if(enEl) enEl.checked=false;
+  var passEl=document.getElementById('cfgPinPassword'); if(passEl) passEl.value='';
+  updatePinUI();
+  showPinMsg('Sincronización por PIN desactivada en este dispositivo.', false);
+}
+
+
 
 // ==========================================
 // VISTAS Y NAVEGACIÓN
@@ -4274,7 +4507,7 @@ function guardarTramoTabla(){
   if(existente){ existente.valores = valores; } else { cfg.tablaHistorial.push({desde:desde, valores:valores}); }
   cfg.tablaHistorial.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
   try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
-  scheduleGistPush();
+  scheduleGistPush(); schedulePinPush();
   if(desdeEl) desdeEl.value='';
   renderTablaHistorial();
   calcNomina();
@@ -4283,7 +4516,7 @@ function borrarTramoTabla(desde){
   if(!Array.isArray(cfg.tablaHistorial) || cfg.tablaHistorial.length<=1) return;
   cfg.tablaHistorial = cfg.tablaHistorial.filter(function(t){ return t.desde!==desde; });
   try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
-  scheduleGistPush();
+  scheduleGistPush(); schedulePinPush();
   renderTablaHistorial();
   calcNomina();
 }
@@ -5534,7 +5767,7 @@ function savePreferenciasEditorToCfg(){
   });
   cfg.prefPeriodos[y]=obj;
   try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
-  scheduleGistPush();
+  scheduleGistPush(); schedulePinPush();
   renderPreferenciasContent(year);
 }
 
@@ -6132,6 +6365,7 @@ window.onload=function(){
   load();
   loadFestivosExtra();
   loadGistCfg();
+  loadPinCfg();
   buildLegend();
   renderAll();
   renderRegimenCards();
@@ -6145,6 +6379,7 @@ window.onload=function(){
 
   // Sincronización automática cifrada al arrancar
   autoSyncGistOnLoad();
+  autoSyncPinOnLoad();
 };
 
 try {
