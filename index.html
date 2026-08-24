@@ -317,6 +317,8 @@ body.ro-mode #roBanner{display:block}
    puede mostrarlo blanco alrededor de la app y de la barra de estado. */
 html.dark-mode{background:#05070a !important;}
 body.dark-mode{filter:invert(1) hue-rotate(180deg);background:#fff;min-height:100dvh;}
+/* Un poco más profundo, conservando el degradado verde-azul del encabezado. */
+body.dark-mode header{background:linear-gradient(135deg,#359a63 0%,#376ab0 100%);}
 body.dark-mode img,
 body.dark-mode .no-invert{filter:hue-rotate(180deg) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.4)) !important;}
 .theme-btn.active{border-color:var(--verde) !important;background:#e8f4f0 !important;color:var(--verde) !important;box-shadow:0 0 0 2px rgba(26,92,56,.15)}
