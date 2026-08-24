@@ -23,8 +23,9 @@ la venta ni la publicación de la aplicación sin permiso previo y expreso del a
   --rojo:#b92b27; --azul:#1e3a6e; --gris:#f0f2f5;
   --texto:#1a1a2e; --blanco:#fff; --sombra:0 2px 10px rgba(0,0,0,.12);
 }
+html{min-height:100%;background:var(--gris);}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--gris);color:var(--texto);min-height:100vh;font-size:14px;}
+body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--gris);color:var(--texto);min-height:100vh;min-height:100dvh;font-size:14px;}
 
 header{background:linear-gradient(135deg,var(--verde) 0%,var(--azul) 100%);color:#fff;padding:12px 14px 0;position:sticky;top:0;z-index:200;box-shadow:0 3px 16px rgba(0,0,0,.3);}
 .h-top{display:flex;align-items:center;gap:10px;padding-bottom:10px;}
@@ -312,7 +313,10 @@ body.ro-mode #roBanner{display:block}
 </style>
 
 <style id="dark-mode-style">
-body.dark-mode{filter:invert(1) hue-rotate(180deg);background:#fff;}
+/* El fondo del documento queda fuera del filtro: si no se fija aquí, iPhone
+   puede mostrarlo blanco alrededor de la app y de la barra de estado. */
+html.dark-mode{background:#05070a !important;}
+body.dark-mode{filter:invert(1) hue-rotate(180deg);background:#fff;min-height:100dvh;}
 body.dark-mode img,
 body.dark-mode .no-invert{filter:hue-rotate(180deg) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.4)) !important;}
 .theme-btn.active{border-color:var(--verde) !important;background:#e8f4f0 !important;color:var(--verde) !important;box-shadow:0 0 0 2px rgba(26,92,56,.15)}
@@ -2305,6 +2309,9 @@ function applyTheme(){
   var mode = localStorage.getItem('cuadrante_theme') || 'auto';
   var dark = mode === 'dark' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.body.classList.toggle('dark-mode', dark);
+  document.documentElement.classList.toggle('dark-mode', dark);
+  var themeColor = document.querySelector('meta[name="theme-color"]');
+  if(themeColor) themeColor.setAttribute('content', dark ? '#05070a' : '#1e3a6e');
   ['cfgThemeLight','cfgThemeDark','cfgThemeAuto'].forEach(function(id){
     var b = document.getElementById(id);
     if(b) b.classList.toggle('active', id === 'cfgTheme'+mode.charAt(0).toUpperCase()+mode.slice(1));
