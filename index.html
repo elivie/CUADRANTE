@@ -351,6 +351,9 @@ body.dark-mode .turn-S .ck{color:#9aaabd!important;}
 body.dark-mode .chip,body.dark-mode .info-card,body.dark-mode .bal-card,body.dark-mode .rule-card,body.dark-mode .leg,body.dark-mode .ajustes-acc,body.dark-mode .incentivos-tbl{background:#111720;color:#e6edf7;box-shadow:0 2px 10px rgba(0,0,0,.38);}
 body.dark-mode .chip .cl,body.dark-mode .info-card .ic-l,body.dark-mode .info-card .ic-s,body.dark-mode .il{color:#a8b4c4;}
 body.dark-mode .tb,body.dark-mode .msel-toggle-icon,body.dark-mode .month-action-btn,body.dark-mode .edit-toggle,body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#111720;color:#e6edf7;border-color:#334155;}
+body.dark-mode #atrasosMesBlock{background:#10271e!important;}
+body.dark-mode #atrasosMesBlock label{color:#8ed4b1!important;}
+body.dark-mode #atrasosMesBlock span{color:#a8b4c4!important;}
 body.dark-mode .ajustes-acc>summary{background:#12251d;color:#8ed4b1;}
 body.dark-mode .modal{background:#111720;color:#e6edf7;}
 body.dark-mode .app-footer{color:#9aaabd;}
@@ -451,9 +454,14 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
       <input type="text" inputmode="decimal" id="prodEstructuralInput" style="width:90px;padding:5px 8px;border:1px solid #6ee7b7;border-radius:8px;font-size:14px;font-weight:700" oninput="saveProdEstructural()">
       <span style="font-size:11px;color:#888">Guardado solo para esta nómina.</span>
     </div>
-    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables; también se estima en turno fijo) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (régimen general: exceso hasta 40h/período, ≥30 min = 1h × 12 €; en <strong>turno fijo/cadencia</strong> no se liquida mes a mes: solo se calcula al cierre del cuatrimestre de devengo, <strong>mayo, septiembre o enero</strong>), <strong>SERVICIOS EXTRAORDINARIOS</strong> DAS/DF remunerados/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 (97,50 €) es fija.</div>
+    <div id="atrasosMesBlock" style="display:flex;align-items:center;gap:8px;background:#ecfdf5;border-radius:10px;padding:8px 12px;margin-bottom:10px;flex-wrap:wrap">
+      <label style="font-size:12px;font-weight:700;color:#065f46;white-space:nowrap">Atrasos este mes (€):</label>
+      <input type="text" inputmode="decimal" id="atrasosMesInput" placeholder="0" style="width:90px;padding:5px 8px;border:1px solid #6ee7b7;border-radius:8px;font-size:14px;font-weight:700" oninput="saveAtrasosMes()">
+      <span style="font-size:11px;color:#64748b">Se suman al bruto y llevan el IRPF de este mes.</span>
+    </div>
     <div id="nominaCard"></div>
     <div class="bal-card"><h3>⚡ Detalle INCENTIVOS del mes</h3><div id="nominaIncentivosDetail"></div></div>
+    <div class="info-box">Variables mes a mes: <strong>ICRES</strong> (nocturnos, festivos y demás servicios computables; también se estima en turno fijo) + <strong>ICREM</strong> (modificaciones HMPS/HMNS, calculado por separado), <strong>CREX</strong> (régimen general: exceso hasta 40h/período, ≥30 min = 1h × 12 €; en <strong>turno fijo/cadencia</strong> no se liquida mes a mes: solo se calcula al cierre del cuatrimestre de devengo, <strong>mayo, septiembre o enero</strong>), <strong>SERVICIOS EXTRAORDINARIOS</strong> DAS/DF remunerados/ESS (96 €/servicio). El exceso sobre 40h genera <strong>DSJ</strong>. ERG3 es fija.</div>
 
     <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0">
       <div style="font-weight:800;font-size:13px;color:#0f766e;margin-bottom:6px">Productividad ACEX4 — ICREM por modificaciones de servicio</div>
@@ -2374,7 +2382,7 @@ function showView(v, btn){
   });
   if(v==='cuadrante') document.getElementById('vCuadrante').style.display='block';
   if(v==='resumen') { document.getElementById('vResumen').style.display='block'; calcResumen(); }
-  if(v==='nomina') { document.getElementById('vNomina').style.display='block'; nominaMesOffset=0; actualizarPeriodoNominaPago(); loadIrpfMes(); loadSocorrosMes(); loadProdEstructural(); actualizarVisibilidadNomina(); calcNomina(); renderModificaciones(); }
+  if(v==='nomina') { document.getElementById('vNomina').style.display='block'; nominaMesOffset=0; actualizarPeriodoNominaPago(); loadIrpfMes(); loadSocorrosMes(); loadAtrasosMes(); loadProdEstructural(); actualizarVisibilidadNomina(); calcNomina(); renderModificaciones(); }
   if(v==='incentivos') { document.getElementById('vIncentivos').style.display='block'; initIncentivosTab(); }
   if(v==='ajustes') { document.getElementById('vAjustes').style.display='block'; renderRegimenCards(); syncBloquesRegimen(); actualizarContadoresAjustes(); renderFestPanel(); }
   if(v==='ayuda') document.getElementById('vAyuda').style.display='block';
@@ -4623,6 +4631,7 @@ function nominaCambiarMes(delta){
   actualizarPeriodoNominaPago();
   loadIrpfMes();
   loadSocorrosMes();
+  loadAtrasosMes();
   loadProdEstructural();
   calcNomina();
   renderModificaciones();
@@ -4693,6 +4702,7 @@ function calcNomina(noReloadInputs){
   if(!noReloadInputs){
     loadIrpfMes();
     loadSocorrosMes();
+    loadAtrasosMes();
   }
   // La pestaña muestra el mismo mes de nómina que el Cuadrante.
   // Los conceptos variables se calculan sobre el periodo de devengo de dos meses antes.
@@ -4740,7 +4750,8 @@ function calcNomina(noReloadInputs){
     pagaExtra = exSal + exTri + exDest + exEspG;
     pagaExtraDetalle = {sal:exSal, tri:exTri, dest:exDest, espG:exEspG, total:pagaExtra};
   }
-  var brutoTotal=baseBruto+impIncentivos+impModificaciones+crex.importe+sExt.importe+pagaExtra;
+  var atrasos = getAtrasosMes();
+  var brutoTotal=baseBruto+impIncentivos+impModificaciones+crex.importe+sExt.importe+pagaExtra+atrasos;
   var irpfMes = getIrpfMes();
   var retIrpf=brutoTotal*(irpfMes/100);
   var dedHuerfanos = esMesExtra ? (cfg.huerfanosExtra || 0) : (cfg.huerfanosOrd || 0);
@@ -4786,10 +4797,13 @@ function calcNomina(noReloadInputs){
   var sExtRow = sExt.importe > 0
     ? '<div class="nom-row var" style="color:#be185d"><span>+ SERVICIOS EXTRAORDINARIOS ('+nSextTotal+' serv. × 96,00 €):</span><strong>'+sExt.importe.toFixed(2)+' €</strong></div>'
     : '<div class="nom-row" style="color:#aaa"><span>+ Servicios Extraordinarios (DAS/DF rem./ESS):</span><strong>0,00 €</strong></div>';
+  var atrasosRow = atrasos !== 0
+    ? '<div class="nom-row var" style="color:#059669"><span>+ Atrasos:</span><strong>'+atrasos.toFixed(2)+' €</strong></div>'
+    : '';
   
   var div=document.getElementById('nominaCard');
   var refMesLabel = MESES[refMonth] + ' ' + refYear;
-  div.innerHTML='<div class="nom-card"><h3>💰 PREVISION NETO A PERCIBIR</h3><div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Conceptos variables (INCENTIVOS/CREX/Serv.Ext.) corresponden a: <strong style=\"color:#5eead4\">'+refMesLabel+'</strong></div><div class="nom-tot"><span class="ntl">Liquido estimado en cuenta:</span><strong class="ntv">'+neto.toFixed(2)+' €</strong></div><div style="margin-top:12px"><div class="nom-row"><span>Sueldo Bruto Fijo base:</span><strong>'+baseBruto.toFixed(2)+' €</strong></div>'+(esRegimenConICRES()?'<div class="nom-row var"><span>+ Complemento INCENTIVOS / ICRES:</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="nom-row var" style="color:#065f46"><span>+ Productividad estructural (EFA/EFM):</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>')+''+modificacionesRow+crexRow+sExtRow+pagaExtraRow+'<div class="nom-row"><span>Bruto Total del mes:</span><strong>'+brutoTotal.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Retencion IRPF ('+irpfMes+'%):</span><strong>-'+retIrpf.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Derechos Pasivos / Mutualidad'+(esMesExtra?' (×2 paga extra)':'')+' :</span><strong>-'+((cfg.pasivos+cfg.mutualidad)*factorExtra).toFixed(2)+' €</strong></div>'+(dedNF>0?'<div class="nom-row" style="color:#fca5a5"><span>- Deducciones no formalizables:</span><strong>-'+dedNF.toFixed(2)+' €</strong></div>':'')+'</div></div>';
+  div.innerHTML='<div class="nom-card"><h3>💰 PREVISION NETO A PERCIBIR</h3><div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Conceptos variables (INCENTIVOS/CREX/Serv.Ext.) corresponden a: <strong style=\"color:#5eead4\">'+refMesLabel+'</strong></div><div class="nom-tot"><span class="ntl">Liquido estimado en cuenta:</span><strong class="ntv">'+neto.toFixed(2)+' €</strong></div><div style="margin-top:12px"><div class="nom-row"><span>Sueldo Bruto Fijo base:</span><strong>'+baseBruto.toFixed(2)+' €</strong></div>'+(esRegimenConICRES()?'<div class="nom-row var"><span>+ Complemento INCENTIVOS / ICRES:</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>':'<div class="nom-row var" style="color:#065f46"><span>+ Productividad estructural (EFA/EFM):</span><strong>'+impIncentivos.toFixed(2)+' €</strong></div>')+''+modificacionesRow+crexRow+sExtRow+pagaExtraRow+atrasosRow+'<div class="nom-row"><span>Bruto Total del mes:</span><strong>'+brutoTotal.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Retencion IRPF ('+irpfMes+'%):</span><strong>-'+retIrpf.toFixed(2)+' €</strong></div><div class="nom-row" style="color:#fca5a5"><span>- Derechos Pasivos / Mutualidad'+(esMesExtra?' (×2 paga extra)':'')+' :</span><strong>-'+((cfg.pasivos+cfg.mutualidad)*factorExtra).toFixed(2)+' €</strong></div>'+(dedNF>0?'<div class="nom-row" style="color:#fca5a5"><span>- Deducciones no formalizables:</span><strong>-'+dedNF.toFixed(2)+' €</strong></div>':'')+'</div></div>';
   
   // Detalle INCENTIVOS en nómina
   var det=document.getElementById('nominaIncentivosDetail');
@@ -6470,6 +6484,30 @@ function saveSocorrosMes(){
 function loadSocorrosMes(){
   var input = document.getElementById('socorrosMesInput');
   if(input && document.activeElement !== input) input.value = formatNumeroInput(getSocorrosMes());
+}
+
+// ===========================================================================
+// ATRASOS POR MES — se añaden al bruto y tributan al IRPF seleccionado ese mes
+// ===========================================================================
+function getAtrasosKey(){ var p=actualizarPeriodoNominaPago(); return 'atrasos_'+p.year+'_'+p.month; }
+
+function getAtrasosMes(){
+  var key = getAtrasosKey();
+  return shifts[key] !== undefined ? Number(shifts[key]) || 0 : 0;
+}
+
+function saveAtrasosMes(){
+  var input = document.getElementById('atrasosMesInput');
+  var val = parseNumeroFlexible(input ? input.value : '');
+  if(isNaN(val)) return;
+  shifts[getAtrasosKey()] = val;
+  save();
+  calcNomina(true);
+}
+
+function loadAtrasosMes(){
+  var input = document.getElementById('atrasosMesInput');
+  if(input && document.activeElement !== input) input.value = formatNumeroInput(getAtrasosMes());
 }
 
 // Inicializacion
