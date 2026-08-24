@@ -566,30 +566,88 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
     <div id="regimenInfo" style="background:#f0f9ff;border-radius:8px;padding:8px 10px;font-size:11px;color:#0369a1;margin-bottom:4px"></div>
 
     <div class="divider"></div>
+    <details class="ajustes-acc"><summary>🕐 Horarios por defecto de tus turnos</summary>
+    <div id="horariosDefectoBlock">
+    <div class="divider"></div>
+
+    <div class="sec-title" style="font-size:14px">Horarios por defecto de tus turnos</div>
+    <div class="info-box" style="margin-bottom:8px">Si cambian los horarios de tu unidad, actualízalos aquí. Se aplicarán automáticamente al asignar nuevos turnos. En turno fijo, la hora de <strong>inicio</strong> de cada turno se usa como punto de partida y la hora de fin del cuadrante generado se calcula a partir de las horas base que hayas puesto aquí.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:4px">🌅 Mañana</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <input type="time" id="cfgIniM" value="06:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+          <span style="font-size:11px;color:#888">→</span>
+          <input type="time" id="cfgFinM" value="14:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#1e3a6e;margin-bottom:4px">🌆 Tarde</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <input type="time" id="cfgIniT" value="14:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+          <span style="font-size:11px;color:#888">→</span>
+          <input type="time" id="cfgFinT" value="21:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#4c1d95;margin-bottom:4px">🌙 Noche</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <input type="time" id="cfgIniN" value="22:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+          <span style="font-size:11px;color:#888">→</span>
+          <input type="time" id="cfgFinN" value="05:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:4px">🌅🌙 Doblete mañana</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <input type="time" id="cfgIniDM" value="06:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+          <span style="font-size:11px;color:#888">→</span>
+          <input type="time" id="cfgFinDM" value="14:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#4c1d95;margin-bottom:4px">🌅🌙 Doblete noche</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <input type="time" id="cfgIniDN" value="22:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+          <span style="font-size:11px;color:#888">→</span>
+          <input type="time" id="cfgFinDN" value="05:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
+        </div>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-row"><span>🌅 Mañana</span><strong>Según horario configurado arriba</strong></div>
+      <div class="rule-row"><span>🌆 Tarde</span><strong>Según horario configurado arriba</strong></div>
+      <div class="rule-row"><span>🌙 Noche</span><strong>Según horario configurado arriba</strong></div>
+      <div class="rule-row"><span>🌅🌙 Doblete</span><strong>Mañana + noche configuradas arriba</strong></div>
+      <div class="rule-row"><span>✅ Vacaciones / AP</span><strong>General: 7,5h · Turno fijo: horas del servicio planificado</strong></div>
+      <div class="rule-row"><span>🏛️ DF</span><strong>7,5h (día libre por festivo trabajado)</strong></div>
+      <div class="rule-row"><span>💼 DAS/DF remunerado / ESS</span><strong>+96,00 € cuando se marque como remunerado</strong></div>
+      <div class="rule-row"><span>✝️ Permiso S.S.</span><strong>7,5h (hasta 3 días/año, Semana Santa)</strong></div>
+      <div class="rule-row"><span>🎄 Permiso Nav.</span><strong>7,5h (hasta 3 días/año, Navidad)</strong></div>
+      <div class="rule-row"><span>🚨 Permiso Urgente</span><strong>7,5h/día laborable (fin de semana intermedio no cuenta)</strong></div>
+      <div class="rule-row"><span>⏳ DSJ</span><strong>7,5h (descanso por superación de jornada)</strong></div>
+    </div>
+    </div><!-- /horariosDefectoBlock -->
+    </details>
+    <div class="divider" id="dividerPreCadencia" style="margin:14px 0 10px"></div>
     <div id="cadenciaBlock">
     <div class="sec-title" style="font-size:14px">🔁 Cadencia de turno fijo</div>
-    <div class="info-box" style="margin-bottom:8px">Define tu patrón rotativo (ej. <strong>M-M-M-T-T-N-S-L-L-L-L</strong>) separado por guiones, las horas base del turno fijo y la fecha en la que empieza el patrón. El botón rellenará el cuadrante repitiendo el patrón desde esa fecha. <strong>Solo rellena días vacíos</strong>: si un día ya tiene un turno asignado (vacaciones, AP, baja, Saliente manual...) no lo toca. En esta modalidad <strong>no se generan DAS ni DF</strong>, sea cual sea el turno trabajado. El <strong>Saliente (S)</strong> mantiene la cadencia, pero se computa a <strong>0 h</strong>.</div>
+    <div class="info-box" style="margin-bottom:8px">Define tu patrón rotativo (ej. <strong>M-M-M-T-T-N-S-L-L-L-L</strong>) y la fecha en la que empieza. El botón rellenará el cuadrante repitiendo el patrón desde esa fecha, usando el horario de cada turno (Mañana/Tarde/Noche) que hayas puesto arriba, en "Horarios por defecto de tus turnos". <strong>Solo rellena días vacíos</strong>: si un día ya tiene un turno asignado (vacaciones, AP, baja, Saliente manual...) no lo toca. En esta modalidad <strong>no se generan DAS ni DF</strong>, sea cual sea el turno trabajado. El <strong>Saliente (S)</strong> mantiene la cadencia, pero se computa a <strong>0 h</strong>.</div>
     <div class="ig"><label class="il">Patrón (códigos separados por guion)</label><input type="text" id="cfgCadenciaPatron" placeholder="M-M-M-T-T-N-S-L-L-L-L" oninput="saveCfg()" style="text-transform:uppercase"></div>
-    <div class="ig">
-      <label class="il">Horas base por turno fijo<br><span style="font-size:10px;color:#888">Si no rellenas las excepciones de abajo, M/T/N se generarán con estas horas. El Saliente (S) siempre se genera a 0 h.</span></label>
-      <input type="number" id="cfgHorasTurno" step="0.5" min="4" max="12" placeholder="8 o 8.5" oninput="saveCfg(); calcVacTurnoFijo()">
-    </div>
-    <div class="ig3">
-      <div class="ig"><label class="il">Horas turno mañana diferente<br><span style="font-size:10px;color:#888">Opcional. Si está vacío, usa las horas base del turno fijo.</span></label><input type="number" id="cfgHorasFijoM" step="0.5" min="0" max="12" placeholder="Usar base" oninput="saveCfg()"></div>
-      <div class="ig"><label class="il">Horas turno tarde diferente<br><span style="font-size:10px;color:#888">Opcional. Si está vacío, usa las horas base del turno fijo.</span></label><input type="number" id="cfgHorasFijoT" step="0.5" min="0" max="12" placeholder="Usar base" oninput="saveCfg()"></div>
-      <div class="ig"><label class="il">Horas turno noche diferente<br><span style="font-size:10px;color:#888">Opcional. Si está vacío, usa las horas base del turno fijo.</span></label><input type="number" id="cfgHorasFijoN" step="0.5" min="0" max="12" placeholder="Usar base" oninput="saveCfg()"></div>
-    </div>
-    <div class="info-box" style="font-size:11px;margin-top:-2px">Ejemplo: pones <strong>8,5</strong> como base y dejas las tres casillas vacías → todas las mañanas, tardes y noches se crean con 8,5 h. Si en algún momento la tarde tiene 9 h, pones <strong>9</strong> solo en “Horas turno tarde diferente” y M/N seguirán usando las horas base.</div>
     <div class="ig2">
       <div class="ig"><label class="il">Fecha de inicio del patrón</label><input type="date" id="cfgCadenciaInicio" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">Aplicar hasta</label><input type="date" id="cfgCadenciaHasta" oninput="saveCfg()"></div>
     </div>
     <button class="btn-ok" style="width:100%;margin-top:4px" onclick="aplicarCadencia()">🔁 Generar cuadrante con esta cadencia</button>
-    <div class="divider" style="margin:14px 0 10px"></div>
+    </div>
+    <div class="divider" id="dividerMidCadencia" style="margin:14px 0 10px"></div>
+    <div id="cadenciaBlock2">
+
     <div class="sec-title" style="font-size:13px;margin-bottom:6px">🏖️ Vacaciones en turno fijo</div>
+    <div class="info-box" style="margin-bottom:8px">Los días de crédito son los mismos que tienes calculados en Ajustes (por <strong>antigüedad</strong> si pusiste tu fecha de incorporación, o el valor manual si no). Aquí no hay que volver a introducirlos.</div>
     <div class="ig">
-      <label class="il">Días de crédito vacacional (los tuyos por años de servicio)<br><span style="font-size:10px;color:#888">Se convierten a horas: cada día de crédito equivale a 7,5 h. En turno fijo se consumen las horas reales del servicio planificado que se deja de prestar.</span></label>
-      <input type="number" id="cfgDiasCredito" step="1" min="22" max="40" placeholder="24" oninput="saveCfg(); calcVacTurnoFijo()">
+      <label class="il">Horas de referencia por servicio<br><span style="font-size:10px;color:#888">Solo para orientarte de a cuántos días de servicio equivalen tus vacaciones (no afecta a la generación del cuadrante, que usa los horarios reales de arriba).</span></label>
+      <input type="number" id="cfgHorasTurno" step="0.5" min="4" max="12" placeholder="8 o 8.5" oninput="saveCfg(); calcVacTurnoFijo()">
     </div>
     <div class="info-box" style="margin-top:4px">✅ <strong>Saliente (S) y Libres (L):</strong> pueden quedar incluidos dentro del periodo vacacional, pero no consumen crédito. En turno fijo la solicitud debe empezar y terminar en días con servicio planificado, y el crédito se consume por las horas de esos servicios.</div>
     <div id="vacTurnoFijoResult" style="display:none;background:#eafaf1;border-left:4px solid var(--verde);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;color:#1a3a2a;margin-top:4px"></div>
@@ -674,68 +732,6 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
     <div id="contadorLibres" style="margin-bottom:8px"></div>
     <div id="contadorDF" style="margin-bottom:8px"></div>
 
-    </details>
-    <details class="ajustes-acc"><summary>🕐 Horarios por defecto de tus turnos</summary>
-    <div id="horariosDefectoBlock">
-    <div class="divider"></div>
-    <div class="sec-title" style="font-size:14px">Horarios por defecto de tus turnos</div>
-    <div class="info-box" style="margin-bottom:8px">Si cambian los horarios de tu unidad, actualízalos aquí. Se aplicarán automáticamente al asignar nuevos turnos.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:4px">🌅 Mañana</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <input type="time" id="cfgIniM" value="06:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-          <span style="font-size:11px;color:#888">→</span>
-          <input type="time" id="cfgFinM" value="14:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-        </div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#1e3a6e;margin-bottom:4px">🌆 Tarde</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <input type="time" id="cfgIniT" value="14:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-          <span style="font-size:11px;color:#888">→</span>
-          <input type="time" id="cfgFinT" value="21:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-        </div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#4c1d95;margin-bottom:4px">🌙 Noche</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <input type="time" id="cfgIniN" value="22:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-          <span style="font-size:11px;color:#888">→</span>
-          <input type="time" id="cfgFinN" value="05:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-        </div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:4px">🌅🌙 Doblete mañana</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <input type="time" id="cfgIniDM" value="06:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-          <span style="font-size:11px;color:#888">→</span>
-          <input type="time" id="cfgFinDM" value="14:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-        </div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#4c1d95;margin-bottom:4px">🌅🌙 Doblete noche</div>
-        <div style="display:flex;gap:4px;align-items:center">
-          <input type="time" id="cfgIniDN" value="22:00" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-          <span style="font-size:11px;color:#888">→</span>
-          <input type="time" id="cfgFinDN" value="05:30" style="flex:1;padding:5px;border:1px solid #ddd;border-radius:8px;font-size:12px" oninput="saveCfg()">
-        </div>
-      </div>
-    </div>
-    <div class="rule-card">
-      <div class="rule-row"><span>🌅 Mañana</span><strong>Según horario configurado arriba</strong></div>
-      <div class="rule-row"><span>🌆 Tarde</span><strong>Según horario configurado arriba</strong></div>
-      <div class="rule-row"><span>🌙 Noche</span><strong>Según horario configurado arriba</strong></div>
-      <div class="rule-row"><span>🌅🌙 Doblete</span><strong>Mañana + noche configuradas arriba</strong></div>
-      <div class="rule-row"><span>✅ Vacaciones / AP</span><strong>General: 7,5h · Turno fijo: horas del servicio planificado</strong></div>
-      <div class="rule-row"><span>🏛️ DF</span><strong>7,5h (día libre por festivo trabajado)</strong></div>
-      <div class="rule-row"><span>💼 DAS/DF remunerado / ESS</span><strong>+96,00 € cuando se marque como remunerado</strong></div>
-      <div class="rule-row"><span>✝️ Permiso S.S.</span><strong>7,5h (hasta 3 días/año, Semana Santa)</strong></div>
-      <div class="rule-row"><span>🎄 Permiso Nav.</span><strong>7,5h (hasta 3 días/año, Navidad)</strong></div>
-      <div class="rule-row"><span>🚨 Permiso Urgente</span><strong>7,5h/día laborable (fin de semana intermedio no cuenta)</strong></div>
-      <div class="rule-row"><span>⏳ DSJ</span><strong>7,5h (descanso por superación de jornada)</strong></div>
-    </div>
-    </div><!-- /horariosDefectoBlock -->
     </details>
 
     <div class="divider"></div>
@@ -1516,7 +1512,7 @@ var cfg={
   base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general',
   vacTotales:22, apTotales:6, pssTotales:3, pnavTotales:3, huerfanosOrd:9.01, huerfanosExtra:16.79, dedNoForm:0,
   iniM:'06:30', finM:'14:00', iniT:'14:00', finT:'21:30', iniN:'22:00', finN:'05:30',
-  horasTurno:0, horasFijoM:0, horasFijoT:0, horasFijoN:0,
+  horasTurno:0,
   iniDM:'06:30', finDM:'14:00', iniDN:'22:00', finDN:'05:30',
   extraSalario:774.342, extraTrienio:28.2984, extraDestino:463.32, extraEspG:562.338,
   prefYear: new Date().getFullYear(), prefPeriodos:{},
@@ -1591,11 +1587,7 @@ function saveCfg(){
   cfg.vacExtra=parseInt((document.getElementById('cfgVacExtra')||{}).value)||0;
   cfg.apExtra=parseInt((document.getElementById('cfgApExtra')||{}).value)||0;
   cfg.horasTurno=parseFloat(document.getElementById('cfgHorasTurno') ? document.getElementById('cfgHorasTurno').value : 0)||0;
-  cfg.horasFijoM=parseFloat(document.getElementById('cfgHorasFijoM') ? document.getElementById('cfgHorasFijoM').value : 0)||0;
-  cfg.horasFijoT=parseFloat(document.getElementById('cfgHorasFijoT') ? document.getElementById('cfgHorasFijoT').value : 0)||0;
-  cfg.horasFijoN=parseFloat(document.getElementById('cfgHorasFijoN') ? document.getElementById('cfgHorasFijoN').value : 0)||0;
   cfg.horasSaliente='0';
-  cfg.diasCredito=parseInt(document.getElementById('cfgDiasCredito') ? document.getElementById('cfgDiasCredito').value : 0)||0;
   cfg.pssTotales=parseInt(document.getElementById('cfgPssTotales').value)||3;
   cfg.pnavTotales=parseInt(document.getElementById('cfgPnavTotales').value)||3;
   savePreferenciasEditorToCfg();
@@ -1607,6 +1599,7 @@ function saveCfg(){
   cfg.extraEspG=parseFloat(document.getElementById('cfgExtraEspG').value)||0;
   cfg.fechaIngreso = document.getElementById('cfgFechaIngreso') ? document.getElementById('cfgFechaIngreso').value : '';
   updateAntiguedadInfo();
+  if(document.getElementById('vacTurnoFijoResult')) calcVacTurnoFijo();
   cfg.iniM=document.getElementById('cfgIniM').value||'06:30';
   cfg.finM=document.getElementById('cfgFinM').value||'14:00';
   cfg.iniT=document.getElementById('cfgIniT').value||'14:00';
@@ -1665,11 +1658,6 @@ function applyConfig(){
   if(document.getElementById('cfgVacExtra')) document.getElementById('cfgVacExtra').value=cfg.vacExtra||0;
   if(document.getElementById('cfgApExtra')) document.getElementById('cfgApExtra').value=cfg.apExtra||0;
   if(document.getElementById('cfgHorasTurno')) document.getElementById('cfgHorasTurno').value=cfg.horasTurno||'';
-  if(document.getElementById('cfgHorasFijoM')) document.getElementById('cfgHorasFijoM').value=cfg.horasFijoM||'';
-  if(document.getElementById('cfgHorasFijoT')) document.getElementById('cfgHorasFijoT').value=cfg.horasFijoT||'';
-  if(document.getElementById('cfgHorasFijoN')) document.getElementById('cfgHorasFijoN').value=cfg.horasFijoN||'';
-  
-  if(document.getElementById('cfgDiasCredito')) document.getElementById('cfgDiasCredito').value=cfg.diasCredito||'';
   calcVacTurnoFijo();
   document.getElementById('cfgPssTotales').value=cfg.pssTotales||3;
   document.getElementById('cfgIniM').value=cfg.iniM||'06:30';
@@ -1736,27 +1724,42 @@ function syncBloquesRegimen(){
   var sel = document.getElementById('cfgRegimen');
   var actual = sel ? sel.value : (cfg.regimen || 'general');
 
-  var bloque = document.getElementById('cadenciaBlock');
-  if(bloque) bloque.style.display = (actual === 'fijo') ? 'block' : 'none';
+  var esFijo = (actual === 'fijo');
 
-  // Solo se oculta en Turno fijo (cadencia).
-  // En General, Administrativo y Especial debe verse siempre.
+  var bloque = document.getElementById('cadenciaBlock');
+  if(bloque) bloque.style.display = esFijo ? 'block' : 'none';
+
+  var bloque2 = document.getElementById('cadenciaBlock2');
+  if(bloque2) bloque2.style.display = esFijo ? 'block' : 'none';
+
+  // Los separadores que rodean estos bloques solo tienen sentido si hay
+  // contenido visible entre ellos; si no, se quedan pegados y parecen
+  // una raya doble.
+  var divPre = document.getElementById('dividerPreCadencia');
+  if(divPre) divPre.style.display = esFijo ? 'block' : 'none';
+  var divMid = document.getElementById('dividerMidCadencia');
+  if(divMid) divMid.style.display = esFijo ? 'block' : 'none';
+
+  // El horario de inicio de cada turno hace falta tanto en régimen general
+  // como en turno fijo (en turno fijo define el punto de partida y el fin
+  // se calcula con las horas base de la cadencia), así que se ve siempre.
   var horariosBlock = document.getElementById('horariosDefectoBlock');
   if(horariosBlock){
-    horariosBlock.style.display = (actual === 'fijo') ? 'none' : 'block';
+    horariosBlock.style.display = 'block';
   }
 }
 function calcVacTurnoFijo(){
   var res = document.getElementById('vacTurnoFijoResult');
   if(!res) return;
   var hT = parseFloat((document.getElementById('cfgHorasTurno')||{}).value || cfg.horasTurno || 0) || 0;
-  var diasCredito = parseInt((document.getElementById('cfgDiasCredito')||{}).value || cfg.diasCredito || 0) || 0;
+  var diasCredito = totalVacAnio();
   if(!diasCredito){ res.style.display='none'; return; }
   var creditoHoras = Math.round(diasCredito * 7.5 * 10) / 10;
   var equivRed = hT > 0 ? calcServiciosEquivRedondeados(creditoHoras, hT) : 0;
   res.style.display = 'block';
   res.innerHTML = '<strong>Vacaciones en turno fijo/cadencia:</strong> '
     + diasCredito + ' días de crédito × 7,5 h = <strong style="color:var(--verde);font-size:15px">'+fmtHoras(creditoHoras)+'</strong>'
+    + '<br><span style="font-size:10px;color:#555">Los días de crédito son los mismos que en "'+(cfg.fechaIngreso?'Fecha de incorporación" (calculados por antigüedad)':'Vacaciones — base manual" de Ajustes')+'".</span>'
     + (hT>0 ? '<br><span style="font-size:11px;color:#555">Equivalencia orientativa: <strong>'+equivRed+' días de vacaciones</strong> en turnos de '+fmtHoras(hT)+'. Si el cálculo da decimales, se redondea al día superior.</span>' : '')
     + '<br><span style="font-size:10px;color:#555">ℹ️ El consumo real será la suma de horas de los servicios planificados cubiertos por vacaciones. Salientes y libres incluidos en el periodo se mantienen a 0 h. La solicitud debe iniciar y finalizar en días con servicio planificado.</span>';
 }
@@ -2876,7 +2879,14 @@ function assignToSelection(tKey){
       var def=TURNO_HORAS_DEF[tKey];
       shifts[d].ini=def?def.ini:'';
       shifts[d].fin=def?def.fin:'';
-      var hDef=def?def.h:7.5;
+      // M/T/N: las horas salen siempre del horario real configurado en Ajustes
+      // (def.h es un valor estático que no se actualiza si cambias el horario).
+      var hDef;
+      if(tKey==='M'||tKey==='T'||tKey==='N'){
+        hDef=calcHoras(def.ini, def.fin);
+      } else {
+        hDef=def?def.h:7.5;
+      }
       if(tKey==='V' && isWeekend(d) && (cfg.regimen||'general')!=='fijo') hDef=0;
       shifts[d].h=hDef;
       if(tKey==='D'){
@@ -2884,6 +2894,7 @@ function assignToSelection(tKey){
         shifts[d].finM=shifts[d].finM||cfg.finDM||'14:00';
         shifts[d].iniN=shifts[d].iniN||cfg.iniDN||'22:00';
         shifts[d].finN=shifts[d].finN||cfg.finDN||'05:30';
+        shifts[d].h=calcHoras(shifts[d].iniM,shifts[d].finM)+calcHoras(shifts[d].iniN,shifts[d].finN);
       }
       if(!shifts[d].companeros) shifts[d].companeros=[];
       if(!shifts[d].nota) shifts[d].nota='';
@@ -2969,7 +2980,8 @@ function guardarTurnoAsignado(day, tKey, remuneradoFlag){
   shifts[day].ini = def ? def.ini : '';
   shifts[day].fin = def ? def.fin : '';
   // Vacaciones en finde de semana: 0 horas, salvo turno fijo, donde se recalcula por cadencia cuando procede
-  var hDef = def ? def.h : 7.5;
+  // M/T/N: las horas salen siempre del horario real configurado en Ajustes.
+  var hDef = (tKey==='M'||tKey==='T'||tKey==='N') ? calcHoras(def.ini, def.fin) : (def ? def.h : 7.5);
   if(tKey==='V' && isWeekend(day) && (cfg.regimen||'general') !== 'fijo') hDef = 0;
   shifts[day].h = hDef;
   if(tKey==='D'){
@@ -2977,6 +2989,7 @@ function guardarTurnoAsignado(day, tKey, remuneradoFlag){
     shifts[day].finM = shifts[day].finM || cfg.finDM || '14:00';
     shifts[day].iniN = shifts[day].iniN || cfg.iniDN || '22:00';
     shifts[day].finN = shifts[day].finN || cfg.finDN || '05:30';
+    shifts[day].h = calcHoras(shifts[day].iniM, shifts[day].finM) + calcHoras(shifts[day].iniN, shifts[day].finN);
   }
   if(!shifts[day].companeros) shifts[day].companeros=[];
   if(!shifts[day].nota) shifts[day].nota='';
@@ -2999,18 +3012,12 @@ function guardarTurnoAsignado(day, tKey, remuneradoFlag){
 }
 
 // Horas que debe usar la generación de cadencia en turno fijo.
-// Prioridad: excepción del turno M/T/N > horas base de turno fijo > horario definido en Ajustes.
+// Salen siempre del horario real (inicio→fin) configurado en
+// "Horarios por defecto de tus turnos".
 function getHorasCadenciaFijo(tKey, def){
   if(tKey==='S' || tKey==='L') return 0;
 
-  var base = parseFloat((document.getElementById('cfgHorasTurno')||{}).value || cfg.horasTurno || 0) || 0;
-
   if(tKey==='M' || tKey==='T' || tKey==='N'){
-    var map = {M:'cfgHorasFijoM', T:'cfgHorasFijoT', N:'cfgHorasFijoN'};
-    var cfgMap = {M:'horasFijoM', T:'horasFijoT', N:'horasFijoN'};
-    var ex = parseFloat((document.getElementById(map[tKey])||{}).value || cfg[cfgMap[tKey]] || 0) || 0;
-    if(ex > 0) return ex;
-    if(base > 0) return base;
     return def ? calcHoras(def.ini, def.fin) : 7.5;
   }
 
@@ -3174,7 +3181,7 @@ function getAnioVacacional(dateStr){
 }
 
 function getVacCreditoHorasTurnoFijo(){
-  var diasCredito = parseInt((document.getElementById('cfgDiasCredito')||{}).value || cfg.diasCredito || cfg.vacTotales || 22) || 22;
+  var diasCredito = totalVacAnio() || 22;
   return Math.round(diasCredito * 7.5 * 10) / 10;
 }
 
@@ -3725,6 +3732,7 @@ function aplicarCadencia(){
     var tKey = tokens[idx];
     var def = TURNO_HORAS_DEF[tKey];
     var horas = getHorasCadenciaFijo(tKey, def);
+    // Horas y horario ya son consistentes por construcción: h sale de calcHoras(ini,fin).
     shifts[k] = {t:tKey, ini: def?def.ini:'', fin: def?def.fin:'', h: horas, companeros:[], nota:''};
     if(tKey==='D'){
       shifts[k].iniM = cfg.iniDM || '06:30';
@@ -5984,7 +5992,7 @@ function renderVacApContent(y){
     var consH = calcVacHorasConsumidas(y);
     var dispH = Math.round((creditoH-consH)*10)/10;
     var cVacH = dispH>=0?'var(--verde)':'var(--rojo)';
-    var diasCreditoF = parseInt(cfg.diasCredito || cfg.vacTotales || 22) || 22;
+    var diasCreditoF = totalVacAnio() || 22;
     var hRefVac = getHorasReferenciaTurnoFijo();
     var serviciosConsumidos = calcVacServiciosConsumidosFijo(y);
     html += '<div class="br"><span>🏖️ Crédito vacaciones:</span><strong>'+diasCreditoF+' días × 7,5 h = '+fmtHoras(creditoH)+'</strong></div>';
