@@ -349,6 +349,8 @@ body.dark-mode .turn-AP .ck,body.dark-mode .turn-DA .ck,body.dark-mode .turn-DSJ
 body.dark-mode .turn-S{background:#111720!important;border-color:#516174!important;}
 body.dark-mode .turn-S .ck{color:#9aaabd!important;}
 body.dark-mode .chip,body.dark-mode .info-card,body.dark-mode .bal-card,body.dark-mode .rule-card,body.dark-mode .leg,body.dark-mode .ajustes-acc,body.dark-mode .incentivos-tbl{background:#111720;color:#e6edf7;box-shadow:0 2px 10px rgba(0,0,0,.38);}
+body.dark-mode .bal-card h3{color:#8ed4b1;}
+body.dark-mode .br,body.dark-mode .rule-row,body.dark-mode .leg-row{border-color:#2c394a;}
 body.dark-mode .chip .cl,body.dark-mode .info-card .ic-l,body.dark-mode .info-card .ic-s,body.dark-mode .il{color:#a8b4c4;}
 body.dark-mode .tb,body.dark-mode .msel-toggle-icon,body.dark-mode .month-action-btn,body.dark-mode .edit-toggle,body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#111720;color:#e6edf7;border-color:#334155;}
 body.dark-mode #atrasosMesBlock{background:#10271e!important;}
@@ -357,6 +359,15 @@ body.dark-mode #atrasosMesBlock span{color:#a8b4c4!important;}
 body.dark-mode .ajustes-acc>summary{background:#12251d;color:#8ed4b1;}
 body.dark-mode .modal{background:#111720;color:#e6edf7;}
 body.dark-mode .app-footer{color:#9aaabd;}
+/* Bloques creados dinámicamente en Resumen y Ajustes. */
+body.dark-mode .saldo-permiso{background:#151c26!important;color:#e6edf7;}
+body.dark-mode .saldo-permiso .saldo-disponible{background:#123725!important;}
+body.dark-mode .preferencias-nota,body.dark-mode .historial-subida,body.dark-mode .fest-add-block{background:#151c26!important;color:#c4d0df!important;border-color:#334155!important;}
+body.dark-mode .historial-subida span,body.dark-mode .fest-list-row{color:#dce6f4!important;}
+body.dark-mode .fest-list-row{background:#151c26!important;}
+body.dark-mode #contadorLibres > div,body.dark-mode #contadorDF > div{background:#151c26!important;color:#e6edf7!important;border-color:#334155!important;}
+body.dark-mode #contadorLibres [style*="border-bottom"],body.dark-mode #contadorDF [style*="border-bottom"]{border-color:#334155!important;}
+body.dark-mode .preferencias-periodo{background:#151c26!important;color:#e6edf7!important;border-color:#334155!important;}
 .theme-btn.active{border-color:var(--verde) !important;background:#e8f4f0 !important;color:var(--verde) !important;box-shadow:0 0 0 2px rgba(26,92,56,.15)}
 body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!important;}
 </style>
@@ -4691,7 +4702,7 @@ function renderTablaHistorial(){
     var puedeBorrar = hist.length>1;
     var v = t.valores||{};
     var resumen = 'Base '+Number(v.base||0).toFixed(2)+'€ · Destino '+Number(v.destino||0).toFixed(2)+'€ · Esp.Gral '+Number(v.espG||0).toFixed(2)+'€ · Esp.Sing '+Number(v.espS||0).toFixed(2)+'€ · Residencia '+Number(v.res||0).toFixed(2)+'€ · Trienio '+Number(v.importeTrienio||0).toFixed(2)+'€ · ERG3 '+Number(v.erg3||0).toFixed(2)+'€';
-    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:4px;font-size:11px;background:#f8fafc">'
+    return '<div class="historial-subida" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:4px;font-size:11px;background:#f8fafc">'
       + '<span>Desde <strong>'+t.desde+'</strong><br><span style="color:#64748b">'+resumen+'</span></span>'
       + (puedeBorrar ? '<button type="button" onclick="borrarTramoTabla(\''+t.desde+'\')" style="background:none;border:none;color:#b91c1c;font-size:13px;cursor:pointer;flex-shrink:0">🗑️</button>' : '')
       + '</div>';
@@ -5324,7 +5335,7 @@ function renderFestPanel(){
       var dow = new Date(fecha + 'T12:00:00').getDay();
       var labelF = parts[2] + '/' + parts[1] + '/' + parts[0] + ' (' + dias[dow] + ')';
       var bgF = (dow===0||dow===6) ? '#fef9c3' : '#f0fdf4';
-      html += '<div style="display:flex;align-items:center;gap:6px;background:' + bgF + ';border-radius:8px;padding:5px 8px;font-size:12px">';
+      html += '<div class="fest-list-row" style="display:flex;align-items:center;gap:6px;background:' + bgF + ';border-radius:8px;padding:5px 8px;font-size:12px">';
       html += '<span style="flex:1;font-weight:600">' + labelF + '</span>';
       html += '<span style="flex:1;color:#555">' + nombre + etiq + '</span>';
       html += '<button class="btn-del-fest" data-fecha="' + fecha + '" style="background:#fee2e2;border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:12px;color:#dc2626">x</button>';
@@ -5333,7 +5344,7 @@ function renderFestPanel(){
     html += '</div>';
   }
 
-  html += '<div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px;margin-top:4px">';
+  html += '<div class="fest-add-block" style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px;margin-top:4px">';
   html += '<div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px">+ Añadir festivo a ' + y + '</div>';
   html += '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">';
   html += '<input type="date" id="festNewDate" min="' + y + '-01-01" max="' + y + '-12-31" value="' + y + '-01-01" style="flex:1;min-width:130px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px">';
@@ -5888,7 +5899,7 @@ function renderPreferenciasContent(y){
     {k:'ss', icon:'✝️', label:'Semana Santa', prev:y-1, actual:y},
     {k:'nav', icon:'🎄', label:'Navidad', prev:y-1, actual:y}
   ];
-  var html='<div style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#475569;margin-bottom:8px">Detecta el turno disfrutado según lo grabado en el cuadrante. La preferencia real dependerá de concurrencia, antigüedad, necesidades del servicio y criterios de la unidad.</div>';
+  var html='<div class="preferencias-nota" style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#475569;margin-bottom:8px">Detecta el turno disfrutado según lo grabado en el cuadrante. La preferencia real dependerá de concurrencia, antigüedad, necesidades del servicio y criterios de la unidad.</div>';
   cats.forEach(function(c){
     var dAct=detectarTurnoPreferencia(c.actual,c.k);
     var dPrev=detectarTurnoPreferencia(c.prev,c.k);
@@ -5909,7 +5920,7 @@ function loadPreferenciasEditor(){
   cfg.prefYear=y;
   var pp=getPreferenciaPeriodos(y);
   function block(k,title,nota){
-    var html='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-bottom:10px">';
+    var html='<div class="preferencias-periodo" style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-bottom:10px">';
     html+='<div style="font-size:12px;font-weight:800;color:var(--verde);margin-bottom:4px">'+title+'</div>';
     if(nota) html+='<div style="font-size:10px;color:#64748b;margin-bottom:7px">'+nota+'</div>';
     for(var i=0;i<3;i++){
@@ -5958,11 +5969,11 @@ function renderVacApContent(y){
   function fila(icon, label, tot, cons, disp, tema){
     var c = disp>=0?'var(--verde)':'var(--rojo)';
     var bgDisp = disp>=0?'#dcfce7':'#fee2e2';
-    var html = '<div style="border-left:4px solid '+tema+';background:#fafafa;border-radius:8px;padding:8px 10px;margin-bottom:8px">';
+    var html = '<div class="saldo-permiso" style="border-left:4px solid '+tema+';background:#fafafa;border-radius:8px;padding:8px 10px;margin-bottom:8px">';
     html += '<div style="font-weight:800;font-size:13px;color:'+tema+';margin-bottom:5px">'+icon+' '+label+'</div>';
     html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0"><span>Totales:</span><strong>'+tot+' días</strong></div>';
     html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0"><span>Consumidos:</span><strong style="color:var(--rojo)">'+cons+' días</strong></div>';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;background:'+bgDisp+';border-radius:6px;padding:6px 8px;margin-top:5px"><span style="font-weight:700;font-size:13px">Disponibles:</span><strong style="color:'+c+';font-size:17px">'+disp+' días</strong></div>';
+    html += '<div class="saldo-disponible" style="display:flex;justify-content:space-between;align-items:center;background:'+bgDisp+';border-radius:6px;padding:6px 8px;margin-top:5px"><span style="font-weight:700;font-size:13px">Disponibles:</span><strong style="color:'+c+';font-size:17px">'+disp+' días</strong></div>';
     html += '</div>';
     return html;
   }
