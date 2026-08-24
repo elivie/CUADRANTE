@@ -555,7 +555,7 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
     <details class="ajustes-acc"><summary>⏱️ Régimen de jornada y cadencia de turno fijo</summary>
     <div class="ig">
       <label class="il">Modalidad de servicio<br><span style="font-size:10px;color:#888">Determina la jornada de referencia, el CREX y el cómputo de DSJ</span></label>
-      <select id="cfgRegimen" style="display:none" onchange="renderRegimenCards(); syncBloquesRegimen(); renderAll(); actualizarVisibilidadNomina(); loadProdEstructural(); if(document.getElementById('vNomina').style.display!=='none') calcNomina();">
+      <select id="cfgRegimen" style="display:none" onchange="renderRegimenCards(); syncBloquesRegimen(true); renderAll(); actualizarVisibilidadNomina(); loadProdEstructural(); if(document.getElementById('vNomina').style.display!=='none') calcNomina();">
         <option value="general">General – Turnos (37,5 h/sem)</option>
         <option value="admin">Administrativo / Específico (40 h/sem)</option>
         <option value="especial">Mando / Especial (40 h/sem)</option>
@@ -566,12 +566,12 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
     <div id="regimenInfo" style="background:#f0f9ff;border-radius:8px;padding:8px 10px;font-size:11px;color:#0369a1;margin-bottom:4px"></div>
 
     <div class="divider"></div>
-    <details class="ajustes-acc"><summary>🕐 Horarios por defecto de tus turnos</summary>
+    <details class="ajustes-acc" id="horariosDefectoDetails"><summary>🕐 Horarios por defecto de tus turnos</summary>
     <div id="horariosDefectoBlock">
     <div class="divider"></div>
 
     <div class="sec-title" style="font-size:14px">Horarios por defecto de tus turnos</div>
-    <div class="info-box" style="margin-bottom:8px">Si cambian los horarios de tu unidad, actualízalos aquí. Se aplicarán automáticamente al asignar nuevos turnos. En turno fijo, la hora de <strong>inicio</strong> de cada turno se usa como punto de partida y la hora de fin del cuadrante generado se calcula a partir de las horas base que hayas puesto aquí.</div>
+    <div class="info-box" style="margin-bottom:8px">Si cambian los horarios de tu unidad, actualízalos aquí. Se aplicarán automáticamente al asignar nuevos turnos. En turno fijo, el cuadrante generado usa exactamente el horario (inicio→fin) que pongas aquí para cada turno: son las horas reales que se te cuentan.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <div>
         <div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:4px">🌅 Mañana</div>
@@ -1720,11 +1720,20 @@ function renderRegimenCards(){
   syncBloquesRegimen();
 }
 
-function syncBloquesRegimen(){
+function syncBloquesRegimen(abrirHorariosSiFijo){
   var sel = document.getElementById('cfgRegimen');
   var actual = sel ? sel.value : (cfg.regimen || 'general');
 
   var esFijo = (actual === 'fijo');
+
+  // Al pasar a turno fijo, el horario de cada turno es imprescindible antes
+  // de generar la cadencia: se abre solo la primera vez (al elegir la
+  // modalidad), no cada vez que se repinta Ajustes, para no reabrirlo si
+  // el usuario lo había cerrado a propósito.
+  if(abrirHorariosSiFijo && esFijo){
+    var horariosDetails = document.getElementById('horariosDefectoDetails');
+    if(horariosDetails) horariosDetails.open = true;
+  }
 
   var bloque = document.getElementById('cadenciaBlock');
   if(bloque) bloque.style.display = esFijo ? 'block' : 'none';
