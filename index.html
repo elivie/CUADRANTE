@@ -3261,8 +3261,8 @@ function openVacRangeModal(prefillDate){
   var ini=document.getElementById('vacRangeInicio');
   var fin=document.getElementById('vacRangeFin');
   var base = prefillDate || dStr(year, month, 1);
-  if(ini && !ini.value) ini.value = base;
-  if(fin && !fin.value) fin.value = base;
+  if(ini) ini.value = base;
+  if(fin) fin.value = base;
   var info=document.getElementById('vacRangeInfo');
   if(info){
     if((cfg.regimen||'general')==='fijo'){
@@ -6004,18 +6004,29 @@ function renderVacApContent(y){
     var diasCreditoF = totalVacAnio() || 22;
     var hRefVac = getHorasReferenciaTurnoFijo();
     var serviciosConsumidos = calcVacServiciosConsumidosFijo(y);
-    html += '<div class="br"><span>🏖️ Crédito vacaciones:</span><strong>'+diasCreditoF+' días × 7,5 h = '+fmtHoras(creditoH)+'</strong></div>';
-    if(hRefVac > 0){
-      var equivTotal = calcServiciosEquivRedondeados(creditoH, hRefVac);
-      html += '<div class="br"><span>Tu crédito da para aprox.:</span><strong>'+equivTotal+' días de vacaciones</strong> <span style="font-size:10px;color:#64748b">(turnos de '+fmtHoras(hRefVac)+')</span></div>';
+    var equivTotal = hRefVac>0 ? calcServiciosEquivRedondeados(creditoH, hRefVac) : null;
+    var equivDisp = hRefVac>0 ? calcServiciosEquivRedondeados(Math.max(0, dispH), hRefVac) : null;
+    var bgHeadline = dispH>=0 ? '#f0fdf4' : '#fef2f2';
+    html += '<div style="text-align:center;background:'+bgHeadline+';border-radius:10px;padding:10px 8px;margin-bottom:8px">';
+    if(equivDisp!==null){
+      html += '<div style="font-size:11px;color:#64748b;font-weight:600">Te quedan aprox.</div>'
+        + '<div style="font-size:28px;font-weight:800;color:'+cVacH+';line-height:1.2">'+equivDisp+' días</div>'
+        + '<div style="font-size:11px;color:#64748b">de vacaciones · turnos de '+fmtHoras(hRefVac)+'</div>'
+        + '<div style="font-size:11px;color:#94a3b8;margin-top:3px">('+fmtHoras(dispH)+' disponibles de '+fmtHoras(creditoH)+')</div>';
+    } else {
+      html += '<div style="font-size:11px;color:#64748b;font-weight:600">Te quedan</div>'
+        + '<div style="font-size:28px;font-weight:800;color:'+cVacH+';line-height:1.2">'+fmtHoras(dispH)+'</div>'
+        + '<div style="font-size:11px;color:#94a3b8">de '+fmtHoras(creditoH)+' de crédito</div>';
     }
-    html += '<div class="br"><span>Días con servicio marcados de vacaciones:</span><strong style="color:var(--rojo)">'+serviciosConsumidos+' días = '+fmtHoras(consH)+'</strong></div>';
-    html += '<div class="br tot"><span>Te quedan:</span><strong style="color:'+cVacH+';font-size:15px">'+fmtHoras(dispH)+'</strong></div>';
-    if(hRefVac > 0){
-      var equivDisp = calcServiciosEquivRedondeados(Math.max(0, dispH), hRefVac);
-      html += '<div class="br"><span>Te quedan aprox.:</span><strong style="color:'+cVacH+'">'+equivDisp+' días más de vacaciones</strong> <span style="font-size:10px;color:#64748b">(turnos de '+fmtHoras(hRefVac)+')</span></div>';
+    html += '</div>';
+    html += '<div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:2px">Cómo se calcula</div>';
+    html += '<div class="br" style="font-size:11px;color:#64748b"><span>🏖️ Crédito vacaciones:</span><span>'+diasCreditoF+' días × 7,5 h = '+fmtHoras(creditoH)+'</span></div>';
+    if(equivTotal!==null){
+      html += '<div class="br" style="font-size:11px;color:#64748b"><span>Tu crédito da para aprox.:</span><span>'+equivTotal+' días</span></div>';
     }
-    html += '<div style="font-size:10px;color:#64748b;margin-top:4px">Ejemplo: si tienes 165 h y tus turnos son de 8,5 h, la app lo traduce a días de vacaciones redondeando hacia arriba. Si gastas 6 días con servicio de 8,5 h, consumes 51 h y quedan 114 h, que equivalen aprox. a 14 días más de vacaciones. Libres y salientes incluidos computan 0 h.</div>';
+    html += '<div class="br" style="font-size:11px;color:#64748b"><span>Días con servicio marcados de vacaciones:</span><span style="color:var(--rojo)">'+serviciosConsumidos+' días = '+fmtHoras(consH)+'</span></div>';
+    html += '<div class="br tot" style="font-size:12px"><span>Disponible en horas:</span><strong style="color:'+cVacH+'">'+fmtHoras(dispH)+'</strong></div>';
+    html += '<div style="font-size:10px;color:#94a3b8;margin-top:4px">Ejemplo: si tienes 165 h y tus turnos son de 8,5 h, la app lo traduce a días de vacaciones redondeando hacia arriba. Si gastas 6 días con servicio de 8,5 h, consumes 51 h y quedan 114 h, que equivalen aprox. a 14 días más de vacaciones. Libres y salientes incluidos computan 0 h.</div>';
   } else {
     html += fila('🏖️','Vacaciones',vacTot,vacCons,vacDisp,'#0369a1');
   }
