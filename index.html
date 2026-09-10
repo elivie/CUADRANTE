@@ -719,10 +719,13 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
       <div class="ig"><label class="il" style="min-height:28px">➕ Vacaciones extra (bajas, etc.)</label><input type="number" id="cfgVacExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
       <div class="ig"><label class="il" style="min-height:28px">➕ AP extra (bajas, etc.)</label><input type="number" id="cfgApExtra" value="0" min="-10" max="30" oninput="saveCfg()"></div>
     </div>
+    <div class="ig"><label class="il" style="min-height:28px">📋 Horas que computan los "Otro AP" (mudanza, examen, deber inexcusable... — no descuentan crédito)</label><input type="number" id="cfgHorasApEspecial" value="7.5" min="0" max="24" step="0.5" oninput="saveCfg()"></div>
     <div class="ig2">
       <div class="ig"><label class="il">✝️ Permiso S.S. (días/año)</label><input type="number" id="cfgPssTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">🎄 Permiso Nav. (días/año)</label><input type="number" id="cfgPnavTotales" value="3" min="0" max="10" oninput="saveCfg()"></div>
     </div>
+    <div class="ig"><label class="il" style="min-height:28px">📄 DAS — ajuste manual (ej. cambio de destino)</label><input type="number" id="cfgDasExtra" value="0" min="-50" max="50" oninput="saveCfg()"></div>
+    <div class="info-box" style="margin-top:4px;font-size:10px">Los DAS no caducan por año, se acumulan siempre. Usa este ajuste solo si cambias de destino y debes corregir manualmente el saldo acumulado.</div>
     </details>
     <div class="divider"></div>
     <details class="ajustes-acc"><summary>🧭 Turnos de preferencia — vacaciones y fechas señaladas</summary>
@@ -1103,6 +1106,27 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
     <div class="modal-btns" style="margin-top:14px;gap:8px">
       <button class="btn-cancel" onclick="closeCsRangeModal()">Cancelar</button>
       <button class="btn-ok" style="background:#334155" onclick="aplicarComisionRangoDesdeModal()">Aplicar comisión</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="apTipoOverlay" onclick="closeApTipoOutside(event)">
+  <div class="modal" style="border-radius:20px;max-width:420px;padding:20px 16px 24px">
+    <h3>📋 ¿Qué tipo de AP es?</h3>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
+      <label style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:10px 12px;cursor:pointer">
+        <input type="radio" name="apTipoRadio" id="apTipoRadioNormal" value="normal" checked style="width:20px;height:20px;flex-shrink:0">
+        <span><strong style="font-size:13px">AP normal</strong><br><span style="font-size:11px;color:#666">Descuenta del crédito anual de AP</span></span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;background:#faf5ff;border:2px solid #d8b4fe;border-radius:12px;padding:10px 12px;cursor:pointer">
+        <input type="radio" name="apTipoRadio" value="otro" style="width:20px;height:20px;flex-shrink:0">
+        <span><strong style="font-size:13px">Otro AP</strong><br><span style="font-size:11px;color:#666">Mudanza, examen, deber inexcusable... no descuenta crédito</span></span>
+      </label>
+    </div>
+    <div class="modal-btns" style="margin-top:14px;gap:8px">
+      <button class="btn-cancel" onclick="closeApTipoModal()">Cancelar</button>
+      <button class="btn-ok" onclick="confirmarTipoAP()">Aplicar</button>
     </div>
   </div>
 </div>
@@ -1509,7 +1533,7 @@ var editMode=false;
 var modalDay=null;
 var TABLA_CAMPOS = ['base','destino','espG','espS','res','vest','importeTrienio','erg3','o3','extraSalario','extraTrienio','extraDestino','extraEspG'];
 var cfg={
-  base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general',
+  base:900.63, destino:465.75, espG:565.29, espS:759.14, res:80.53, vest:6.17, importeTrienio:32.96, trienios:6, erg3:97.50, o3:0, irpf:20.32, pasivos:71.35, mutualidad:31.24, nombre:'', fechaIngreso:'', incentivosReal:38.60, companeros: '', regimen:'general', horasApEspecial:7.5,
   vacTotales:22, apTotales:6, pssTotales:3, pnavTotales:3, huerfanosOrd:9.01, huerfanosExtra:16.79, dedNoForm:0,
   iniM:'06:30', finM:'14:00', iniT:'14:00', finT:'21:30', iniN:'22:00', finN:'05:30',
   horasTurno:0,
@@ -1586,6 +1610,8 @@ function saveCfg(){
   cfg.apTotales=parseInt(document.getElementById('cfgApTotales').value)||6;
   cfg.vacExtra=parseInt((document.getElementById('cfgVacExtra')||{}).value)||0;
   cfg.apExtra=parseInt((document.getElementById('cfgApExtra')||{}).value)||0;
+  cfg.horasApEspecial=parseFloat((document.getElementById('cfgHorasApEspecial')||{}).value)||7.5;
+  cfg.dasExtra=parseInt((document.getElementById('cfgDasExtra')||{}).value)||0;
   cfg.horasTurno=parseFloat(document.getElementById('cfgHorasTurno') ? document.getElementById('cfgHorasTurno').value : 0)||0;
   cfg.horasSaliente='0';
   cfg.pssTotales=parseInt(document.getElementById('cfgPssTotales').value)||3;
@@ -1657,6 +1683,8 @@ function applyConfig(){
   document.getElementById('cfgApTotales').value=cfg.apTotales||6;
   if(document.getElementById('cfgVacExtra')) document.getElementById('cfgVacExtra').value=cfg.vacExtra||0;
   if(document.getElementById('cfgApExtra')) document.getElementById('cfgApExtra').value=cfg.apExtra||0;
+  if(document.getElementById('cfgHorasApEspecial')) document.getElementById('cfgHorasApEspecial').value=(cfg.horasApEspecial!=null?cfg.horasApEspecial:7.5);
+  if(document.getElementById('cfgDasExtra')) document.getElementById('cfgDasExtra').value=cfg.dasExtra||0;
   if(document.getElementById('cfgHorasTurno')) document.getElementById('cfgHorasTurno').value=cfg.horasTurno||'';
   calcVacTurnoFijo();
   document.getElementById('cfgPssTotales').value=cfg.pssTotales||3;
@@ -2701,7 +2729,7 @@ function renderCalendar(){
           } else {
             var hintExtra = '';
             if(isFestNac(k) && !isWeekend(k)){
-              var dfNow = calcDFAnio(new Date(k+'T12:00:00').getFullYear());
+              var dfNow = calcDFAnio(getAnioVacacional(k));
               hintExtra = ' · 🏛️ <strong>Festivo laborable</strong> — DF disponibles: <strong style="color:#0f766e">'+dfNow.disponibles+'</strong>';
             }
             document.getElementById('selHint').innerHTML='Día seleccionado: <strong>'+k.split('-')[2]+'</strong>. Haz clic en un turno arriba para asignarlo, o pulsa de nuevo para editar detalles.'+hintExtra;
@@ -2856,16 +2884,12 @@ function assignToSelection(tKey){
   if(selectedDays.size===0){ alert('Marca primero uno o varios días en el calendario'); return; }
   var dias=Array.from(selectedDays);
 
+  if(tKey==='AP'){ openApTipoModal('bulk'); return; }
+
   if(tKey==='DF'){
-    var dfInfo=calcDFAnio(year);
+    var dfInfo=calcDFAnio(getAnioVacacional());
     if(dfInfo.disponibles < dias.length){
       if(!confirm('⚠️ Vas a aplicar DF a '+dias.length+' días, pero solo te quedan '+dfInfo.disponibles+' disponibles. ¿Continuar igualmente?')) return;
-    }
-  }
-  if(tKey==='AP'){
-    var apDisp=totalApAnio(year)-calcApConsumidos(year);
-    if(apDisp < dias.length){
-      if(!confirm('⚠️ Vas a aplicar AP a '+dias.length+' días, pero solo te quedan '+apDisp+' disponibles. ¿Continuar igualmente?')) return;
     }
   }
   if(tKey==='PSS'){
@@ -2932,10 +2956,11 @@ function assignSelected(tKey){
   if(tKey==='V'){ openVacRangeModal(selectedDay); return; }
   if(tKey==='CS'){ openCsRangeModal(selectedDay); return; }
   if(!selectedDay){ alert('Selecciona primero un día en el calendario'); return; }
-  
+  if(tKey==='AP'){ openApTipoModal('single'); return; }
+
   // Aviso si se intenta gastar un DF sin tener disponibles
   if(tKey==='DF'){
-    var dfInfo = calcDFAnio(year);
+    var dfInfo = calcDFAnio(getAnioVacacional());
     // No bloqueamos, solo avisamos si el saldo va a negativo
     if(dfInfo.disponibles <= 0){
       if(!confirm('⚠️ No te quedan DF disponibles (tienes '+dfInfo.generados+' generados y '+dfInfo.consumidos+' consumidos). ¿Quieres grabarlo igualmente?')) return;
@@ -2944,17 +2969,9 @@ function assignSelected(tKey){
   
   // Aviso si se intenta gastar vacaciones sin tener disponibles
   if(tKey==='V'){
-    var vacDisp = totalVacAnio() - calcVacConsumidas(year);
+    var vacDisp = totalVacAnio(getAnioVacacional()) - calcVacConsumidas(getAnioVacacional());
     if(vacDisp <= 0){
       if(!confirm('⚠️ No te quedan días de vacaciones disponibles. ¿Quieres grabarlo igualmente?')) return;
-    }
-  }
-  
-  // Aviso si se intenta gastar AP sin tener disponibles
-  if(tKey==='AP'){
-    var apDisp = totalApAnio(year) - calcApConsumidos(year);
-    if(apDisp <= 0){
-      if(!confirm('⚠️ No te quedan AP disponibles. ¿Quieres grabarlo igualmente?')) return;
     }
   }
 
@@ -2980,7 +2997,81 @@ function assignSelected(tKey){
   guardarTurnoAsignado(dayToAssign, tKey, false);
 }
 
-function guardarTurnoAsignado(day, tKey, remuneradoFlag){
+// --- Selector de tipo de AP (normal / otro) mediante modal con radio buttons ---
+var apModalPendingMode = null; // 'single' | 'bulk'
+
+function openApTipoModal(mode){
+  apModalPendingMode = mode;
+  var rNormal = document.getElementById('apTipoRadioNormal');
+  if(rNormal) rNormal.checked = true;
+  var ov = document.getElementById('apTipoOverlay');
+  if(ov) ov.classList.add('open');
+}
+function closeApTipoModal(){
+  var ov = document.getElementById('apTipoOverlay');
+  if(ov) ov.classList.remove('open');
+  apModalPendingMode = null;
+}
+function closeApTipoOutside(e){ if(e.target.id==='apTipoOverlay') closeApTipoModal(); }
+
+function confirmarTipoAP(){
+  var radios = document.getElementsByName('apTipoRadio');
+  var tipo = 'normal';
+  for(var i=0;i<radios.length;i++){ if(radios[i].checked){ tipo = radios[i].value; break; } }
+  var mode = apModalPendingMode;
+  closeApTipoModal();
+  if(mode==='single') aplicarApDiaConTipo(tipo);
+  else if(mode==='bulk') aplicarApLoteConTipo(tipo);
+}
+
+function aplicarApDiaConTipo(tipo){
+  if(!selectedDay) return;
+  if(tipo==='normal'){
+    var apDisp = totalApAnio(getAnioVacacional()) - calcApConsumidos(getAnioVacacional());
+    if(apDisp <= 0){
+      if(!confirm('⚠️ No te quedan AP disponibles. ¿Quieres grabarlo igualmente?')) return;
+    }
+  }
+  guardarTurnoAsignado(selectedDay, 'AP', false, tipo);
+}
+
+function aplicarApLoteConTipo(tipo){
+  var dias = Array.from(selectedDays);
+  if(dias.length===0){ alert('Marca primero uno o varios días en el calendario'); return; }
+  if(tipo==='normal'){
+    var apDisp=totalApAnio(getAnioVacacional())-calcApConsumidos(getAnioVacacional());
+    if(apDisp < dias.length){
+      if(!confirm('⚠️ Vas a aplicar AP a '+dias.length+' días, pero solo te quedan '+apDisp+' disponibles. ¿Continuar igualmente?')) return;
+    }
+  }
+  dias.forEach(function(d){
+    shifts[d]=shifts[d]||{t:''};
+    shifts[d].t='AP';
+    var def=TURNO_HORAS_DEF['AP'];
+    shifts[d].ini=def?def.ini:'';
+    shifts[d].fin=def?def.fin:'';
+    shifts[d].h=def?def.h:7.5;
+    if(!shifts[d].companeros) shifts[d].companeros=[];
+    if(!shifts[d].nota) shifts[d].nota='';
+    if(tipo && tipo!=='normal'){
+      shifts[d].tipoAP='otro';
+      shifts[d].h = parseFloat(cfg.horasApEspecial!=null?cfg.horasApEspecial:7.5) || 7.5;
+      if(!shifts[d].nota) shifts[d].nota = 'Otro AP (mudanza, examen, deber inexcusable... — no descuenta crédito)';
+    } else {
+      delete shifts[d].tipoAP;
+    }
+    delete shifts[d].remunerado;
+  });
+  save();
+  var n=dias.length;
+  multiSelectMode=false;
+  selectedDays.clear();
+  updateMultiSelectUI();
+  renderAll();
+  showToast('AP asignado a '+n+' día'+(n===1?'':'s'));
+}
+
+function guardarTurnoAsignado(day, tKey, remuneradoFlag, tipoAP){
   if(isReadOnly()) return;
   if(!day) return;
   if(!shifts[day]) shifts[day]={t:''};
@@ -3002,6 +3093,15 @@ function guardarTurnoAsignado(day, tKey, remuneradoFlag){
   }
   if(!shifts[day].companeros) shifts[day].companeros=[];
   if(!shifts[day].nota) shifts[day].nota='';
+  if(tKey==='AP'){
+    if(tipoAP && tipoAP!=='normal'){
+      shifts[day].tipoAP = 'otro';
+      shifts[day].h = parseFloat(cfg.horasApEspecial!=null?cfg.horasApEspecial:7.5) || 7.5;
+      if(!shifts[day].nota) shifts[day].nota = 'Otro AP (mudanza, examen, deber inexcusable... — no descuenta crédito)';
+    } else {
+      delete shifts[day].tipoAP;
+    }
+  }
   if(esTurnoRemunerable(tKey)){
     // DAS/DF directos son descansos planificados, no servicios remunerados.
     delete shifts[day].remunerado;
@@ -3189,8 +3289,8 @@ function getAnioVacacional(dateStr){
   return d.getMonth() >= 1 ? d.getFullYear() : d.getFullYear()-1;
 }
 
-function getVacCreditoHorasTurnoFijo(){
-  var diasCredito = totalVacAnio() || 22;
+function getVacCreditoHorasTurnoFijo(anioVac){
+  var diasCredito = totalVacAnio(anioVac) || 22;
   return Math.round(diasCredito * 7.5 * 10) / 10;
 }
 
@@ -3314,7 +3414,7 @@ function previewVacRange(){
     }
     var rF = getVacFijoRangoResumen(inicioStr, hastaStr);
     var anioVac = getAnioVacacional(inicioStr);
-    var creditoH = getVacCreditoHorasTurnoFijo();
+    var creditoH = getVacCreditoHorasTurnoFijo(anioVac);
     var consumidoAntes = calcVacHorasConsumidas(anioVac);
     var dispAntes = Math.round((creditoH-consumidoAntes)*10)/10;
     var dispDespues = Math.round((dispAntes-rF.horas)*10)/10;
@@ -3393,7 +3493,7 @@ function aplicarVacacionesTurnoFijoRango(inicioStr, hastaStr){
     if(!okMin) return;
   }
   var anioVac = getAnioVacacional(inicioStr);
-  var creditoH = getVacCreditoHorasTurnoFijo();
+  var creditoH = getVacCreditoHorasTurnoFijo(anioVac);
   var consumidoAntes = calcVacHorasConsumidas(anioVac);
   var dispAntes = Math.round((creditoH-consumidoAntes)*10)/10;
   var dispDespues = Math.round((dispAntes-r.horas)*10)/10;
@@ -4418,7 +4518,7 @@ function calcResumen(){
   Object.keys(shifts).forEach(function(k){
     if(shifts[k] && shifts[k].t === 'DA' && !shifts[k].remunerado) dasCons++;
   });
-  var dasDisp = dasAcc.totalDAS - dasCons;
+  var dasDisp = dasAcc.totalDAS - dasCons + (cfg.dasExtra||0);
 
   function addRowDasExtra(l,v,color){
     var r=document.createElement('div'); r.className='br';
@@ -4426,14 +4526,15 @@ function calcResumen(){
     dasContent.appendChild(r);
   }
   addRowDasExtra('DAS disfrutados (grabados en cuadrante)', dasCons+' DAS', 'var(--rojo)');
+  if(cfg.dasExtra) addRowDasExtra('Ajuste manual (cambio de destino, etc.)', (cfg.dasExtra>0?'+':'')+cfg.dasExtra+' DAS', cfg.dasExtra>0?'var(--verde)':'var(--rojo)');
   var colorDisp = dasDisp >= 0 ? 'var(--verde)' : 'var(--rojo)';
   var rDisp = document.createElement('div'); rDisp.className='br tot';
   rDisp.innerHTML='<span>DAS disponibles</span><strong style="color:'+colorDisp+';font-size:16px">'+dasDisp+' DAS</strong>';
   dasContent.appendChild(rDisp);
 
   // Renderizar DF y Vac/AP
-  renderDFContent(year);
-  renderVacApContent(year);
+  renderDFContent(getAnioVacacional());
+  renderVacApContent(getAnioVacacional());
   renderPreferenciasContent(year);
 
   // BLOQUE OFICIAL DE REFERENCIA — turno fijo cuatrimestral / mando-especial trimestral
@@ -5492,7 +5593,10 @@ function calcDFAnio(y){
   if((cfg.regimen||'general') === 'fijo'){
     return {generados:0, consumidos:0, disponibles:0, detalle:[]};
   }
-  var festivos = getFestivosAnio(y);
+  // Periodo: 1-feb(y) al 31-ene(y+1), igual que vacaciones y AP.
+  var festivosY  = getFestivosAnio(y).filter(function(f){ return new Date(f+'T12:00:00').getMonth() >= 1; });
+  var festivosY1 = getFestivosAnio(y+1).filter(function(f){ return new Date(f+'T12:00:00').getMonth() === 0; });
+  var festivos = festivosY.concat(festivosY1);
   var generados = 0;
   var detalleGenerados = [];
 
@@ -5519,15 +5623,16 @@ function calcDFAnio(y){
     detalleGenerados.push({fecha:fechaStr, estado:'genera', genera:true});
   });
 
-  // DF consumidos = días con turno DF en el año
+  // DF consumidos = días con turno DF en el periodo 1-feb(y) al 31-ene(y+1)
   var consumidos = 0;
-  for(var mes=0; mes<12; mes++){
-    var diasMes = daysIn(y, mes);
-    for(var d=1; d<=diasMes; d++){
-      var k = dStr(y, mes, d);
-      var s = shifts[k];
-      if(s && s.t==='DF' && !s.remunerado) consumidos++;
-    }
+  var inicioC = new Date(y, 1, 1);
+  var finC    = new Date(y+1, 0, 31);
+  var runnerC = new Date(inicioC);
+  while(runnerC <= finC){
+    var k = dStr(runnerC.getFullYear(), runnerC.getMonth(), runnerC.getDate());
+    var s2 = shifts[k];
+    if(s2 && s2.t==='DF' && !s2.remunerado) consumidos++;
+    runnerC.setDate(runnerC.getDate()+1);
   }
 
   return {
@@ -5547,10 +5652,15 @@ function calcDFAnio(y){
 function calcAnosServicio(){
   if(!cfg.fechaIngreso) return 0;
   var ingreso = new Date(cfg.fechaIngreso+'T00:00:00');
-  var hoy = new Date();
-  var anos = hoy.getFullYear() - ingreso.getFullYear();
-  var m = hoy.getMonth() - ingreso.getMonth();
-  if(m < 0 || (m===0 && hoy.getDate() < ingreso.getDate())) anos--;
+  // El nuevo día de crédito no se genera hasta el mes SIGUIENTE a cumplir años de
+  // servicio (no se puede pedir/gastar lo que aún no se ha generado). Por eso se
+  // evalúa a fecha de fin del mes ANTERIOR al que se esté viendo en el cuadrante:
+  // si el aniversario cae en septiembre, septiembre todavía cuenta con la
+  // antigüedad antigua, y ya en octubre computa la nueva.
+  var ref = new Date(year, month, 0); // último día del mes anterior al navegado
+  var anos = ref.getFullYear() - ingreso.getFullYear();
+  var m = ref.getMonth() - ingreso.getMonth();
+  if(m < 0 || (m===0 && ref.getDate() < ingreso.getDate())) anos--;
   return Math.max(0, anos);
 }
 
@@ -5582,10 +5692,11 @@ function updateAntiguedadInfo(){
     if(note) note.innerHTML = '⚠️ No has indicado fecha de incorporación (arriba, Datos personales). Vacaciones y AP usarán la <strong>base manual</strong> de abajo.';
     return;
   }
+  var anioVac = getAnioVacacional();
   var anos = calcAnosServicio();
   var vac  = calcVacTotalesPorAntiguedad();
   var ap   = calcApTotalesPorTrienios();
-  var apExtra = calcApExtraPorFestivosSabado(year);
+  var apExtra = calcApExtraPorFestivosSabado(anioVac);
   var vacExtra = cfg.vacExtra||0, apExtraManual = cfg.apExtra||0;
   if(note) note.innerHTML = '✅ Tienes fecha de incorporación: Vacaciones y AP se calculan <strong>automáticamente</strong> por antigüedad ('+anos+' años). Los campos "base manual" de abajo se ignoran; usa los de "extra" solo para añadir días excepcionales (bajas, causas ajenas...).';
   if(!div) return;
@@ -5670,12 +5781,15 @@ function calcApExtraPorFestivosSabado(y){
 
 // Total AP disponibles = base + extras por festivos en sabado
 function totalApAnio(y){
+  var anioVac = (y!==undefined && y!==null) ? y : getAnioVacacional();
   var base = cfg.fechaIngreso ? calcApTotalesPorTrienios() : (cfg.apTotales || 6);
-  return base + calcApExtraPorFestivosSabado(y || year) + (cfg.apExtra||0);
+  return base + calcApExtraPorFestivosSabado(anioVac) + (cfg.apExtra||0);
 }
 // Total de vacaciones: automático por antigüedad si hay fecha de incorporación,
 // si no, el valor manual introducido. Siempre se suma el ajuste manual (bajas, etc.)
-function totalVacAnio(){
+// La antigüedad se evalúa siempre respecto al mes navegado en el cuadrante
+// (ver calcAnosServicio), no respecto al periodo Feb-Ene como tal.
+function totalVacAnio(y){
   var base = cfg.fechaIngreso ? calcVacTotalesPorAntiguedad() : (cfg.vacTotales || 22);
   return base + (cfg.vacExtra||0);
 }
@@ -5688,7 +5802,8 @@ function calcApConsumidos(y){
   while(runner <= fin){
     var k = dStr(runner.getFullYear(), runner.getMonth(), runner.getDate());
     var s = shifts[k];
-    if(s && s.t==='AP') total++;
+    // Los "Otro AP" (mudanza/examen/deber inexcusable...) NO descuentan del saldo anual de AP.
+    if(s && s.t==='AP' && s.tipoAP!=='otro' && s.tipoAP!=='mudanza' && s.tipoAP!=='examen') total++;
     runner.setDate(runner.getDate()+1);
   }
   return total;
@@ -5796,13 +5911,13 @@ function renderDFContent(y){
   var box = document.getElementById('dfContent');
   if(!box) return;
   var html = '';
-  html += '<div class="br"><span>Festivos laborables del año '+y+':</span><strong>'+df.generados+' DF</strong></div>';
+  html += '<div class="br"><span>Festivos laborables del periodo '+y+'/'+(y+1)+':</span><strong>'+df.generados+' DF</strong></div>';
   html += '<div class="br"><span>DF disfrutados (grabados en cuadrante):</span><strong style="color:var(--rojo)">'+df.consumidos+' DF</strong></div>';
   var col = df.disponibles>=0 ? 'var(--verde)' : 'var(--rojo)';
   html += '<div class="br tot"><span>DF disponibles:</span><strong style="color:'+col+';font-size:15px">'+df.disponibles+' DF</strong></div>';
   // Detalle festivos
   if(df.detalle.length>0){
-    html += '<div style="margin-top:8px;font-size:11px;font-weight:700;color:#555">Detalle festivos del año:</div>';
+    html += '<div style="margin-top:8px;font-size:11px;font-weight:700;color:#555">Detalle festivos del periodo '+y+'/'+(y+1)+':</div>';
     df.detalle.forEach(function(item){
       var d = new Date(item.fecha+'T12:00:00');
       var label = pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();
@@ -5970,7 +6085,7 @@ function savePreferenciasEditorToCfg(){
 function renderVacApContent(y){
   var box = document.getElementById('vacApContent');
   if(!box) return;
-  var vacTot  = totalVacAnio();
+  var vacTot  = totalVacAnio(y);
   var apTot   = totalApAnio(y);
   var pssTot  = cfg.pssTotales||3;
   var pnavTot = cfg.pnavTotales||3;
@@ -5997,11 +6112,11 @@ function renderVacApContent(y){
 
   var html = '';
   if(isTurnoFijo()){
-    var creditoH = getVacCreditoHorasTurnoFijo();
+    var creditoH = Math.round((vacTot||22) * 7.5 * 10) / 10;
     var consH = calcVacHorasConsumidas(y);
     var dispH = Math.round((creditoH-consH)*10)/10;
     var cVacH = dispH>=0?'var(--verde)':'var(--rojo)';
-    var diasCreditoF = totalVacAnio() || 22;
+    var diasCreditoF = vacTot || 22;
     var hRefVac = getHorasReferenciaTurnoFijo();
     var serviciosConsumidos = calcVacServiciosConsumidosFijo(y);
     var equivTotal = hRefVac>0 ? calcServiciosEquivRedondeados(creditoH, hRefVac) : null;
@@ -6069,13 +6184,14 @@ function renderVacApContent(y){
 
 // Actualiza los contadores en Ajustes
 function actualizarContadoresAjustes(){
-  var df       = calcDFAnio(year);
-  var vacTot   = totalVacAnio();
-  var apTot    = totalApAnio(year);
+  var anioVac  = getAnioVacacional();
+  var df       = calcDFAnio(anioVac);
+  var vacTot   = totalVacAnio(anioVac);
+  var apTot    = totalApAnio(anioVac);
   var pssTot   = cfg.pssTotales||3;
   var pnavTot  = cfg.pnavTotales||3;
-  var vacCons  = calcVacConsumidas(year);
-  var apCons   = calcApConsumidos(year);
+  var vacCons  = calcVacConsumidas(anioVac);
+  var apCons   = calcApConsumidos(anioVac);
   var pssCons  = calcPssConsumidos(year);
   var pnavCons = calcPnavConsumidos(year);
 
@@ -6094,11 +6210,11 @@ function actualizarContadoresAjustes(){
     var html = '<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:10px 12px;font-size:12px;">';
     html += '<div style="font-weight:800;color:var(--verde);margin-bottom:6px">📊 Saldo actual de permisos</div>';
     if(isTurnoFijo()){
-      html += lineaSaldoHoras('🏖️','Vacaciones disponibles',getVacCreditoHorasTurnoFijo(),calcVacHorasConsumidas(year));
+      html += lineaSaldoHoras('🏖️','Vacaciones disponibles',getVacCreditoHorasTurnoFijo(anioVac),calcVacHorasConsumidas(anioVac));
     } else {
       html += lineaSaldo('🏖️','Vacaciones disponibles',vacTot,vacCons);
     }
-    var apExtra = calcApExtraPorFestivosSabado(year);
+    var apExtra = calcApExtraPorFestivosSabado(anioVac);
     var apBaseInicial = cfg.fechaIngreso ? 6 : (cfg.apTotales || 6);
     var apPorAntiguedad = cfg.fechaIngreso ? (calcApTotalesPorTrienios() - 6) : 0;
     var apPartes = [];
