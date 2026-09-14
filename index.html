@@ -496,7 +496,8 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
 
     <div class="bal-card">
       <h3>🧮 Fórmula INCENTIVOS — Introduce tus valores del mes</h3>
-      <p style="font-size:10px;color:#888;margin-bottom:10px">INCENTIVOS = HES + HSF×0,50 + HSN×0,25 + DSA×3 + DSB×2 + DSC×1,75 + DSD×1,75 + HSA×3/24 + HSB×1,75/24</p>
+      <p style="font-size:10px;color:#888;margin-bottom:2px">INCENTIVOS = HES + HSF×0,50 + HSN×0,25 + DSA×3 + DSB×2 + DSC×1,75 + DSD×1,75 + HSA×3/24 + HSB×1,75/24</p>
+      <p style="font-size:10px;color:var(--verde);font-weight:700;margin-bottom:10px" id="incentivosMesLabel">Datos guardados para: —</p>
       <div class="ig2">
         <div class="ig"><label class="il">HES — Horas esp. significación</label><input type="number" id="fHES" value="0" min="0" step="0.5" oninput="calcIncentivosFormula()"></div>
         <div class="ig"><label class="il">HSF — Horas servicio festivas</label><input type="number" id="fHSF" value="0" min="0" step="0.5" oninput="calcIncentivosFormula()"></div>
@@ -1524,6 +1525,7 @@ var now=new Date();
 var year=now.getFullYear();
 var month=now.getMonth();
 var shifts={};
+var incentivosManual={}; // { 'YYYY-MM': {hes,hsf,hsn,dsa,dsb,dsc,dsd,hsa,hsb} } — simulador de INCENTIVOS guardado por mes
 var selectedDay=null;
 var multiSelectMode=false;
 var selectedDays=new Set();
@@ -1548,6 +1550,8 @@ function load(){
   try{
     var s=localStorage.getItem('cuadrante_shifts');
     if(s) shifts=JSON.parse(s);
+    var im=localStorage.getItem('cuadrante_incentivos_manual');
+    if(im) incentivosManual=JSON.parse(im);
     var c=localStorage.getItem('cuadrante_cfg');
     if(c) cfg=Object.assign(cfg,JSON.parse(c));
     normalizarServiciosRemuneradosLegacy();
@@ -2035,6 +2039,7 @@ function buildGistPayload(){
     shifts: shifts,
     cfg: cfg,
     festivosExtra: (typeof festivosExtra !== 'undefined' ? festivosExtra : {}),
+    incentivosManual: incentivosManual,
     ts: new Date().toISOString()
   };
 }
@@ -2044,12 +2049,14 @@ function applyGistPayload(parsed, remoteTs){
   if(parsed.shifts && typeof parsed.shifts === 'object') shifts = parsed.shifts;
   if(parsed.cfg && typeof parsed.cfg === 'object') cfg = Object.assign(cfg, parsed.cfg);
   if(parsed.festivosExtra && typeof parsed.festivosExtra === 'object') festivosExtra = parsed.festivosExtra;
+  if(parsed.incentivosManual && typeof parsed.incentivosManual === 'object') incentivosManual = parsed.incentivosManual;
   var ts = remoteTs || (parsed.ts ? new Date(parsed.ts).getTime() : Date.now());
   if(!isFinite(ts)) ts = Date.now();
   try{
     localStorage.setItem('cuadrante_shifts', JSON.stringify(shifts));
     localStorage.setItem('cuadrante_cfg', JSON.stringify(cfg));
     if(typeof festivosExtra !== 'undefined') localStorage.setItem('cuadrante_festivos', JSON.stringify(festivosExtra));
+    localStorage.setItem('cuadrante_incentivos_manual', JSON.stringify(incentivosManual));
     localStorage.setItem('cuadrante_lastSave', ts.toString());
   }catch(e){}
   applyConfig();
@@ -2455,6 +2462,7 @@ function changeMonth(dir){
   deleteMode=false;
   updateDeleteUI();
   renderAll();
+  if(document.getElementById('vIncentivos').style.display==='block') initIncentivosTab();
 }
 
 function renderAll(){
@@ -5077,7 +5085,24 @@ function getIncentivosRow(p){
   return 0;
 }
 
+function mesKeyIncentivos(){
+  return year+'-'+String(month+1).padStart(2,'0');
+}
+
 function initIncentivosTab(){
+  var k = mesKeyIncentivos();
+  var guardado = incentivosManual[k] || {};
+  document.getElementById('fHES').value = guardado.hes!=null ? guardado.hes : 0;
+  document.getElementById('fHSF').value = guardado.hsf!=null ? guardado.hsf : 0;
+  document.getElementById('fHSN').value = guardado.hsn!=null ? guardado.hsn : 0;
+  document.getElementById('fDSA').value = guardado.dsa!=null ? guardado.dsa : 0;
+  document.getElementById('fDSB').value = guardado.dsb!=null ? guardado.dsb : 0;
+  document.getElementById('fDSC').value = guardado.dsc!=null ? guardado.dsc : 0;
+  document.getElementById('fDSD').value = guardado.dsd!=null ? guardado.dsd : 0;
+  document.getElementById('fHSA').value = guardado.hsa!=null ? guardado.hsa : 0;
+  document.getElementById('fHSB').value = guardado.hsb!=null ? guardado.hsb : 0;
+  var lbl = document.getElementById('incentivosMesLabel');
+  if(lbl) lbl.innerText = 'Datos guardados para: '+MESES[month]+' '+year;
   calcIncentivosFormula();
   var pMes=calcIncentivosMesPoints();
   var impMes=getIncentivosImporte(pMes);
@@ -5106,7 +5131,13 @@ function calcIncentivosFormula(){
   var dsd=parseInt(document.getElementById('fDSD').value)||0;
   var hsa=parseFloat(document.getElementById('fHSA').value)||0;
   var hsb=parseFloat(document.getElementById('fHSB').value)||0;
-  
+
+  // Se guarda por mes (año-mes navegado en el cuadrante) para que los valores
+  // de un mes no se mezclen ni se pisen con los de otro.
+  var k = mesKeyIncentivos();
+  incentivosManual[k] = {hes:hes,hsf:hsf,hsn:hsn,dsa:dsa,dsb:dsb,dsc:dsc,dsd:dsd,hsa:hsa,hsb:hsb};
+  try{ localStorage.setItem('cuadrante_incentivos_manual', JSON.stringify(incentivosManual)); }catch(e){}
+
   var pts = hes + (hsf*0.50) + (hsn*0.25) + (dsa*3) + (dsb*2) + (dsc*1.75) + (dsd*1.75) + (hsa*3/24) + (hsb*1.75/24);
   pts=Math.round(pts*100)/100;
   
@@ -5341,7 +5372,7 @@ function buildLegend(){
 
 // COPIAS DE SEGURIDAD LOCALES (JSON)
 function exportarDatos(){
-  var data = { shifts: shifts, cfg: cfg, festivosExtra: festivosExtra, version: '2.0' };
+  var data = { shifts: shifts, cfg: cfg, festivosExtra: festivosExtra, incentivosManual: incentivosManual, version: '2.0' };
   var str = JSON.stringify(data, null, 2);
   var blob = new Blob([str], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
@@ -5362,6 +5393,7 @@ function importarDatos(e){
         shifts = Object.assign(shifts, parsed.shifts);
         if(parsed.cfg) cfg = Object.assign(cfg, parsed.cfg);
         if(parsed.festivosExtra){ festivosExtra = Object.assign(festivosExtra, parsed.festivosExtra); saveFestivosExtra(); }
+        if(parsed.incentivosManual){ incentivosManual = Object.assign(incentivosManual, parsed.incentivosManual); try{ localStorage.setItem('cuadrante_incentivos_manual', JSON.stringify(incentivosManual)); }catch(e2){} }
         save(); applyConfig(); renderAll();
         var msg = document.getElementById('importMsg');
         msg.innerText = '✅ ¡Datos importados correctamente!'; msg.style.display='block'; msg.style.background='#e8f4f0'; msg.style.color='var(--verde)';
