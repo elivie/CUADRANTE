@@ -2895,7 +2895,7 @@ function assignToSelection(tKey){
   if(tKey==='AP'){ openApTipoModal('bulk'); return; }
 
   if(tKey==='DF'){
-    var dfInfo=calcDFAnio(getAnioVacacional());
+    var dfInfo=calcDFAnio(getAnioVacacional(dias.slice().sort()[0]));
     if(dfInfo.disponibles < dias.length){
       if(!confirm('⚠️ Vas a aplicar DF a '+dias.length+' días, pero solo te quedan '+dfInfo.disponibles+' disponibles. ¿Continuar igualmente?')) return;
     }
@@ -2968,7 +2968,7 @@ function assignSelected(tKey){
 
   // Aviso si se intenta gastar un DF sin tener disponibles
   if(tKey==='DF'){
-    var dfInfo = calcDFAnio(getAnioVacacional());
+    var dfInfo = calcDFAnio(getAnioVacacional(selectedDay));
     // No bloqueamos, solo avisamos si el saldo va a negativo
     if(dfInfo.disponibles <= 0){
       if(!confirm('⚠️ No te quedan DF disponibles (tienes '+dfInfo.generados+' generados y '+dfInfo.consumidos+' consumidos). ¿Quieres grabarlo igualmente?')) return;
@@ -4492,7 +4492,8 @@ function calcResumen(){
   addAnnCard('⚖️', (aDiff>=0?'+':'')+aDiff+'h', 'Balance total', aDiff>=0?'var(--verde)':'var(--rojo)');
   addAnnCard('📋', annCounts.AP, 'Asuntos Propios', '#059669');
   addAnnCard('🏖️', annCounts.V, 'Vacaciones marc.', '#0e7490');
-  addAnnCard('🏛️', annCounts.DF, 'Días Fest. (DF)', '#0f766e');
+  var annAnioVacDF=getAnioVacacional();
+  addAnnCard('🏛️', calcDFAnio(annAnioVacDF).consumidos, 'DF periodo '+annAnioVacDF+'/'+(annAnioVacDF+1), '#0f766e');
   var annRem=0;
   Object.keys(shifts).forEach(function(k){ var ss=shifts[k]; if(ss && ((ss.t==='DA'||ss.t==='DF') && ss.remunerado)) annRem++; });
   if(annRem > 0){
@@ -5657,13 +5658,14 @@ function calcDFAnio(y){
 
   // DF consumidos = días con turno DF en el periodo 1-feb(y) al 31-ene(y+1)
   var consumidos = 0;
+  var detalleConsumidos = [];
   var inicioC = new Date(y, 1, 1);
   var finC    = new Date(y+1, 0, 31);
   var runnerC = new Date(inicioC);
   while(runnerC <= finC){
     var k = dStr(runnerC.getFullYear(), runnerC.getMonth(), runnerC.getDate());
     var s2 = shifts[k];
-    if(s2 && s2.t==='DF' && !s2.remunerado) consumidos++;
+    if(s2 && s2.t==='DF' && !s2.remunerado){ consumidos++; detalleConsumidos.push(k); }
     runnerC.setDate(runnerC.getDate()+1);
   }
 
@@ -5671,7 +5673,8 @@ function calcDFAnio(y){
     generados: generados,
     consumidos: consumidos,
     disponibles: generados - consumidos,
-    detalle: detalleGenerados
+    detalle: detalleGenerados,
+    detalleConsumidos: detalleConsumidos
   };
 }
 
@@ -5947,8 +5950,14 @@ function renderDFContent(y){
   html += '<div class="br"><span>DF disfrutados (grabados en cuadrante):</span><strong style="color:var(--rojo)">'+df.consumidos+' DF</strong></div>';
   var col = df.disponibles>=0 ? 'var(--verde)' : 'var(--rojo)';
   html += '<div class="br tot"><span>DF disponibles:</span><strong style="color:'+col+';font-size:15px">'+df.disponibles+' DF</strong></div>';
+  // DF grabados (fechas)
+  if(df.detalleConsumidos && df.detalleConsumidos.length>0){
+    html += '<div style="margin-top:8px;font-size:11px;font-weight:700;color:#555">DF grabados en el cuadrante:</div>';
+    html += '<div style="font-size:11px;padding:3px 0">'+df.detalleConsumidos.map(function(f){return f.split('-').reverse().join('/');}).join(' · ')+'</div>';
+  }
   // Detalle festivos
   if(df.detalle.length>0){
+    df.detalle.sort(function(a,b){return a.fecha<b.fecha?-1:1;});
     html += '<div style="margin-top:8px;font-size:11px;font-weight:700;color:#555">Detalle festivos del periodo '+y+'/'+(y+1)+':</div>';
     df.detalle.forEach(function(item){
       var d = new Date(item.fecha+'T12:00:00');
