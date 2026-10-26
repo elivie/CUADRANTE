@@ -1,12 +1,13 @@
-LICENCIA DE USO DE CUADRANTE v1.5
+LICENCIA DE USO · CUADRANTE Y GESTOR DE ACTAS
 
-Copyright © 2026 Ivan DM. Todos los derechos reservados.
+Copyright © 2026 elivie. Todos los derechos reservados.
 
 1. TITULARIDAD
-CUADRANTE, su código fuente, diseño, estructura, textos y elementos propios son titularidad de Ivan DM, salvo los componentes de terceros que, en su caso, conserven sus respectivas licencias.
+Las aplicaciones CUADRANTE y GESTOR DE ACTAS (en adelante, «las aplicaciones»), su código fuente, diseño, estructura, textos y elementos propios son titularidad de su autor, salvo los componentes de terceros que, en su caso, conserven sus respectivas licencias.
+Los textos legales y normativos que las aplicaciones recogen no son objeto de propiedad intelectual; sí lo son su selección, estructura, resúmenes, campos y organización propios.
 
 2. USO AUTORIZADO
-Se concede al usuario un permiso gratuito, no exclusivo, intransferible y revocable para ejecutar y utilizar CUADRANTE con fines personales y no comerciales.
+Se concede al usuario un permiso gratuito, no exclusivo, intransferible y revocable para ejecutar y utilizar las aplicaciones con fines personales y no comerciales.
 
 3. COPIAS PRIVADAS
 Se permite realizar las copias privadas estrictamente necesarias para el uso personal o como copia de seguridad, siempre que se mantengan íntegros este aviso de autoría y esta licencia.
@@ -15,16 +16,25 @@ Se permite realizar las copias privadas estrictamente necesarias para el uso per
 Sin autorización previa y expresa del autor, no está permitido:
 
 - Suprimir, ocultar o modificar la autoría, el aviso legal o esta licencia.
-- Presentar CUADRANTE, total o parcialmente, como una creación propia o como una aplicación oficial.
-- Redistribuir, publicar, alojar, compartir o poner a disposición de terceros el código fuente, la aplicación o copias de esta.
+- Presentar las aplicaciones, total o parcialmente, como una creación propia o como una aplicación oficial.
+- Redistribuir, publicar, alojar, compartir o poner a disposición de terceros el código fuente, las aplicaciones o copias de ellas.
 - Modificar, adaptar, traducir o crear versiones derivadas destinadas a su distribución, publicación o explotación.
-- Vender, alquilar, sublicenciar o explotar comercialmente CUADRANTE o cualquiera de sus partes.
-- Utilizar el nombre, la imagen o el contenido de CUADRANTE para inducir a error sobre su autoría, procedencia o vinculación con una Administración u organismo público.
+- Vender, alquilar, sublicenciar o explotar comercialmente las aplicaciones o cualquiera de sus partes.
+- Utilizar el nombre, la imagen o el contenido de las aplicaciones para inducir a error sobre su autoría, procedencia o vinculación con una Administración u organismo público.
+- Utilizar GESTOR DE ACTAS o los documentos que genera para aparentar la condición, la autoridad o la actuación de una Administración, cuerpo u organismo público por quien no la tenga, ni para elaborar documentos falsos o engañosos.
 
 5. FUNCIONAMIENTO Y RESPONSABILIDAD
-CUADRANTE es una herramienta personal e independiente. No es una aplicación oficial ni está vinculada, avalada o supervisada por ninguna Administración u organismo público.
+Las aplicaciones son herramientas personales e independientes. No son aplicaciones oficiales ni están vinculadas, avaladas o supervisadas por ninguna Administración u organismo público. Se proporcionan «tal cual», sin garantía expresa o implícita de exactitud, disponibilidad o adecuación a un fin concreto.
 
-La aplicación se proporciona «tal cual», sin garantía expresa o implícita de exactitud, disponibilidad o adecuación a un fin concreto. Los cálculos de jornada, descansos, incentivos y nómina son orientativos y deben contrastarse con la normativa vigente y la documentación oficial. El usuario es responsable del uso de la aplicación, de la información introducida y de sus copias de seguridad.
+CUADRANTE: los cálculos de jornada, descansos, incentivos y nómina son orientativos y deben contrastarse con la normativa vigente y la documentación oficial. El usuario es responsable del uso de la aplicación, de la información introducida y de sus copias de seguridad.
+
+GESTOR DE ACTAS:
+GESTOR DE ACTAS es una herramienta de apoyo documental que genera borradores. No sustituye la consulta de la norma vigente, el criterio profesional ni el asesoramiento jurídico.
+El contenido legislativo incluido es orientativo: puede contener errores u omisiones o estar desactualizado, y debe contrastarse siempre con el texto vigente en el BOE, el BOIB u otras fuentes oficiales.
+El usuario es el único responsable de los datos que introduce, de la revisión del contenido y del uso que haga de los documentos generados. La aplicación guarda los ajustes y datos únicamente en el dispositivo del usuario y no los envía a ningún servidor del autor.
+Quien incorpore emblemas, escudos o logotipos a los documentos debe disponer de autorización o título legítimo para ello; su incorporación no convierte la aplicación en oficial.
+
+En la medida que permita la ley, el autor no responde de los daños o perjuicios derivados del uso de las aplicaciones o de los documentos generados con ellas.
 
 6. RESERVA DE DERECHOS
 Todos los derechos no concedidos expresamente en esta licencia quedan reservados al autor. El incumplimiento de estas condiciones extingue automáticamente el permiso de uso concedido.

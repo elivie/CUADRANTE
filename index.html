@@ -1,6 +1,6 @@
 <!--
 CUADRANTE v2.1
-Copyright © 2026 Ivan DM. Todos los derechos reservados.
+Copyright © 2026 elivie. Todos los derechos reservados.
 Uso autorizado únicamente conforme a la licencia incluida en esta aplicación y en LICENSE.txt.
 No se autoriza la eliminación de la atribución, la redistribución, la modificación,
 la venta ni la publicación de la aplicación sin permiso previo y expreso del autor.
@@ -372,6 +372,7 @@ body.dark-mode .preferencias-periodo{background:#151c26!important;color:#e6edf7!
 body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!important;}
 </style>
 
+<style>@media(max-width:350px){#syncBadge{min-width:0;max-width:96px;overflow:hidden;text-overflow:ellipsis}}</style>
 </head>
 <body>
 
@@ -385,6 +386,7 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
       <div class="h-sub" id="hName">Configuración local</div>
     </div>
     <div id="syncBadge" style="display:none;font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;white-space:nowrap"></div>
+    <a id="btnActas" href="actas.html" title="Gestor de Actas" aria-label="Gestor de Actas" style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 9px;border-radius:9px;background:rgba(255,255,255,0.15);color:#fff;text-decoration:none;font-size:15px;line-height:1.1"><span aria-hidden="true">⚖️</span><span style="font-size:9px;font-weight:700">Actas</span></a>
   </div>
   <nav>
     <button class="active" onclick="showView('cuadrante',this)">📅 Cuadrante</button>
@@ -974,7 +976,7 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
 
 
 <footer class="app-footer" aria-label="Autoría y licencia">
-  <strong>© 2026 Ivan DM · CUADRANTE v2.1</strong> · Todos los derechos reservados ·
+  <strong>© 2026 elivie · CUADRANTE v2.1</strong> · Todos los derechos reservados ·
   <button type="button" class="license-link" onclick="openLicenseModal()">Licencia de uso</button>
 </footer>
 
@@ -1163,11 +1165,11 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
 
 <div class="modal-overlay license-overlay" id="licenseModalOverlay" onclick="closeLicenseModalOutside(event)" role="dialog" aria-modal="true" aria-labelledby="licenseModalTitle">
   <div class="modal license-modal">
-    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE v2.0</h3>
-    <div class="license-subtitle">Copyright © 2026 Ivan DM. Todos los derechos reservados.</div>
+    <h3 id="licenseModalTitle">Licencia de uso de CUADRANTE</h3>
+    <div class="license-subtitle">Copyright © 2026 elivie. Todos los derechos reservados.</div>
     <div class="license-content">
       <h4>1. Titularidad</h4>
-      <p>CUADRANTE, su código fuente, diseño, estructura, textos y elementos propios son titularidad de Ivan DM, salvo los componentes de terceros que, en su caso, conserven sus respectivas licencias.</p>
+      <p>CUADRANTE, su código fuente, diseño, estructura, textos y elementos propios son titularidad de elivie, salvo los componentes de terceros que, en su caso, conserven sus respectivas licencias.</p>
 
       <h4>2. Uso autorizado</h4>
       <p>Se concede al usuario un permiso gratuito, no exclusivo, intransferible y revocable para ejecutar y utilizar CUADRANTE con fines personales y no comerciales.</p>
