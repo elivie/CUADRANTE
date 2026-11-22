@@ -5460,6 +5460,7 @@ function borrarAnio(){
 // ==========================================
 
 var festEditorAnio = new Date().getFullYear();
+var festEditando = null; // fecha del festivo en edición
 
 function renderFestPanel(){
   var panel = document.getElementById('festPanel');
@@ -5504,9 +5505,19 @@ function renderFestPanel(){
       var dow = new Date(fecha + 'T12:00:00').getDay();
       var labelF = parts[2] + '/' + parts[1] + '/' + parts[0] + ' (' + dias[dow] + ')';
       var bgF = (dow===0||dow===6) ? '#fef9c3' : '#f0fdf4';
+      if(festEditando === fecha){
+        html += '<div class="fest-list-row" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:' + bgF + ';border-radius:8px;padding:6px 8px;font-size:12px">';
+        html += '<input type="date" id="festEditDate" min="' + y + '-01-01" max="' + y + '-12-31" value="' + fecha + '" style="flex:1;min-width:130px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px">';
+        html += '<input type="text" id="festEditNombre" placeholder="Nombre del festivo" value="' + nombre.replace(/"/g,'&quot;') + '" style="flex:2;min-width:140px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px">';
+        html += '<button id="festEditSave" data-fecha="' + fecha + '" style="background:#0f766e;color:#fff;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:700">Guardar</button>';
+        html += '<button id="festEditCancel" style="background:#e5e7eb;color:#374151;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px">Cancelar</button>';
+        html += '</div>';
+        continue;
+      }
       html += '<div class="fest-list-row" style="display:flex;align-items:center;gap:6px;background:' + bgF + ';border-radius:8px;padding:5px 8px;font-size:12px">';
       html += '<span style="flex:1;font-weight:600">' + labelF + '</span>';
       html += '<span style="flex:1;color:#555">' + nombre + etiq + '</span>';
+      html += '<button class="btn-edit-fest" data-fecha="' + fecha + '" style="background:#e0f2fe;border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:12px">✏️</button>';
       html += '<button class="btn-del-fest" data-fecha="' + fecha + '" style="background:#fee2e2;border:none;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:12px;color:#dc2626">x</button>';
       html += '</div>';
     }
@@ -5534,13 +5545,21 @@ function renderFestPanel(){
 
   // Wire events with addEventListener — no inline onclick with string params
   var bp = document.getElementById('festPrev');
-  if(bp) bp.addEventListener('click', function(){ festEditorAnio--; renderFestPanel(); });
+  if(bp) bp.addEventListener('click', function(){ festEditorAnio--; festEditando=null; renderFestPanel(); });
   var bn = document.getElementById('festNext');
-  if(bn) bn.addEventListener('click', function(){ festEditorAnio++; renderFestPanel(); });
+  if(bn) bn.addEventListener('click', function(){ festEditorAnio++; festEditando=null; renderFestPanel(); });
   var ba = document.getElementById('festAddBtn');
   if(ba) ba.addEventListener('click', agregarFestivo);
   var bc = document.getElementById('festCopyPrev');
   if(bc) bc.addEventListener('click', copiarFestivosDeAnioAnterior);
+  var edBtns = panel.querySelectorAll('.btn-edit-fest');
+  for(var ei=0; ei<edBtns.length; ei++){
+    (function(btn){ btn.addEventListener('click', function(){ festEditando = btn.getAttribute('data-fecha'); renderFestPanel(); }); })(edBtns[ei]);
+  }
+  var bes = document.getElementById('festEditSave');
+  if(bes) bes.addEventListener('click', function(){ editarFestivo(bes.getAttribute('data-fecha')); });
+  var bec = document.getElementById('festEditCancel');
+  if(bec) bec.addEventListener('click', function(){ festEditando = null; renderFestPanel(); });
   var delBtns = panel.querySelectorAll('.btn-del-fest');
   for(var di=0; di<delBtns.length; di++){
     (function(btn){ btn.addEventListener('click', function(){ eliminarFestivo(btn.getAttribute('data-fecha')); }); })(delBtns[di]);
@@ -5565,6 +5584,46 @@ function agregarFestivo(){
   renderFestPanel();
   renderAll();
   showToast('Festivo '+fecha+' añadido a '+y);
+}
+
+function editarFestivo(vieja){
+  var nueva = document.getElementById('festEditDate').value;
+  var nombre = (document.getElementById('festEditNombre').value || '').trim();
+  var y = String(festEditorAnio);
+  if(!nueva){ showToast('Selecciona una fecha'); return; }
+  if(nueva.slice(0,4) !== y){ showToast('La fecha debe ser de '+y); return; }
+  if(nueva !== vieja && getFestivosDeAnio(festEditorAnio).indexOf(nueva) >= 0){
+    showToast('Ya existe un festivo en esa fecha'); return;
+  }
+  var delKey = 'deleted_'+y, nomKey = 'nombres_'+y;
+  if(nueva !== vieja){
+    // quitar la antigua
+    if(festivosExtra[y]){
+      var ix = festivosExtra[y].indexOf(vieja);
+      if(ix>=0) festivosExtra[y].splice(ix,1);
+    }
+    if((FEST_BASE[y]||[]).indexOf(vieja)>=0){
+      if(!festivosExtra[delKey]) festivosExtra[delKey] = [];
+      if(festivosExtra[delKey].indexOf(vieja)<0) festivosExtra[delKey].push(vieja);
+    }
+    if(festivosExtra[nomKey]) delete festivosExtra[nomKey][vieja];
+    // añadir la nueva
+    if(festivosExtra[delKey]){
+      var id2 = festivosExtra[delKey].indexOf(nueva);
+      if(id2>=0) festivosExtra[delKey].splice(id2,1);
+    }
+    if((FEST_BASE[y]||[]).indexOf(nueva)<0){
+      if(!festivosExtra[y]) festivosExtra[y] = [];
+      festivosExtra[y].push(nueva);
+    }
+  }
+  if(!festivosExtra[nomKey]) festivosExtra[nomKey] = {};
+  if(nombre) festivosExtra[nomKey][nueva] = nombre; else delete festivosExtra[nomKey][nueva];
+  festEditando = null;
+  saveFestivosExtra();
+  renderFestPanel();
+  renderAll();
+  showToast('Festivo actualizado');
 }
 
 function eliminarFestivo(fecha){
