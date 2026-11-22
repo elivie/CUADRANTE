@@ -3251,13 +3251,24 @@ function getHorasComputablesRegistro(dateStr, registro){
   return Math.round(reales*10)/10;
 }
 
+// Crédito que reduce la referencia exigible. Igual que getCreditoDASDFRegistro, salvo que
+// unas vacaciones en festivo laborable (régimen general) no consumen crédito de vacaciones
+// pero sí reducen la referencia 7,5 h.
+function getCreditoReferenciaRegistro(dateStr, registro){
+  var cr = getCreditoDASDFRegistro(dateStr, registro);
+  if(cr===0 && registro && registro.t==='V' && (cfg.regimen||'general')==='general' && !isWeekend(dateStr) && isFestNac(dateStr)){
+    cr = (TURNO_HORAS_DEF.V ? TURNO_HORAS_DEF.V.h : 7.5);
+  }
+  return cr;
+}
+
 function getCreditoDASDFPeriodo(inicio, fin){
   var credito=0;
   var runner=new Date(inicio);
   while(runner<=fin){
     var k=dStr(runner.getFullYear(),runner.getMonth(),runner.getDate());
     var s=shifts[k];
-    if(s) credito += getCreditoDASDFRegistro(k, s);
+    if(s) credito += getCreditoReferenciaRegistro(k, s);
     runner.setDate(runner.getDate()+1);
   }
   return Math.round(credito*10)/10;
@@ -4486,7 +4497,7 @@ function calcResumen(){
   var annCreditoDASDF=0;
   Object.keys(shifts).forEach(function(k){
     var ss=shifts[k];
-    if(ss && k.slice(0,4)===String(year)) annCreditoDASDF += getCreditoDASDFRegistro(k, ss);
+    if(ss && k.slice(0,4)===String(year)) annCreditoDASDF += getCreditoReferenciaRegistro(k, ss);
   });
   annCreditoDASDF=Math.round(annCreditoDASDF*10)/10;
   var annRefEfectiva=Math.round((annRefH-annCreditoDASDF)*10)/10;
