@@ -658,6 +658,16 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
     </details>
     <div class="divider"></div>
     <details class="ajustes-acc"><summary>💶 Conceptos fijos de nómina y pagas extra</summary>
+    <div style="border:2px solid #7c3aed;border-radius:12px;padding:10px;margin-bottom:12px">
+      <div style="font-size:14px;font-weight:800;margin-bottom:4px">📈 ¿Te han subido el sueldo?</div>
+      <div style="font-size:12px;margin-bottom:8px"><strong>No cambies los importes de abajo a mano</strong>: afectaría a nóminas anteriores. Indica el % y el mes de la primera nómina con la subida: se aplica a <strong>todos los conceptos y pagas extra</strong> solo desde ese mes.</div>
+      <div class="ig2">
+        <div class="ig"><label class="il">Subida (%)</label><input type="number" id="subidaPct" step="0.01" placeholder="4,5"></div>
+        <div class="ig"><label class="il">Desde la nómina de</label><input type="month" id="subidaDesde"></div>
+      </div>
+      <button class="btn-ok" type="button" style="width:100%;margin-top:6px;background:#7c3aed" onclick="aplicarSubidaPorcentaje()">📌 Aplicar subida desde ese mes</button>
+      <div style="font-size:11px;margin-top:6px;opacity:.8">¿Solo cambia un concepto concreto? Edítalo abajo y guárdalo en <a href="#" onclick="var d=document.getElementById('detHistSubidas');d.open=true;d.scrollIntoView({behavior:'smooth'});return false" style="color:#a78bfa;font-weight:700">Histórico de subidas</a>.</div>
+    </div>
     <div class="ig2">
       <div class="ig"><label class="il">Sueldo Grupo C1</label><input type="number" id="cfgBase" value="900.63" step="0.01" oninput="saveCfg()"></div>
       <div class="ig"><label class="il">Comp. Destino</label><input type="number" id="cfgDestino" value="465.75" step="0.01" oninput="saveCfg()"></div>
@@ -694,8 +704,8 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
 
     </details>
     <div class="divider"></div>
-    <details class="ajustes-acc"><summary>📅 Histórico de subidas (tramos por fecha)</summary>
-    <div class="info-box" style="margin-bottom:10px">Cuando te suban algún concepto (sueldo, destino, específicos, <strong>residencia</strong>, vestuario, trienio, ERG3, O3 o pagas extra), <strong>no edites directamente</strong> los campos de arriba sin más. Hazlo así: 1) cambia arriba, en "Conceptos fijos", los importes a los nuevos valores; 2) elige aquí el mes desde el que aplica; 3) guarda. Las nóminas anteriores a ese mes conservan los importes antiguos automáticamente.</div>
+    <details class="ajustes-acc" id="detHistSubidas"><summary>📅 Histórico de subidas (tramos por fecha)</summary>
+    <div class="info-box" style="margin-bottom:10px"><strong>Si la subida es un % para todo, usa la tarjeta 📈 de «Conceptos fijos».</strong> Para cambios sueltos: cuando te suban algún concepto (sueldo, destino, específicos, <strong>residencia</strong>, vestuario, trienio, ERG3, O3 o pagas extra), <strong>no edites directamente</strong> los campos de arriba sin más. Hazlo así: 1) cambia arriba, en "Conceptos fijos", los importes a los nuevos valores; 2) elige aquí el mes desde el que aplica; 3) guarda. Las nóminas anteriores a ese mes conservan los importes antiguos automáticamente.</div>
     <div class="ig2">
       <div class="ig"><label class="il">Aplicar desde (mes)</label><input type="month" id="tablaTramoDesde"></div>
     </div>
@@ -4825,6 +4835,48 @@ function guardarTramoTabla(){
   if(desdeEl) desdeEl.value='';
   renderTablaHistorial();
   calcNomina();
+}
+function aplicarSubidaPorcentaje(){
+  var pct = parseFloat(document.getElementById('subidaPct').value);
+  var desde = document.getElementById('subidaDesde').value;
+  if(!isFinite(pct) || pct===0){ alert('Indica el porcentaje de subida (por ejemplo 4,5).'); return; }
+  if(!desde){ alert('Indica el mes de la primera nómina con la subida.'); return; }
+  // Base: tabla vigente en el mes anterior al de la subida (así se puede repetir sin acumular)
+  var py = parseInt(desde.slice(0,4),10), pm = parseInt(desde.slice(5,7),10)-1;
+  var prev = pm===0 ? ymFrom(py-1,11) : ymFrom(py,pm-1);
+  var base = getTablaVigente(cfg.tablaHistorial, prev, cfg);
+  var f = 1 + pct/100, nuevos = {};
+  TABLA_CAMPOS.forEach(function(k){
+    var dec = (k.indexOf('extra')===0) ? 1000 : 100;
+    nuevos[k] = Math.round((base[k]||0)*f*dec)/dec;
+  });
+  function fm(n){ return Number(n).toFixed(2).replace('.',','); }
+  var msg = 'Subida del '+String(pct).replace('.',',')+'% desde la nómina de '+desde+' a todos los conceptos.\n\n'
+    + 'Sueldo: '+fm(base.base)+' → '+fm(nuevos.base)+'\n'
+    + 'Destino: '+fm(base.destino)+' → '+fm(nuevos.destino)+'\n'
+    + 'Esp. General: '+fm(base.espG)+' → '+fm(nuevos.espG)+'\n'
+    + 'Esp. Singular: '+fm(base.espS)+' → '+fm(nuevos.espS)+'\n\n'
+    + 'Las nóminas anteriores no cambian. ¿Aplicar?';
+  if(!confirm(msg)) return;
+  if(!Array.isArray(cfg.tablaHistorial)) cfg.tablaHistorial = [];
+  var existente = cfg.tablaHistorial.find(function(t){ return t.desde===desde; });
+  if(existente){ existente.valores = nuevos; } else { cfg.tablaHistorial.push({desde:desde, valores:nuevos}); }
+  cfg.tablaHistorial.sort(function(a,b){ return (a.desde||'').localeCompare(b.desde||''); });
+  // Los campos de Ajustes muestran los importes del último tramo
+  var ultimo = cfg.tablaHistorial[cfg.tablaHistorial.length-1].valores;
+  TABLA_CAMPOS.forEach(function(k){
+    if(typeof ultimo[k]==='number'){
+      cfg[k] = ultimo[k];
+      var el = document.getElementById('cfg'+k.charAt(0).toUpperCase()+k.slice(1));
+      if(el) el.value = ultimo[k];
+    }
+  });
+  try{ localStorage.setItem('cuadrante_cfg',JSON.stringify(cfg)); }catch(e){}
+  scheduleGistPush(); schedulePinPush();
+  document.getElementById('subidaPct').value=''; document.getElementById('subidaDesde').value='';
+  renderTablaHistorial();
+  calcNomina();
+  showToast('Subida aplicada desde '+desde);
 }
 function borrarTramoTabla(desde){
   if(!Array.isArray(cfg.tablaHistorial) || cfg.tablaHistorial.length<=1) return;
