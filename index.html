@@ -662,7 +662,7 @@ body.dark-mode .theme-btn.active{background:#173326!important;color:#8ed4b1!impo
       <div style="font-size:14px;font-weight:800;margin-bottom:4px">📈 ¿Te han subido el sueldo?</div>
       <div style="font-size:12px;margin-bottom:8px"><strong>No cambies los importes de abajo a mano</strong>: afectaría a nóminas anteriores. Indica el % y el mes de la primera nómina con la subida: se aplica a <strong>todos los conceptos y pagas extra</strong> solo desde ese mes.</div>
       <div class="ig2">
-        <div class="ig"><label class="il">Subida (%)</label><input type="number" id="subidaPct" step="0.01" placeholder="4,5"></div>
+        <div class="ig"><label class="il">Subida (%)</label><input type="text" inputmode="decimal" id="subidaPct" placeholder="4,5" autocomplete="off"></div>
         <div class="ig"><label class="il">Desde la nómina de</label><input type="month" id="subidaDesde"></div>
       </div>
       <button class="btn-ok" type="button" style="width:100%;margin-top:6px;background:#7c3aed" onclick="aplicarSubidaPorcentaje()">📌 Aplicar subida desde ese mes</button>
@@ -4837,7 +4837,7 @@ function guardarTramoTabla(){
   calcNomina();
 }
 function aplicarSubidaPorcentaje(){
-  var pct = parseFloat(document.getElementById('subidaPct').value);
+  var pct = parseFloat(String(document.getElementById('subidaPct').value||'').replace(',','.').trim());
   var desde = document.getElementById('subidaDesde').value;
   if(!isFinite(pct) || pct===0){ alert('Indica el porcentaje de subida (por ejemplo 4,5).'); return; }
   if(!desde){ alert('Indica el mes de la primera nómina con la subida.'); return; }
